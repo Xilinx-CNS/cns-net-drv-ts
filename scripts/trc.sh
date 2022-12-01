@@ -10,4 +10,4 @@ if [[ -n "${TS_RIGSDIR}" ]] && [[ -r "${TS_RIGSDIR}"/trc.key2html ]] ; then
     OPTS+=(--key2html="${TS_RIGSDIR}"/trc.key2html)
 fi
 
-. $TE_BASE/scripts/trc.sh "${OPTS[@]}" $@"
+. $TE_BASE/scripts/trc.sh "${OPTS[@]}" "$@"
