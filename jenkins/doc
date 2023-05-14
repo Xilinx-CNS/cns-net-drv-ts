@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (C) 2023 OKTET Labs Ltd. All rights reserved.
+//
+// Building net driver test suite documentation.
+
+@Library('teLib') _
+
+teTsDocPipeline {
+    label = 'net-drv-ts-doc'
+    ts_name = 'net-drv-ts'
+    tsconf = true
+    doxyrest = true
+
+    buildDocHook = {
+        dir("${ts_name}") {
+            sh "./scripts/gen_doxygen"
+        }
+    }
+
+    archiveDocHook = {
+        dir("${ts_name}") {
+            archiveArtifacts artifacts: "net-drv-ts/doc/generated/**, doxygen.warn"
+        }
+    }
+}

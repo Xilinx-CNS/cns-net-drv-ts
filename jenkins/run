@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (C) 2023 OKTET Labs Ltd. All rights reserved.
+//
+// Main pipeline for running tests.
+
+@Library('teLib') _
+
+teTsPipeline {
+    specificParameters = [
+        booleanParam(name: 'reuse_pco', defaultValue: true,
+                     description: 'Reuse RPC server for different tests. It speeds up tests execution.'),
+    ]
+
+    label = 'net-drv-ts'
+    ts_name = 'net-drv-ts'
+
+    tsconf = true
+    publish_logs = true
+
+    optionsProvider = {
+        def opts = [
+            '--steal-cfg',
+            '--release-cfg',
+            '--tester-req=!BROKEN',
+        ]
+
+        if (params.reuse_pco) {
+            opts.add('--reuse-pco')
+        }
+        return opts
+    }
+
+    preRunHook = {
+        metas.REUSE_PCO = params.reuse_pco ? 'true' : 'false'
+        metas.NET_DRV_TS_REV = env.TS_REV
+    }
+
+    postAlwaysHook = {
+        teEmail.email_set_prefix("[CI NET-DRV]")
+    }
+}

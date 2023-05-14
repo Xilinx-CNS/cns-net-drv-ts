@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (C) 2023 OKTET Labs Ltd. All rights reserved.
+//
+// Pipeline to rebuild test suite after something changed in its
+// sources. This pipeline saves revisions in an artifact in case of
+// success, other pipelines use revisions from that artifact.
+
+@Library('teLib') _
+
+teTsPipeline {
+    label = 'net-drv-ts'
+    ts_name = 'net-drv-ts'
+
+    tsconf = true
+    sticky_repo_params = true
+
+    optionsProvider = {
+        return [
+            '--build-only',
+            '--no-grab-cfg',
+        ]
+    }
+
+    triggersProvider = {
+        def triggers = [
+            pollSCM('H * * * *'),
+        ]
+        return triggers
+    }
+
+    preRunHook = {
+        metas.NET_DRV_TS_REV = env.TS_REV
+    }
+
+    postRunHook = {
+        dir('run') {
+            sh "${TS_SRC}/scripts/trc-status.sh"
+            archiveArtifacts artifacts: '*.html'
+        }
+    }
+}
