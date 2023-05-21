@@ -1,0 +1,2 @@
+# Use ta_core_watcher for all Test Agents
+export TE_TA_CORE_WATCHER=yes
