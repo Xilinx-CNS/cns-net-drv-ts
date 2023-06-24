@@ -11,8 +11,9 @@ source "$(dirname "$(which $0)")"/guess.sh
 
 declare -a COMMON_OPTS
 COMMON_OPTS+=(--db="${TE_TS_TRC_DB}")
-if [[ -n "${TS_RIGSDIR}" ]] && [[ -r "${TS_RIGSDIR}"/trc.key2html ]] ; then
-    COMMON_OPTS+=(--key2html="${TS_RIGSDIR}"/trc.key2html)
+if [[ -n "${TE_TS_RIGSDIR}" ]] \
+   && [[ -r "${TE_TS_RIGSDIR}"/trc.key2html ]] ; then
+    COMMON_OPTS+=(--key2html="${TE_TS_RIGSDIR}"/trc.key2html)
 fi
 
 declare -a COMMON_TAGS

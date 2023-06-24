@@ -6,8 +6,9 @@ source "$(dirname "$(which "$0")")"/guess.sh
 
 declare -a OPTS
 OPTS+=(--db="${TE_TS_TRC_DB}")
-if [[ -n "${TS_RIGSDIR}" ]] && [[ -r "${TS_RIGSDIR}"/trc.key2html ]] ; then
-    OPTS+=(--key2html="${TS_RIGSDIR}"/trc.key2html)
+if [[ -n "${TE_TS_RIGSDIR}" ]] \
+   && [[ -r "${TE_TS_RIGSDIR}"/trc.key2html ]] ; then
+    OPTS+=(--key2html="${TE_TS_RIGSDIR}"/trc.key2html)
 fi
 
 . $TE_BASE/scripts/trc.sh "${OPTS[@]}" "$@"
