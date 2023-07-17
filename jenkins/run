@@ -36,6 +36,6 @@ teTsPipeline {
     }
 
     postAlwaysHook = {
-        teEmail.email_set_prefix("[CI NET-DRV]")
+        teEmail.email_set_prefix(teCtx, "[CI NET-DRV]")
     }
 }
