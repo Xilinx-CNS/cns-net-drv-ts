@@ -15,6 +15,7 @@ teTsPipeline {
     ts_name = 'net-drv-ts'
 
     tsconf = true
+    publish_logs = true
 
     optionsProvider = {
         def opts = [
