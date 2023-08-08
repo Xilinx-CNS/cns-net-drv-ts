@@ -32,7 +32,6 @@ teTsPipeline {
 
     preRunHook = {
         metas.REUSE_PCO = params.reuse_pco ? 'true' : 'false'
-        metas.NET_DRV_TS_REV = env.TS_REV
     }
 
     postAlwaysHook = {

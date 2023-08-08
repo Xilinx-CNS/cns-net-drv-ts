@@ -28,10 +28,6 @@ teTsPipeline {
         return triggers
     }
 
-    preRunHook = {
-        metas.NET_DRV_TS_REV = env.TS_REV
-    }
-
     postRunHook = {
         dir('run') {
             sh "${TS_SRC}/scripts/trc-status.sh"
