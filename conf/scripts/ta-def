@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # (c) Copyright 2021 - 2022 Xilinx, Inc. All rights reserved.
 
+. ${SF_TS_CONFDIR}/make_cmds
+. ${SF_TS_CONFDIR}/scripts/fix-ssh-keys-perm
 . ${SF_TS_CONFDIR}/scripts/lib
 
 export TE_IUT_TA_NAME="NetDrv"
