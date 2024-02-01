@@ -57,6 +57,11 @@
             <value reqs="SOCK_DGRAM">SOCK_DGRAM</value>
         </enum>
 
+        <enum name="do_if_down">
+            <value>FALSE</value>
+            <value reqs="IF_DOWN">TRUE</value>
+        </enum>
+
         <!--- @} -->
 
         <prologue>

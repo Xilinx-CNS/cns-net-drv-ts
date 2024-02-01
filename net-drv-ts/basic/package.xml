@@ -36,7 +36,7 @@
                 <value>ALL</value>
             </arg>
             <arg name="sock_type" type="sock_stream_dgram"/>
-            <arg name="if_down" type="boolean"/>
+            <arg name="if_down" type="do_if_down"/>
         </run>
 
         <run>
@@ -45,7 +45,7 @@
                 <value ref="env.peer2peer"/>
                 <value ref="env.peer2peer_ipv6"/>
             </arg>
-            <arg name="if_down" type="boolean"/>
+            <arg name="if_down" type="do_if_down"/>
         </run>
 
         <run>
@@ -197,6 +197,7 @@
         <run>
             <script name="set_if_down" track_conf="nohistory">
                 <req id="X3-ST06"/>
+                <req id="IF_DOWN"/>
             </script>
             <arg name="env">
                 <value ref="env.peer2peer"/>

@@ -12,6 +12,7 @@
             <script name="dev_properties" track_conf="nohistory">
                 <req id="X3-ET001"/>
                 <req id="X3-ET010"/>
+                <req id="IF_DOWN"/>
             </script>
             <arg name="env">
                 <value ref="env.peer2peer"/>
@@ -32,6 +33,7 @@
         <run>
             <script name="msglvl" track_conf="nohistory">
                 <req id="X3-ET009"/>
+                <req id="IF_DOWN"/>
             </script>
             <arg name="env">
                 <value ref="env.peer2peer"/>

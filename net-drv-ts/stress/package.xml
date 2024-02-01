@@ -12,7 +12,9 @@
 
         <!--- @autogroup -->
         <run>
-            <script name="driver_unload" track_conf="nohistory"/>
+            <script name="driver_unload" track_conf="nohistory">
+                <req id="IF_DOWN"/>
+            </script>
             <arg name="env">
                 <value ref="env.peer2peer"/>
             </arg>
@@ -53,7 +55,9 @@
         </run>
 
         <run>
-            <script name="if_down_up_loop" track_conf="nohistory"/>
+            <script name="if_down_up_loop" track_conf="nohistory">
+                <req id="IF_DOWN"/>
+            </script>
             <arg name="env">
                 <value ref="env.peer2peer"/>
             </arg>
@@ -78,6 +82,7 @@
         <run>
             <script name="if_down_up_loop" track_conf="nohistory">
                 <req id="X3-STR12"/>
+                <req id="IF_DOWN"/>
             </script>
             <arg name="env">
                 <value ref="env.peer2peer"/>

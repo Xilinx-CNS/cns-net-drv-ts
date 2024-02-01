@@ -16,13 +16,14 @@
             <arg name="env">
                 <value ref="env.peer2peer"/>
             </arg>
-            <arg name="if_down" type="boolean"/>
+            <arg name="if_down" type="do_if_down"/>
         </run>
 
         <run>
             <script name="ct_thresh" track_conf="nohistory">
                 <req id="X3-DVL002"/>
                 <req id="X3-DVL003"/>
+                <req id="IF_DOWN"/>
             </script>
             <arg name="env">
                 <value ref="env.peer2peer"/>
@@ -37,7 +38,7 @@
             <arg name="env">
                 <value ref="env.peer2peer"/>
             </arg>
-            <arg name="if_down" type="boolean"/>
+            <arg name="if_down" type="do_if_down"/>
         </run>
 
     </session>

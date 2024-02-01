@@ -23,3 +23,6 @@ Tester requirements list
   *
     - SFPTPD
     - Tests running sfptpd
+  *
+    - IF_DOWN
+    - The test switches the network interfaces down
