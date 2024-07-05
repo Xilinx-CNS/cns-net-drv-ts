@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- (c) Copyright 2024 OKTET Labs Ltd. All rights reserved. -->
+<test name="perf" type="package">
+  <objective>Performance testing</objective>
+  <notes/>
+  <iter result="PASSED">
+    <notes/>
+    <test name="tcp_perf2" type="script">
+      <objective>Report TCP or UDP performance</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="perf_bench"/>
+        <arg name="dual_mode"/>
+        <arg name="protocol"/>
+        <arg name="n_perf_insts"/>
+        <arg name="n_streams"/>
+        <arg name="bandwidth"/>
+        <notes/>
+      </iter>
+    </test>
+    <test name="tcp_perf3" type="script">
+      <objective>Report TCP or UDP performance</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="perf_bench"/>
+        <arg name="dual_mode"/>
+        <arg name="protocol"/>
+        <arg name="n_perf_insts"/>
+        <arg name="n_streams"/>
+        <arg name="bandwidth"/>
+        <notes/>
+      </iter>
+    </test>
+    <test name="udp_perf2" type="script">
+      <objective>Report TCP or UDP performance</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="perf_bench"/>
+        <arg name="dual_mode"/>
+        <arg name="protocol"/>
+        <arg name="n_perf_insts"/>
+        <arg name="n_streams"/>
+        <arg name="bandwidth"/>
+        <notes/>
+      </iter>
+    </test>
+    <test name="udp_perf3" type="script">
+      <objective>Report TCP or UDP performance</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="perf_bench"/>
+        <arg name="dual_mode"/>
+        <arg name="protocol"/>
+        <arg name="n_perf_insts"/>
+        <arg name="n_streams"/>
+        <arg name="bandwidth"/>
+        <notes/>
+      </iter>
+    </test>
+  </iter>
+</test>

@@ -41,6 +41,9 @@
       <xi:include href="rx_path.xml" parse="xml"
                   xmlns:xi="http://www.w3.org/2003/XInclude"/>
 
+      <xi:include href="perf.xml" parse="xml"
+                  xmlns:xi="http://www.w3.org/2003/XInclude"/>
+
       <xi:include href="stress.xml" parse="xml"
                   xmlns:xi="http://www.w3.org/2003/XInclude"/>
 

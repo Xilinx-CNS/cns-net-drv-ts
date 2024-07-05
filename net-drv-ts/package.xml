@@ -98,6 +98,10 @@
         </run>
 
         <run>
+            <package name="perf"/>
+        </run>
+
+        <run>
             <package name="stress"/>
         </run>
 

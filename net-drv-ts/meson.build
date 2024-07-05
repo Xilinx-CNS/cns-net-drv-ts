@@ -37,6 +37,7 @@ te_libs = [
     'asn',
     'tapi_job',
     'tapi_tool',
+    'tapi_performance',
 ]
 
 foreach lib : te_libs
@@ -77,6 +78,7 @@ packages = [
     'devlink',
     'ethtool',
     'offload',
+    'perf',
     'ptp',
     'rss',
     'rx_path',

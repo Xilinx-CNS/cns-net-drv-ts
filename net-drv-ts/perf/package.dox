@@ -1,0 +1,16 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* (c) Copyright 2024 OKTET Labs Ltd. All rights reserved. */
+/**
+
+@defgroup perf Performance testing
+@ingroup net_drv_tests
+@{
+
+@author Andrew Rybchenko <andrew.rybchenko@oktetlabs.ru>
+
+@par Tests:
+
+
+@} perf
+
+*/

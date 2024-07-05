@@ -1,0 +1,234 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- (c) Copyright 2016 - 2022 Xilinx, Inc. All rights reserved. -->
+<!-- (c) Copyright 2024 OKTET Labs Ltd. All rights reserved. -->
+<package version="1.0">
+
+    <description>Performance testing</description>
+
+    <author mailto="andrew.rybchenko@oktetlabs.ru"/>
+
+    <req id="PERF"/>
+
+    <session track_conf="silent" track_conf_handdown="descendants">
+
+        <var name="env.peer2peer.iut_server" global="true">
+            <value reqs="IP4">
+                'net':IUT{
+                    'server_host'{
+                        {'iut_rpcs':IUT},
+                        addr:'server_addr':inet:unicast
+                    },
+                    'client_host'{
+                        {'tst_rpcs':tester},
+                        addr:'client_addr':inet:unicast
+                    }
+                },
+                'client_rpcs'='tst_rpcs',
+                'server_rpcs'='iut_rpcs'
+            </value>
+        </var>
+
+        <var name="env.peer2peer.iut_client" global="true">
+            <value reqs="IP4">
+                'net':IUT{
+                    'client_host'{
+                        {'iut_rpcs':IUT},
+                        addr:'client_addr':inet:unicast
+                    },
+                    'server_host'{
+                        {'tst_rpcs':tester},
+                        addr:'server_addr':inet:unicast
+                    }
+                },
+                'client_rpcs'='iut_rpcs',
+                'server_rpcs'='tst_rpcs'
+            </value>
+        </var>
+
+        <var name="env.peer2peer.iut_server_ip6" global="true">
+            <value reqs="IP6">
+                'net':IUT{
+                    'server_host'{
+                        {'iut_rpcs':IUT},
+                        addr:'server_addr':inet6:unicast
+                    },
+                    'client_host'{
+                        {'tst_rpcs':tester},
+                        addr:'client_addr':inet6:unicast
+                    }
+                },
+                'client_rpcs'='tst_rpcs',
+                'server_rpcs'='iut_rpcs'
+            </value>
+        </var>
+
+        <var name="env.peer2peer.iut_client_ip6" global="true">
+            <value reqs="IP6">
+                'net':IUT{
+                    'client_host'{
+                        {'iut_rpcs':IUT},
+                        addr:'client_addr':inet6:unicast
+                    },
+                    'server_host'{
+                        {'tst_rpcs':tester},
+                        addr:'server_addr':inet6:unicast
+                    }
+                },
+                'client_rpcs'='iut_rpcs',
+                'server_rpcs'='tst_rpcs'
+            </value>
+        </var>
+
+        <enum name="perf_bench.all">
+            <value reqs="IPERF2">iperf</value>
+            <value reqs="IPERF3">iperf3</value>
+        </enum>
+
+        <run name="tcp_udp_perf">
+            <session track_conf="silent" track_conf_handdown="descendants">
+                <run name="tcp_perf2">
+                    <script name="tcp_udp_perf"/>
+                    <arg name="env">
+                      <value ref="env.peer2peer.iut_client"/>
+                      <value ref="env.peer2peer.iut_server"/>
+                      <value ref="env.peer2peer.iut_client_ip6"/>
+                      <value ref="env.peer2peer.iut_server_ip6"/>
+                    </arg>
+                    <arg name="perf_bench" type="perf_bench.all">
+                        <value>iperf</value>
+                    </arg>
+                    <arg name="dual_mode" type="boolean">
+                        <value>FALSE</value>
+                        <value>TRUE</value>
+                    </arg>
+                    <arg name="protocol">
+                        <value>IPPROTO_TCP</value>
+                    </arg>
+                    <arg name="n_perf_insts">
+                        <value>1</value>
+                    </arg>
+                    <arg name="n_streams">
+                        <value>1</value>
+                        <value>2</value>
+                        <value>4</value>
+                        <value>8</value>
+                        <value>16</value>
+                    </arg>
+                    <arg name="bandwidth">
+                        <value>-1</value>
+                    </arg>
+                </run>
+
+                <run name="tcp_perf3">
+                    <script name="tcp_udp_perf"/>
+                    <arg name="env">
+                      <value ref="env.peer2peer.iut_client"/>
+                      <value ref="env.peer2peer.iut_server"/>
+                      <value ref="env.peer2peer.iut_client_ip6"/>
+                      <value ref="env.peer2peer.iut_server_ip6"/>
+                    </arg>
+                    <arg name="perf_bench" type="perf_bench.all">
+                        <value>iperf3</value>
+                    </arg>
+                    <arg name="dual_mode" type="boolean">
+                        <value>FALSE</value>
+                        <value>TRUE</value>
+                    </arg>
+                    <arg name="protocol">
+                        <value>IPPROTO_TCP</value>
+                    </arg>
+                    <arg name="n_perf_insts" list="streams_insts">
+                        <value>1</value>
+                        <value>1</value>
+                        <value>2</value>
+                        <value>2</value>
+                        <value>4</value>
+                    </arg>
+                    <arg name="n_streams" list="streams_insts">
+                        <value>1</value>
+                        <value>4</value>
+                        <value>1</value>
+                        <value>2</value>
+                        <value>1</value>
+                    </arg>
+                    <arg name="bandwidth">
+                        <value>-1</value>
+                    </arg>
+                </run>
+
+                <run name="udp_perf2">
+                    <script name="tcp_udp_perf"/>
+                    <arg name="env">
+                      <value ref="env.peer2peer.iut_client"/>
+                      <value ref="env.peer2peer.iut_server"/>
+                      <value ref="env.peer2peer.iut_client_ip6"/>
+                      <value ref="env.peer2peer.iut_server_ip6"/>
+                    </arg>
+                    <arg name="perf_bench" type="perf_bench.all">
+                        <value>iperf</value>
+                    </arg>
+                    <arg name="dual_mode" type="boolean">
+                        <value>FALSE</value>
+                        <value>TRUE</value>
+                    </arg>
+                    <arg name="protocol">
+                        <value>IPPROTO_UDP</value>
+                    </arg>
+                    <arg name="n_perf_insts">
+                        <value>1</value>
+                    </arg>
+                    <arg name="n_streams">
+                        <value>1</value>
+                        <value>2</value>
+                        <value>4</value>
+                        <value>8</value>
+                        <value>16</value>
+                    </arg>
+                    <arg name="bandwidth">
+                        <value>1000</value>
+                    </arg>
+                </run>
+
+                <run name="udp_perf3">
+                    <script name="tcp_udp_perf"/>
+                    <arg name="env">
+                      <value ref="env.peer2peer.iut_client"/>
+                      <value ref="env.peer2peer.iut_server"/>
+                      <value ref="env.peer2peer.iut_client_ip6"/>
+                      <value ref="env.peer2peer.iut_server_ip6"/>
+                    </arg>
+                    <arg name="perf_bench" type="perf_bench.all">
+                        <value>iperf3</value>
+                    </arg>
+                    <arg name="dual_mode" type="boolean">
+                        <value>FALSE</value>
+                        <value>TRUE</value>
+                    </arg>
+                    <arg name="protocol">
+                        <value>IPPROTO_UDP</value>
+                    </arg>
+                    <arg name="n_perf_insts" list="streams_insts">
+                        <value>1</value>
+                        <value>1</value>
+                        <value>2</value>
+                        <value>2</value>
+                        <value>4</value>
+                    </arg>
+                    <arg name="n_streams" list="streams_insts">
+                        <value>1</value>
+                        <value>4</value>
+                        <value>1</value>
+                        <value>2</value>
+                        <value>1</value>
+                    </arg>
+                    <arg name="bandwidth">
+                        <value>1000</value>
+                    </arg>
+                </run>
+
+            </session>
+        </run>
+
+    </session>
+</package>
