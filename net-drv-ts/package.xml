@@ -24,7 +24,7 @@
             are connected directly using @b SFC NICs. IPv4 addresses
             are issued for testing.
             -->
-            <value>'net':IUT{'iut_host'{{'iut_rpcs':IUT,if:'iut_if'},addr:'iut_addr':inet:unicast,addr:'mcast_addr':ether:multicast,addr:'bcast_addr':ether:broadcast,addr:'iut_lladdr':ether:unicast,addr:'iut_alien_mac':ether:alien,addr:'alien_addr':inet:alien},'tst_host'{{'tst_rpcs':tester},addr:'tst_addr':inet:unicast,if:'tst_if',addr:'tst_lladdr':ether:unicast,addr:'tst_alien_mac':ether:alien}}</value>
+            <value reqs="IP4">'net':IUT{'iut_host'{{'iut_rpcs':IUT,if:'iut_if'},addr:'iut_addr':inet:unicast,addr:'mcast_addr':ether:multicast,addr:'bcast_addr':ether:broadcast,addr:'iut_lladdr':ether:unicast,addr:'iut_alien_mac':ether:alien,addr:'alien_addr':inet:alien},'tst_host'{{'tst_rpcs':tester},addr:'tst_addr':inet:unicast,if:'tst_if',addr:'tst_lladdr':ether:unicast,addr:'tst_alien_mac':ether:alien}}</value>
         </var>
 
         <var name="env.peer2peer_ipv6" global="true">
@@ -32,7 +32,7 @@
             are connected directly using @b SFC NICs. IPv6 addresses
             are issued for testing.
             -->
-            <value>'net':IUT{'iut_host'{{'iut_rpcs':IUT,if:'iut_if'},addr:'iut_addr':inet6:unicast,addr:'mcast_addr':ether:multicast,addr:'bcast_addr':ether:broadcast,addr:'iut_lladdr':ether:unicast,addr:'iut_alien_mac':ether:alien,addr:'alien_addr':inet6:alien},'tst_host'{{'tst_rpcs':tester},addr:'tst_addr':inet6:unicast,if:'tst_if',addr:'tst_lladdr':ether:unicast,addr:'tst_alien_mac':ether:alien}}</value>
+            <value reqs="IP6">'net':IUT{'iut_host'{{'iut_rpcs':IUT,if:'iut_if'},addr:'iut_addr':inet6:unicast,addr:'mcast_addr':ether:multicast,addr:'bcast_addr':ether:broadcast,addr:'iut_lladdr':ether:unicast,addr:'iut_alien_mac':ether:alien,addr:'alien_addr':inet6:alien},'tst_host'{{'tst_rpcs':tester},addr:'tst_addr':inet6:unicast,if:'tst_if',addr:'tst_lladdr':ether:unicast,addr:'tst_alien_mac':ether:alien}}</value>
         </var>
 
         <var name="env.peer2peer_mcast" global="true">
@@ -40,7 +40,7 @@
             are connected directly using tested NICs. IPv4 addresses
             are issued for testing, including multicast one.
             -->
-            <value>'net':IUT{{{'iut_rpcs':IUT},addr:'iut_addr':inet:unicast,addr:'mcast_addr':inet:multicast,if:'iut_if'},{{'tst_rpcs':tester},addr:'tst_addr':inet:unicast,if:'tst_if'}}</value>
+            <value reqs="IP4">'net':IUT{{{'iut_rpcs':IUT},addr:'iut_addr':inet:unicast,addr:'mcast_addr':inet:multicast,if:'iut_if'},{{'tst_rpcs':tester},addr:'tst_addr':inet:unicast,if:'tst_if'}}</value>
         </var>
 
         <var name="env.peer2peer_mcast_ipv6" global="true">
@@ -48,7 +48,7 @@
             are connected directly using tested NICs. IPv6 addresses
             are issued for testing, including multicast one.
             -->
-            <value>'net':IUT{{{'iut_rpcs':IUT},addr:'iut_addr':inet6:unicast,addr:'mcast_addr':inet6:multicast,if:'iut_if'},{{'tst_rpcs':tester},addr:'tst_addr':inet6:unicast,if:'tst_if'}}</value>
+            <value reqs="IP6">'net':IUT{{{'iut_rpcs':IUT},addr:'iut_addr':inet6:unicast,addr:'mcast_addr':inet6:multicast,if:'iut_if'},{{'tst_rpcs':tester},addr:'tst_addr':inet6:unicast,if:'tst_if'}}</value>
         </var>
 
         <enum name="sock_stream_dgram">
