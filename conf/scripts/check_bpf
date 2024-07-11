@@ -9,8 +9,11 @@ if test -z "${TE_LIBBPF_SRC}" -a -n "${LIBBPF_SRC}" ; then
 fi
 
 # BPF/XDP tests require kernels and installed Linux headers >= 4.18.
-if test ${TE_IUT_HEADERS_NUM} -lt 418 -o \
-    ${TE_IUT_KERNEL_VERSION_NUM} -lt 418 ; then
+if $(test -n "${TE_IUT_HEADERS_NUM}" \
+     -a ${TE_IUT_HEADERS_NUM} -lt 418) \
+    || \
+    $(test -n "${TE_IUT_KERNEL_VERSION_NUM}" \
+      -a ${TE_IUT_KERNEL_VERSION_NUM} -lt 418) ; then
 
     TE_EXTRA_OPTS="${TE_EXTRA_OPTS} --tester-req=!BPF"
     echo "IUT does not support BPF/XDP" >&2
