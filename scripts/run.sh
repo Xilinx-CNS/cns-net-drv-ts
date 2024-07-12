@@ -33,6 +33,12 @@ usage() {
 USAGE: run.sh [run.sh options] [dispatcher.sh options]
 Options:
   --cfg=<CFG>               Configuration to be used.
+  --cfg=<CFG>:vm-pt[:VM_NAME]
+                            Run VM on IUT with NIC under test PCI functions
+                            passed to it.
+                            VM_NAME is a virtual machine name mapped to disk
+                            image and build host via environment variables
+                            (see TE_TS_RIGSDIR/env/vms).
   --cfg=virtio_virtio[:HV][:VM_NAME]
                             Run on a pair of dynamically started VMs connected
                             via Linux bridge. VMs are started on HV host
@@ -70,27 +76,70 @@ function process_virtio() {
     fi
 }
 
+#######################################
+# Process configuration modifiers
+# Globals:
+#   TE_VM_NAME
+#   MOD_OPTS
+# Arguments:
+#   Configuration name (mandatory)
+#   Modifier - 'vm-pt' for now (mandatory)
+#   VM name to use, see ts-rigs/env/ta-build (optional)
+#######################################
+function process_cfg_modifiers() {
+    local cfg="$1" ; shift
+    local modifier="$1" ; shift
+    local vm_name="$1"
+
+    if [[ "$modifier" != "vm-pt" ]] ; then
+        run_fail "ERROR: unsupported '$modifier' modifier"
+    fi
+
+    [[ -n "$vm_name" ]] || export TE_VM_NAME="$vm_name"
+
+    # site-specific TA build configuration for VMs
+    MOD_OPTS+=(--script=env/ta-build)
+    # site-specific tuning of VMs configuration
+    MOD_OPTS+=(--script=env/vms)
+    # generic ts-conf options to enable VM pass-through
+    MOD_OPTS+=(--opts=opts/vm_pt)
+}
+
+#######################################
+# Process the configuration that was passed to the script using the --cfg option
+# Globals:
+#   RUN_OPTS
+# Arguments:
+#   Configuration name (mandatory)
+#   Variants of the second argument:
+#     - empty
+#     - hypervisor name, if the previous argument was virtio_virtio
+#     - vm-pt - for testing VM on IUT with PCI pass-through
+#######################################
 function process_cfg() {
     local cfg="$1" ; shift
+    local modifier="$1"
     local run_conf
-    local -a mod_opts
+    local -a MOD_OPTS
 
     case "${cfg}" in
         virtio_virtio)
             process_virtio TE_HYPERVISOR "$@" ;;
         *)
-            call_if_defined grab_cfg_process "${cfg}" || exit 1 ;;
+            call_if_defined grab_cfg_process "${cfg}" || exit 1
+            [[ -z "$modifier" ]] || process_cfg_modifiers "$cfg" "$@"
+            ;;
     esac
 
     # Support <cfg>-p0 etc modifiers to use only one port
     if test "${cfg}" != "${cfg%-p[0-9]}" ; then
         run_conf="${cfg%-p[0-9]}"
         # VF modifiers must be applied after port modifiers
-        mod_opts=(--script=scripts/only-"${cfg#${run_conf}-}" "${mod_opts[@]}")
+        MOD_OPTS=(--script=scripts/only-"${cfg#${run_conf}-}" "${MOD_OPTS[@]}")
         cfg="${run_conf}"
     fi
     # Modifier must be applied after base configuration
-    RUN_OPTS+=(--opts=run/"${cfg}" "${mod_opts[@]}")
+    RUN_OPTS+=(--opts=run/"${cfg}" "${MOD_OPTS[@]}")
 }
 
 # In ts-conf/env/sfc do not try to autodetect interface names for hosts -
