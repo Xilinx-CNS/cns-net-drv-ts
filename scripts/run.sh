@@ -86,7 +86,7 @@ function process_cfg() {
     if test "${cfg}" != "${cfg%-p[0-9]}" ; then
         run_conf="${cfg%-p[0-9]}"
         # VF modifiers must be applied after port modifiers
-        mod_opts=(--script=env/"${cfg#${run_conf}-}" "${mod_opts[@]}")
+        mod_opts=(--script=scripts/only-"${cfg#${run_conf}-}" "${mod_opts[@]}")
         cfg="${run_conf}"
     fi
     # Modifier must be applied after base configuration
