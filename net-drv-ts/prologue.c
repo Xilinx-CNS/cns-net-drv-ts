@@ -78,57 +78,6 @@ cleanup:
     return rc;
 }
 
-#define FUNC_CHECK_RC(_expr) \
-    do {                            \
-        rc = (_expr);               \
-                                    \
-        if (rc != 0)                \
-            goto finish;            \
-    } while (0)
-
-/* Add TRC tags related to tested NIC */
-static te_errno
-add_nic_tags(const char *ta,
-             const struct if_nameindex *intf)
-{
-    char *pci_oid = NULL;
-    unsigned int vendor_id = 0;
-    unsigned int device_id = 0;
-    unsigned int sub_vendor_id = 0;
-    unsigned int sub_device_id = 0;
-    te_string str = TE_STRING_INIT_STATIC(DEF_STR_LEN);
-    te_errno rc;
-
-    rc = tapi_cfg_pci_oid_by_net_if(ta, intf->if_name, &pci_oid);
-    if (TE_RC_GET_ERROR(rc) == TE_ENOENT)
-        return 0;
-    else if (rc != 0)
-        return rc;
-
-    FUNC_CHECK_RC(tapi_cfg_pci_get_vendor_dev_ids(
-                        pci_oid, &vendor_id, &device_id,
-                        &sub_vendor_id,
-                        &sub_device_id));
-
-    FUNC_CHECK_RC(te_string_append(&str, "pci-%04x", vendor_id));
-    FUNC_CHECK_RC(tapi_tags_add_tag(te_string_value(&str), NULL));
-
-    FUNC_CHECK_RC(te_string_append(&str, "-%04x", device_id));
-    FUNC_CHECK_RC(tapi_tags_add_tag(te_string_value(&str), NULL));
-
-    te_string_reset(&str);
-    FUNC_CHECK_RC(te_string_append(&str, "pci-sub-%04x", sub_vendor_id));
-    FUNC_CHECK_RC(tapi_tags_add_tag(te_string_value(&str), NULL));
-
-    FUNC_CHECK_RC(te_string_append(&str, "-%04x", sub_device_id));
-    FUNC_CHECK_RC(tapi_tags_add_tag(te_string_value(&str), NULL));
-
-finish:
-    free(pci_oid);
-
-    return rc;
-}
-
 /* Add TRC tag named after network interface driver */
 static te_errno
 add_driver_tag(const char *ta, const char *prefix)
@@ -226,7 +175,7 @@ main(int argc, char **argv)
 
     CHECK_RC(add_driver_tag(iut_rpcs->ta, ""));
     CHECK_RC(add_driver_tag(tst_rpcs->ta, "peer-"));
-    CHECK_RC(add_nic_tags(iut_rpcs->ta, iut_if));
+    CHECK_RC(tapi_tags_add_net_pci_tags(iut_rpcs->ta, iut_if->if_name));
 
     TEST_SUCCESS;
 
