@@ -173,6 +173,7 @@ main(int argc, char **argv)
     TEST_GET_PCO(iut_rpcs);
     TEST_GET_PCO(tst_rpcs);
 
+    CHECK_RC(tapi_tags_add_linux_mm(iut_rpcs->ta, ""));
     CHECK_RC(add_driver_tag(iut_rpcs->ta, ""));
     CHECK_RC(add_driver_tag(tst_rpcs->ta, "peer-"));
     CHECK_RC(tapi_tags_add_net_pci_tags(iut_rpcs->ta, iut_if->if_name));
