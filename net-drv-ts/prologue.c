@@ -59,13 +59,15 @@ load_required_modules(const char *ta, void *cookie)
         }
         else
         {
-            rc = tapi_cfg_module_add(ta, driver, FALSE);
+            rc = tapi_cfg_module_add_from_ta_dir_or_fallback(ta, driver, FALSE);
             if (rc != 0)
                 goto cleanup;
 
             if (is_net_driver_needed)
             {
-                rc = tapi_cfg_module_add(ta, net_driver, FALSE);
+                rc = tapi_cfg_module_add_from_ta_dir_or_fallback(ta,
+                                                                 net_driver,
+                                                                 FALSE);
                 if (rc != 0)
                     goto cleanup;
             }
