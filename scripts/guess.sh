@@ -88,3 +88,7 @@ if test -z "${SFC_LINUX_NET_SRC}" ; then
         echo "Cannot guess SFC_LINUX_NET_SRC" >&2
     fi
 fi
+
+if [[ -n "${TE_TS_RIGSDIR}" && -r "${TE_TS_RIGSDIR}/scripts/guess.sh" ]] ; then
+    source "${TE_TS_RIGSDIR}/scripts/guess.sh"
+fi
