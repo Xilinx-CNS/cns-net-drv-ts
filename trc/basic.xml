@@ -39,6 +39,16 @@
         </results>
       </iter>
     </test>
+    <test name="rx_mode" type="script">
+      <objective>Check that Rx mode is appropriately handled by the driver and packets are received or not depending on configured Rx mode and destination MAC address.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="promisc"/>
+        <arg name="allmulti"/>
+        <notes/>
+      </iter>
+    </test>
     <test name="ethtool_reset_nic" type="script">
       <objective>Check what happens when NIC is reset with SIOCETHTOOL.</objective>
       <notes/>

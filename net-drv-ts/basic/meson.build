@@ -11,6 +11,7 @@ tests = [
     'multicast',
     'ping',
     'read_sysfs',
+    'rx_mode',
     'send_receive',
     'set_if_down',
 ]

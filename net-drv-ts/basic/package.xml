@@ -18,6 +18,16 @@
         </run>
 
         <run>
+            <script name="rx_mode"/>
+            <arg name="env">
+                <value ref="env.peer2peer"/>
+                <value ref="env.peer2peer_ipv6"/>
+            </arg>
+            <arg name="promisc" type="boolean"/>
+            <arg name="allmulti" type="boolean"/>
+        </run>
+
+        <run>
             <script name="ethtool_reset_nic" track_conf="nohistory|sync">
                 <req id="RESET"/>
                 <req id="X3-ST10"/>
