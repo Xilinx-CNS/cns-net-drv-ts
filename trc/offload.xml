@@ -412,5 +412,14 @@
         </results>
       </iter>
     </test>
+    <test name="vlan_filter" type="script">
+      <objective>Check VLAN filter offload functionality.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="vlan_filter_on"/>
+        <notes/>
+      </iter>
+    </test>
   </iter>
 </test>

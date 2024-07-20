@@ -52,5 +52,16 @@
             <arg name="gro_hw_on" type="boolean"/>
         </run>
 
+        <run>
+            <script name="vlan_filter">
+                <req id="SOCK_DGRAM"/>
+            </script>
+            <arg name="env">
+                <value ref="env.peer2peer"/>
+                <value ref="env.peer2peer_ipv6"/>
+            </arg>
+            <arg name="vlan_filter_on" type="boolean"/>
+        </run>
+
     </session>
 </package>

@@ -5,6 +5,7 @@ tests = [
     'receive_offload',
     'simple_csum',
     'tso',
+    'vlan_filter',
 ]
 
 foreach test : tests
