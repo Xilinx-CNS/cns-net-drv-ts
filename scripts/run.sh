@@ -95,7 +95,7 @@ function process_cfg_modifiers() {
         run_fail "ERROR: unsupported '$modifier' modifier"
     fi
 
-    [[ -n "$vm_name" ]] || export TE_VM_NAME="$vm_name"
+    [[ -z "$vm_name" ]] || export TE_VM_NAME="$vm_name"
 
     # site-specific TA build configuration for VMs
     MOD_OPTS+=(--script=env/ta-build)
