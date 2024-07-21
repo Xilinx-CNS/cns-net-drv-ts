@@ -64,7 +64,8 @@ send_recv_pkt(int af, uint16_t vlan_tci, bool exp_receive, bool fail,
     CHECK_RC(asn_parse_value_text(buf_tmpl, ndn_traffic_template,
                                   &pkt_templ, &num));
 
-    CHECK_RC(tapi_ndn_pkt_inject_vlan_tag(pkt_templ, vlan_tci));
+    if (vlan_tci != 0)
+        CHECK_RC(tapi_ndn_pkt_inject_vlan_tag(pkt_templ, vlan_tci));
 
     send_len = rand_range(1, sizeof(send_buf));
     te_fill_buf(send_buf, send_len);
@@ -183,6 +184,10 @@ main(int argc, char *argv[])
                                          TAD_SA2ARGS(tst_addr2, iut_addr2),
                                          &csap_tst));
 
+    TEST_STEP("Send untagged packet when no VLANs are added yet.");
+    send_recv_pkt(iut_addr2->sa_family, 0, true, true,
+                  "Sending untagged when no VLANs added");
+
     TEST_STEP("Send a packet to @p vlan_a_id when no VLANs are added yet.");
     vlan_a_id = rand_range(1, 4094);
     send_recv_pkt(iut_addr2->sa_family, vlan_a_id, !vlan_filter_on,
@@ -196,6 +201,10 @@ main(int argc, char *argv[])
     CHECK_RC(tapi_cfg_base_if_add_vlan(iut_rpcs->ta, iut_if->if_name,
                                        vlan_b_id, &vlan_b_if));
     CFG_WAIT_CHANGES;
+
+    TEST_STEP("Send untagged packet when VLANs are added.");
+    send_recv_pkt(iut_addr2->sa_family, 0, true, true,
+                  "Sending untagged when VLANs added");
 
     TEST_STEP("Send a packet to added VLAN @p vlan_a_id.");
     send_recv_pkt(iut_addr2->sa_family, vlan_a_id, true, true,
@@ -227,6 +236,10 @@ main(int argc, char *argv[])
     send_recv_pkt(iut_addr2->sa_family, vlan_b_id, !vlan_filter_on,
                   !vlan_filter_on,
                   "Sending to a VLAN when all VLANs removed");
+
+    TEST_STEP("Send untagged packet when all VLANs are removed.");
+    send_recv_pkt(iut_addr2->sa_family, 0, true, true,
+                  "Sending untagged when all VLANs removed");
 
     TEST_SUCCESS;
 
