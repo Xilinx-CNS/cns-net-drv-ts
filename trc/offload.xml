@@ -417,7 +417,17 @@
       <notes/>
       <iter result="PASSED">
         <arg name="env"/>
-        <arg name="vlan_filter_on"/>
+        <arg name="vlan_filter_on">FALSE</arg>
+        <notes/>
+        <results tags="virtio-pci" key="RX-VLAN-FILTER-ALWAYS-ON" notes="rx-vlan-filter is on and cannot be disabled on virtio-net">
+          <result value="SKIPPED">
+            <verdict>Feature 'rx-vlan-filter' is enabled and cannot be modified</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="vlan_filter_on">TRUE</arg>
         <notes/>
       </iter>
     </test>
