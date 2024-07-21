@@ -295,7 +295,7 @@
         <arg name="lro_on">FALSE</arg>
         <arg name="gro_on"/>
         <arg name="gro_hw_on">FALSE</arg>
-        <arg name="rx_vlan_strip_on"/>
+        <arg name="rx_vlan_strip_on">FALSE</arg>
         <notes/>
       </iter>
       <iter result="PASSED">
@@ -303,8 +303,22 @@
         <arg name="rx_csum_on">TRUE</arg>
         <arg name="lro_on">FALSE</arg>
         <arg name="gro_on"/>
+        <arg name="gro_hw_on">FALSE</arg>
+        <arg name="rx_vlan_strip_on">TRUE</arg>
+        <notes/>
+        <results tags="virtio-pci" key="RX-VLAN-HW-PARSE" notes="VirtIO net does not support Rx VLAN strip">
+          <result value="SKIPPED">
+            <verdict>Feature 'rx-vlan-hw-parse' is disabled and cannot be modified</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="rx_csum_on">TRUE</arg>
+        <arg name="lro_on">FALSE</arg>
+        <arg name="gro_on"/>
         <arg name="gro_hw_on">TRUE</arg>
-        <arg name="rx_vlan_strip_on"/>
+        <arg name="rx_vlan_strip_on">FALSE</arg>
         <notes/>
         <results tags="i40e" key="NO-RX-GRO-HW" notes="rx-gro-hw offload is not supported">
           <result value="SKIPPED">
@@ -329,6 +343,45 @@
         <results tags="sfc" key="SWNETLINUX-4961" notes="rx-gro-hw offload is not supported">
           <result value="SKIPPED">
             <verdict>Feature 'rx-gro-hw' is disabled and cannot be modified</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="rx_csum_on">TRUE</arg>
+        <arg name="lro_on">FALSE</arg>
+        <arg name="gro_on"/>
+        <arg name="gro_hw_on">TRUE</arg>
+        <arg name="rx_vlan_strip_on">TRUE</arg>
+        <notes/>
+        <results tags="i40e" key="NO-RX-GRO-HW" notes="rx-gro-hw offload is not supported">
+          <result value="SKIPPED">
+            <verdict>Feature 'rx-gro-hw' is disabled and cannot be modified</verdict>
+          </result>
+        </results>
+        <results tags="ice" key="NO-RX-GRO-HW" notes="rx-gro-hw offload is not supported">
+          <result value="SKIPPED">
+            <verdict>Feature 'rx-gro-hw' is disabled and cannot be modified</verdict>
+          </result>
+        </results>
+        <results tags="mlx5_core" key="NO-RX-GRO-HW" notes="rx-gro-hw offload is not supported">
+          <result value="SKIPPED">
+            <verdict>Feature 'rx-gro-hw' is disabled and cannot be modified</verdict>
+          </result>
+        </results>
+        <results tags="xilinx_efct" key="X3-1308" notes="rx-gro-hw offload is not supported">
+          <result value="SKIPPED">
+            <verdict>Feature 'rx-gro-hw' is disabled and cannot be modified</verdict>
+          </result>
+        </results>
+        <results tags="sfc" key="SWNETLINUX-4961" notes="rx-gro-hw offload is not supported">
+          <result value="SKIPPED">
+            <verdict>Feature 'rx-gro-hw' is disabled and cannot be modified</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="RX-VLAN-HW-PARSE" notes="VirtIO net does not support Rx VLAN strip">
+          <result value="SKIPPED">
+            <verdict>Feature 'rx-vlan-hw-parse' is disabled and cannot be modified</verdict>
           </result>
         </results>
       </iter>
