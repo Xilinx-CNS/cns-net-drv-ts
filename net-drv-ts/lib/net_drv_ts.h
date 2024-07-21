@@ -311,4 +311,28 @@ do {                                                      \
     net_drv_wait_up_gen(_ta, _if_name, TRUE);             \
 } while (0)
 
+/**
+ * Create VLAN over pair of interfaces, allocate and assign IP
+ * addresses, use the same transport ports.
+ *
+ * @param[in] ta1           The first Test Agent.
+ * @param[in] ta2           The second Test Agent.
+ * @param[in] if1           Interface on the first Test Agent.
+ * @param[in] if2           Interface on the second Test Agent.
+ * @param[in] af            Family of addresses to add.
+ * @param[in,out] vlan_id   Optional location with/for VLAN ID
+ *                          (if not @c NULL and value is not @c 0,
+ *                          use specified ID, otherwise allocate random
+ *                          and return it here).
+ * @param[out] vlan_addr1   Optional location for address assigned to
+ *                          the VLAN over the first interface.
+ * @param[out] vlan_addr2   Optional location for address assigned to
+ *                          the VLAN over the second interface.
+ */
+extern void net_drv_ts_add_vlan(const char *ta1, const char *ta2,
+                                const char *if1, const char *if2,
+                                int af, uint16_t *vlan_id,
+                                struct sockaddr **vlan_addr1,
+                                struct sockaddr **vlan_addr2);
+
 #endif /* !__TS_NET_DRV_TS_H__ */

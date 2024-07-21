@@ -610,3 +610,53 @@ net_drv_wait_up_gen(const char *ta, const char *if_name, te_bool cleanup)
     }
 #undef MAX_IF_WAIT_MS
 }
+
+/* See description in net_drv_ts.h */
+void
+net_drv_ts_add_vlan(const char *ta1, const char *ta2,
+                    const char *if1, const char *if2,
+                    int af, uint16_t *vlan_id,
+                    struct sockaddr **vlan_addr1,
+                    struct sockaddr **vlan_addr2)
+{
+    uint16_t new_vlan_id;
+    char *vlan_if1 = NULL;
+    char *vlan_if2 = NULL;
+    struct sockaddr *new_addr1 = NULL;
+    struct sockaddr *new_addr2 = NULL;
+    int prefix;
+
+    if (vlan_id != NULL && *vlan_id != 0)
+        new_vlan_id = *vlan_id;
+    else
+        new_vlan_id = rand_range(1, 4094);
+
+    CHECK_RC(tapi_cfg_base_if_add_vlan(ta1, if1,
+                                       new_vlan_id, &vlan_if1));
+    CHECK_RC(tapi_cfg_base_if_add_vlan(ta2, if2,
+                                       new_vlan_id, &vlan_if2));
+    CHECK_RC(tapi_cfg_base_if_up(ta1, vlan_if1));
+    CHECK_RC(tapi_cfg_base_if_up(ta2, vlan_if2));
+    CHECK_RC(tapi_cfg_alloc_af_net_addr_pair(af, &new_addr1, &new_addr2,
+                                             &prefix));
+    CHECK_RC(tapi_cfg_base_if_add_net_addr(ta1, vlan_if1,
+                                           new_addr1, prefix, true, NULL));
+    CHECK_RC(tapi_cfg_base_if_add_net_addr(ta2, vlan_if2,
+                                           new_addr2, prefix, true, NULL));
+
+    free(vlan_if1);
+    free(vlan_if2);
+
+    if (vlan_id != NULL)
+        *vlan_id = new_vlan_id;
+
+    if (vlan_addr1 != NULL)
+        *vlan_addr1 = new_addr1;
+    else
+        free(new_addr1);
+
+    if (vlan_addr2 != NULL)
+        *vlan_addr2 = new_addr2;
+    else
+        free(new_addr2);
+}

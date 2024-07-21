@@ -20,6 +20,7 @@
  * @param lro_on        If @c TRUE, LRO is enabled.
  * @param gro_on        If @c TRUE, GRO is enabled.
  * @param gro_hw_on     If @c TRUE, Hardware GRO is enabled.
+ * @param rx_vlan_strip_on If @c TRUE, VLAN strip is enabled.
  *
  * @par Scenario:
  *
@@ -134,6 +135,7 @@ main(int argc, char *argv[])
     te_bool lro_on;
     te_bool gro_on;
     te_bool gro_hw_on;
+    te_bool rx_vlan_strip_on;
     te_bool lro_works;
 
     int iut_s = -1;
@@ -168,11 +170,12 @@ main(int argc, char *argv[])
     TEST_GET_BOOL_PARAM(lro_on);
     TEST_GET_BOOL_PARAM(gro_on);
     TEST_GET_BOOL_PARAM(gro_hw_on);
+    TEST_GET_BOOL_PARAM(rx_vlan_strip_on);
 
     TEST_STEP("Set @b rx-checksum, @b rx-lro, @b rx-gro and @b rx-gro-hw "
               "features on the IUT interface according to "
-              "values of @p rx_csum_on, @p lro_on, @p gro_on and "
-              "@p gro_hw_on test parameters.");
+              "values of @p rx_csum_on, @p lro_on, @p gro_on, "
+              "@p gro_hw_on and @p rx_vlan_strip_on test parameters.");
     net_drv_set_if_feature(iut_rpcs->ta, iut_if->if_name,
                            "rx-checksum", rx_csum_on ? 1 : 0);
     net_drv_set_if_feature(iut_rpcs->ta, iut_if->if_name,
@@ -181,6 +184,8 @@ main(int argc, char *argv[])
                            "rx-gro", gro_on ? 1 : 0);
     net_drv_set_if_feature(iut_rpcs->ta, iut_if->if_name,
                            "rx-gro-hw", gro_hw_on ? 1 : 0);
+    net_drv_set_if_feature(iut_rpcs->ta, iut_if->if_name,
+                           "rx-vlan-hw-parse", rx_vlan_strip_on ? 1 : 0);
 
     /* Rx checksum offload is needed for LRO to work */
     lro_works = (lro_on && rx_csum_on);
@@ -231,6 +236,24 @@ main(int argc, char *argv[])
                                    "tx-checksum-ipv6", 1);
         net_drv_try_set_if_feature(tst_rpcs->ta, tst_if->if_name,
                                    "tx-tcp6-segmentation", 1);
+    }
+
+    TEST_STEP("If @p rx_vlan_strip_on, create VLANs, assign addresses and "
+              "use it for traffic checks below.");
+    if (rx_vlan_strip_on)
+    {
+        struct sockaddr *iut_addr2 = NULL;
+        struct sockaddr *tst_addr2 = NULL;
+
+        net_drv_ts_add_vlan(iut_rpcs->ta, tst_rpcs->ta,
+                            iut_if->if_name, tst_if->if_name,
+                            iut_addr->sa_family, NULL,
+                            &iut_addr2, &tst_addr2);
+
+        te_sockaddr_set_port(iut_addr2, te_sockaddr_get_port(iut_addr));
+        iut_addr = iut_addr2;
+        te_sockaddr_set_port(tst_addr2, te_sockaddr_get_port(tst_addr));
+        tst_addr = tst_addr2;
     }
 
     CFG_WAIT_CHANGES;

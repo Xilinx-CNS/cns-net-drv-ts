@@ -50,6 +50,7 @@
             <arg name="lro_on" type="boolean"/>
             <arg name="gro_on" type="boolean"/>
             <arg name="gro_hw_on" type="boolean"/>
+            <arg name="rx_vlan_strip_on" type="boolean"/>
         </run>
 
         <run>

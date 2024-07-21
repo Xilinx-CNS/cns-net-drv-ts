@@ -110,6 +110,7 @@
         <arg name="lro_on">FALSE</arg>
         <arg name="gro_on"/>
         <arg name="gro_hw_on">FALSE</arg>
+        <arg name="rx_vlan_strip_on"/>
         <notes/>
         <results tags="virtio-pci" key="NO-RX-CKSUM" notes="VirtIO net does not support Rx checksum offload disabling">
           <result value="SKIPPED">
@@ -123,6 +124,7 @@
         <arg name="lro_on">FALSE</arg>
         <arg name="gro_on"/>
         <arg name="gro_hw_on">TRUE</arg>
+        <arg name="rx_vlan_strip_on"/>
         <notes/>
         <results tags="i40e" key="NO-RX-GRO-HW" notes="rx-gro-hw offload is not supported">
           <result value="SKIPPED">
@@ -161,6 +163,7 @@
         <arg name="lro_on">TRUE</arg>
         <arg name="gro_on">FALSE</arg>
         <arg name="gro_hw_on">FALSE</arg>
+        <arg name="rx_vlan_strip_on"/>
         <notes/>
         <results tags="sfc_ef100" key="WONTFIX SWNETLINUX-4593" notes="sfc_ef100 does not support LRO">
           <result value="SKIPPED">
@@ -204,6 +207,7 @@
         <arg name="lro_on">TRUE</arg>
         <arg name="gro_on">TRUE</arg>
         <arg name="gro_hw_on">FALSE</arg>
+        <arg name="rx_vlan_strip_on"/>
         <notes/>
         <results tags="sfc_ef100" key="WONTFIX SWNETLINUX-4593" notes="sfc_ef100 does not support LRO">
           <result value="SKIPPED">
@@ -242,6 +246,7 @@
         <arg name="lro_on">TRUE</arg>
         <arg name="gro_on"/>
         <arg name="gro_hw_on">TRUE</arg>
+        <arg name="rx_vlan_strip_on"/>
         <notes/>
         <results tags="mlx5_core" key="NO-RX-GRO-HW" notes="rx-gro-hw offload is not supported">
           <result value="SKIPPED">
@@ -290,6 +295,7 @@
         <arg name="lro_on">FALSE</arg>
         <arg name="gro_on"/>
         <arg name="gro_hw_on">FALSE</arg>
+        <arg name="rx_vlan_strip_on"/>
         <notes/>
       </iter>
       <iter result="PASSED">
@@ -298,6 +304,7 @@
         <arg name="lro_on">FALSE</arg>
         <arg name="gro_on"/>
         <arg name="gro_hw_on">TRUE</arg>
+        <arg name="rx_vlan_strip_on"/>
         <notes/>
         <results tags="i40e" key="NO-RX-GRO-HW" notes="rx-gro-hw offload is not supported">
           <result value="SKIPPED">
@@ -331,6 +338,7 @@
         <arg name="lro_on">TRUE</arg>
         <arg name="gro_on"/>
         <arg name="gro_hw_on">FALSE</arg>
+        <arg name="rx_vlan_strip_on"/>
         <notes/>
         <results tags="sfc_ef100" key="WONTFIX SWNETLINUX-4593" notes="sfc_ef100 does not support LRO">
           <result value="SKIPPED">
@@ -369,6 +377,7 @@
         <arg name="lro_on">TRUE</arg>
         <arg name="gro_on"/>
         <arg name="gro_hw_on">TRUE</arg>
+        <arg name="rx_vlan_strip_on"/>
         <notes/>
         <results tags="mlx5_core" key="NO-RX-GRO-HW" notes="rx-gro-hw offload is not supported">
           <result value="SKIPPED">
