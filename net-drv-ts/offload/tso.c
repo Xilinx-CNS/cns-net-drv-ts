@@ -251,6 +251,7 @@ main(int argc, char *argv[])
     csap_handle_t csap_tx = CSAP_INVALID_HANDLE;
 
     te_bool tso_on;
+    te_bool vlan_hw_insert_on;
     int min_size;
     int max_size;
     int send_calls;
@@ -264,6 +265,7 @@ main(int argc, char *argv[])
     TEST_GET_ADDR(iut_rpcs, iut_addr);
     TEST_GET_ADDR(tst_rpcs, tst_addr);
     TEST_GET_BOOL_PARAM(tso_on);
+    TEST_GET_BOOL_PARAM(vlan_hw_insert_on);
     TEST_GET_INT_PARAM(min_size);
     TEST_GET_INT_PARAM(max_size);
     TEST_GET_INT_PARAM(send_calls);
@@ -294,6 +296,10 @@ main(int argc, char *argv[])
     net_drv_set_if_feature(iut_rpcs->ta, iut_if->if_name,
                            tso_feature, tso_on ? 1 : 0);
 
+    TEST_STEP("Turn Tx VLAN HW insertion on or off on IUT according to @p vlan_hw_insert_on.");
+    net_drv_set_if_feature(iut_rpcs->ta, iut_if->if_name,
+                           "tx-vlan-hw-insert", vlan_hw_insert_on ? 1 : 0);
+
     TEST_STEP("Make sure LRO and GRO are turned off on Tester, so that "
               "CSAP captures IUT packets there exactly as they were sent "
               "and their sizes can be checked.");
@@ -303,6 +309,26 @@ main(int argc, char *argv[])
                            "rx-gro-hw", 0);
     net_drv_set_if_feature(tst_rpcs->ta, tst_if->if_name,
                            "rx-lro", 0);
+
+    TEST_STEP("If @p rx_vlan_strip_on, create VLANs, assign addresses and "
+              "use it for traffic checks below.");
+    if (vlan_hw_insert_on)
+    {
+        struct sockaddr *iut_addr2 = NULL;
+        struct sockaddr *tst_addr2 = NULL;
+
+        net_drv_ts_add_vlan(iut_rpcs->ta, tst_rpcs->ta,
+                            iut_if->if_name, tst_if->if_name,
+                            iut_addr->sa_family, NULL,
+                            &iut_addr2, &tst_addr2);
+
+        CFG_WAIT_CHANGES;
+
+        te_sockaddr_set_port(iut_addr2, te_sockaddr_get_port(iut_addr));
+        iut_addr = iut_addr2;
+        te_sockaddr_set_port(tst_addr2, te_sockaddr_get_port(tst_addr));
+        tst_addr = tst_addr2;
+    }
 
     CHECK_RC(tapi_cfg_base_if_get_mtu_u(iut_rpcs->ta, iut_if->if_name,
                                         &mtu));

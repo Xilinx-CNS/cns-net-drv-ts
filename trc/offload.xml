@@ -49,6 +49,7 @@
       <iter result="PASSED">
         <arg name="env"/>
         <arg name="tso_on">FALSE</arg>
+        <arg name="vlan_hw_insert_on"/>
         <arg name="min_size"/>
         <arg name="max_size"/>
         <arg name="send_calls"/>
@@ -62,6 +63,7 @@
       <iter result="PASSED">
         <arg name="env">VAR.env.peer2peer</arg>
         <arg name="tso_on">TRUE</arg>
+        <arg name="vlan_hw_insert_on"/>
         <arg name="min_size"/>
         <arg name="max_size"/>
         <arg name="send_calls"/>
@@ -80,6 +82,7 @@
       <iter result="PASSED">
         <arg name="env">VAR.env.peer2peer_ipv6</arg>
         <arg name="tso_on">TRUE</arg>
+        <arg name="vlan_hw_insert_on"/>
         <arg name="min_size"/>
         <arg name="max_size"/>
         <arg name="send_calls"/>

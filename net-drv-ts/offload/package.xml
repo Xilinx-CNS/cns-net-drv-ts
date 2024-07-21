@@ -27,6 +27,7 @@
                 <value ref="env.peer2peer_ipv6"/>
             </arg>
             <arg name="tso_on" type="boolean"/>
+            <arg name="vlan_hw_insert_on" type="boolean"/>
             <arg name="min_size">
                 <value>2</value>
             </arg>
