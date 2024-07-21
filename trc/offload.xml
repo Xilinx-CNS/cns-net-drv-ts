@@ -419,6 +419,11 @@
         <arg name="env"/>
         <arg name="vlan_filter_on">FALSE</arg>
         <notes/>
+        <results tags="i40e" key="RX-VLAN-FILTER-ALWAYS-ON" notes="rx-vlan-filter is on and cannot be disabled on i40e">
+          <result value="SKIPPED">
+            <verdict>Feature 'rx-vlan-filter' is enabled and cannot be modified</verdict>
+          </result>
+        </results>
         <results tags="virtio-pci" key="RX-VLAN-FILTER-ALWAYS-ON" notes="rx-vlan-filter is on and cannot be disabled on virtio-net">
           <result value="SKIPPED">
             <verdict>Feature 'rx-vlan-filter' is enabled and cannot be modified</verdict>
@@ -429,6 +434,12 @@
         <arg name="env"/>
         <arg name="vlan_filter_on">TRUE</arg>
         <notes/>
+        <results tags="i40e" key="RX-VLAN-FILTER-NO-VLANS" notes="VLAN filtering is disabled when no VLANs added on i40e">
+          <result value="PASSED">
+            <verdict>Sending to a VLAN when no VLANs added: CSAP on IUT captured the packet</verdict>
+            <verdict>Sending to a VLAN when all VLANs removed: CSAP on IUT captured the packet</verdict>
+          </result>
+        </results>
       </iter>
     </test>
   </iter>

@@ -27,6 +27,7 @@
 
 #include "net_drv_test.h"
 #include "te_ethernet.h"
+#include "te_rand.h"
 #include "tapi_udp.h"
 #include "tapi_cfg.h"
 #include "ndn.h"
@@ -45,7 +46,8 @@ static csap_handle_t csap_iut = CSAP_INVALID_HANDLE;
  * Send UDP packet from Tester to IUT with specified VLAN TCI.
  */
 static void
-send_recv_pkt(int af, uint16_t vlan_tci, bool exp_receive, const char *stage)
+send_recv_pkt(int af, uint16_t vlan_tci, bool exp_receive, bool fail,
+              const char *stage)
 {
     char buf_tmpl[1024];
     asn_value *pkt_templ = NULL;
@@ -85,14 +87,27 @@ send_recv_pkt(int af, uint16_t vlan_tci, bool exp_receive, const char *stage)
     {
         if (rx_pkts_num == 0)
         {
-            TEST_VERDICT("%s: CSAP on IUT did not capture the packet",
-                         stage);
+            if (fail)
+            {
+                TEST_VERDICT("%s: CSAP on IUT did not capture the packet",
+                             stage);
+            }
+            else
+            {
+                WARN_VERDICT("%s: CSAP on IUT did not capture the packet",
+                             stage);
+            }
         }
     }
     else
     {
         if (rx_pkts_num != 0)
-            TEST_VERDICT("%s: CSAP on IUT captured the packet", stage);
+        {
+            if (fail)
+                TEST_VERDICT("%s: CSAP on IUT captured the packet", stage);
+            else
+                WARN_VERDICT("%s: CSAP on IUT captured the packet", stage);
+        }
     }
 
     free(pkt_templ);
@@ -114,7 +129,9 @@ main(int argc, char *argv[])
     const struct sockaddr *iut_lladdr = NULL;
 
     uint16_t vlan_a_id;
+    uint16_t vlan_b_id;
     char *vlan_a_if = NULL;
+    char *vlan_b_if = NULL;
 
     TEST_START;
     TEST_GET_PCO(iut_rpcs);
@@ -166,28 +183,50 @@ main(int argc, char *argv[])
                                          TAD_SA2ARGS(tst_addr2, iut_addr2),
                                          &csap_tst));
 
-    TEST_STEP("Send a packet to @p vlan_a_id when the VLAN is not added yet.");
+    TEST_STEP("Send a packet to @p vlan_a_id when no VLANs are added yet.");
     vlan_a_id = rand_range(1, 4094);
     send_recv_pkt(iut_addr2->sa_family, vlan_a_id, !vlan_filter_on,
-                  "Sending to the not added VLAN");
+                  !vlan_filter_on,
+                  "Sending to a VLAN when no VLANs added");
 
-    TEST_STEP("Add the VLAN @p vlan_a_id to the @p iut_if.");
+    TEST_STEP("Add VLANs @p vlan_a_id and @p vlan_b_id to the @p iut_if.");
     CHECK_RC(tapi_cfg_base_if_add_vlan(iut_rpcs->ta, iut_if->if_name,
                                        vlan_a_id, &vlan_a_if));
+    vlan_b_id = te_rand_range_exclude(1, 4094, vlan_a_id);
+    CHECK_RC(tapi_cfg_base_if_add_vlan(iut_rpcs->ta, iut_if->if_name,
+                                       vlan_b_id, &vlan_b_if));
     CFG_WAIT_CHANGES;
 
-    TEST_STEP("Send a packet to @p vlan_a_id when the VLAN is added.");
-    send_recv_pkt(iut_addr2->sa_family, vlan_a_id, true,
-                  "Sending to the just added VLAN");
+    TEST_STEP("Send a packet to added VLAN @p vlan_a_id.");
+    send_recv_pkt(iut_addr2->sa_family, vlan_a_id, true, true,
+                  "Sending to just added VLAN A");
 
-    TEST_STEP("Delete the VLAN @p vlan_a_id from the @p iut_if.");
+    TEST_STEP("Send a packet to added VLAN @p vlan_b_id.");
+    send_recv_pkt(iut_addr2->sa_family, vlan_b_id, true, true,
+                  "Sending to just added VLAN B");
+
+    TEST_STEP("Delete VLAN @p vlan_a_id from the @p iut_if.");
     CHECK_RC(tapi_cfg_base_if_del_vlan(iut_rpcs->ta, iut_if->if_name,
                                        vlan_a_id));
     CFG_WAIT_CHANGES;
 
-    TEST_STEP("Send a packet to @p vlan_a_id when the VLAN is removed.");
-    send_recv_pkt(iut_addr2->sa_family, vlan_a_id, !vlan_filter_on,
-                  "Sending to the removed VLAN");
+    TEST_STEP("Send a packet to still added VLAN @p vlan_b_id.");
+    send_recv_pkt(iut_addr2->sa_family, vlan_b_id, true, true,
+                  "Sending to still added VLAN B");
+
+    TEST_STEP("Send a packet to just removed VLAN @p vlan_a_id.");
+    send_recv_pkt(iut_addr2->sa_family, vlan_a_id, !vlan_filter_on, true,
+                  "Sending to just removed VLAN A");
+
+    TEST_STEP("Delete the VLAN @p vlan_b_id from the @p iut_if.");
+    CHECK_RC(tapi_cfg_base_if_del_vlan(iut_rpcs->ta, iut_if->if_name,
+                                       vlan_b_id));
+    CFG_WAIT_CHANGES;
+
+    TEST_STEP("Send a packet to VLAN @p vlan_b_id when all VLANs are removed.");
+    send_recv_pkt(iut_addr2->sa_family, vlan_b_id, !vlan_filter_on,
+                  !vlan_filter_on,
+                  "Sending to a VLAN when all VLANs removed");
 
     TEST_SUCCESS;
 
