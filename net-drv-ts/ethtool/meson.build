@@ -5,6 +5,7 @@ tests = [
     'check_ring',
     'dev_properties',
     'msglvl',
+    'register_dump',
     'reset_under_traffic',
     'show_pause',
     'statistics',

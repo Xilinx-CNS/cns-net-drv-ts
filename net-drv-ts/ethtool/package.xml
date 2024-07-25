@@ -85,5 +85,12 @@
             </arg>
         </run>
 
+        <run>
+            <script name="register_dump"/>
+            <arg name="env">
+                <value ref="env.iut_only"/>
+            </arg>
+        </run>
+
     </session>
 </package>

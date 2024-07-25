@@ -320,5 +320,19 @@
         </results>
       </iter>
     </test>
+    <test name="register_dump" type="script">
+      <objective>Check that register dump can be obtained.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <notes/>
+        <results tags="mlx5_core|virtio-pci" key="NO-REG-DUMP">
+          <result value="FAILED">
+            <verdict>Ethtool command did not terminate successfully</verdict>
+            <verdict>Getting register dump is not supported</verdict>
+          </result>
+        </results>
+      </iter>
+    </test>
   </iter>
 </test>
