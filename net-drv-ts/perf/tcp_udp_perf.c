@@ -6,7 +6,9 @@
  * Performance testing
  */
 
-/** @page perf-tcp_udp_perf TCP UPD performance test
+/** @defgroup perf-tcp_udp_perf TCP UPD performance test
+ * @ingroup perf
+ * @{
  *
  * @objective Report TCP or UDP performance
  *
