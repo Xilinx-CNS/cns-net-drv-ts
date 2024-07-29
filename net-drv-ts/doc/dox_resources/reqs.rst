@@ -15,14 +15,14 @@ Tester requirements list
     - Name
     - Description
   *
-    - SOCK_STREAM
-    - Tests using TCP sockets
-  *
-    - SOCK_DGRAM
-    - Tests using UDP sockets
+    - IF_DOWN
+    - The test switches the network interfaces down
   *
     - SFPTPD
     - Tests running sfptpd
   *
-    - IF_DOWN
-    - The test switches the network interfaces down
+    - SOCK_DGRAM
+    - Tests using UDP sockets
+  *
+    - SOCK_STREAM
+    - Tests using TCP sockets
