@@ -147,5 +147,14 @@
         </results>
       </iter>
     </test>
+    <test name="rx_coalesce_frames" type="script">
+      <objective>Check that when rx_max_coalesced_frames is set to a specific value, Rx interrupts coalescing works accordingly.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="coalesce_frames"/>
+        <notes/>
+      </iter>
+    </test>
   </iter>
 </test>

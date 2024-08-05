@@ -2,6 +2,7 @@
 # (c) Copyright 2021 - 2022 Xilinx, Inc. All rights reserved.
 
 tests = [
+    'rx_coalesce_frames',
     'rx_coalesce_usecs',
     'rx_fcs',
 ]
