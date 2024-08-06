@@ -68,6 +68,27 @@ destroy_perf_insts(tapi_perf_server **perf_server,
     }
 }
 
+static void
+perf_summary_throughput_mi_log(const double server_throughput,
+                               const double client_throughput)
+{
+    te_mi_logger *logger;
+
+    CHECK_RC(te_mi_logger_meas_create("summary throughput", &logger));
+
+    te_mi_logger_add_meas_vec(logger, NULL, TE_MI_MEAS_V(
+            TE_MI_MEAS(THROUGHPUT,
+                       "Server", SINGLE,
+                       server_throughput,
+                       PLAIN),
+            TE_MI_MEAS(THROUGHPUT,
+                       "Client", SINGLE,
+                       client_throughput,
+                       PLAIN)));
+
+    te_mi_logger_destroy(logger);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -211,6 +232,11 @@ main(int argc, char *argv[])
         CHECK_RC(tapi_perf_client_get_dump_check_report(perf_clients[i],
                                             "client", &perf_clients_report[i]));
 
+        CHECK_RC(tapi_perf_server_report_mi_log(perf_servers[i],
+                                                &perf_servers_report[i]));
+        CHECK_RC(tapi_perf_client_report_mi_log(perf_clients[i],
+                                                &perf_clients_report[i]));
+
         bits_per_second_server += perf_servers_report[i].bits_per_second;
         bits_per_second_client += perf_clients_report[i].bits_per_second;
     }
@@ -220,6 +246,9 @@ main(int argc, char *argv[])
 
     TEST_ARTIFACT("Client throughput: %.2f Mbps",
                   TE_UNITS_DEC_U2M(bits_per_second_client));
+
+    perf_summary_throughput_mi_log(bits_per_second_server,
+                                   bits_per_second_client);
 
     TEST_SUCCESS;
 
