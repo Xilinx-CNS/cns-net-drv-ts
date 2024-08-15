@@ -154,6 +154,11 @@
         <arg name="env"/>
         <arg name="coalesce_frames"/>
         <notes/>
+        <results tags="virtio-pci" key="NO-RX-IRQ-MODER-CONTROL" notes="VirtIO net does not support interrupt moderation control">
+          <result value="FAILED">
+            <verdict>Failed to set rx_max_coalesced_frames, rc=TA_UNIX-EINVAL</verdict>
+          </result>
+        </results>
       </iter>
     </test>
   </iter>
