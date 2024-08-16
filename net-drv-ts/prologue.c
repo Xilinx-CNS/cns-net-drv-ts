@@ -1,14 +1,19 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 /* (c) Copyright 2021 - 2022 Xilinx, Inc. All rights reserved. */
-/** @file
- * @brief Test Suite prologue
+/**
+ * @defgroup prologue Test Suite prologue
+ * @ingroup net_drv_tests
+ * @{
  *
- * Net Driver Test Suite prologue.
+ * @objective Prepare configuration.
+ *
+ * @param env               Testing environment:
+ *                          - @ref env-peer2peer
+ *
+ * @par Scenario:
  *
  * @author Dmitry Izbitsky <Dmitry.Izbitsky@oktetlabs.ru>
  */
-
-#ifndef DOXYGEN_TEST_SPEC
 
 /** Logging subsystem entity name */
 #define TE_TEST_NAME    "prologue"
@@ -126,9 +131,11 @@ main(int argc, char **argv)
 
     CHECK_RC(tapi_expand_path_all_ta(NULL));
 
+    TEST_STEP("Remove empty networks from configuration.");
     if ((rc = tapi_cfg_net_remove_empty()) != 0)
         TEST_VERDICT("Failed to remove /net instances with empty interfaces");
 
+    TEST_STEP("Reserve all resources specified in network configuration.");
     rc = tapi_cfg_net_reserve_all();
     if (rc != 0)
     {
@@ -136,12 +143,11 @@ main(int argc, char **argv)
                      "configuration: %r", rc);
     }
 
+    TEST_STEP("Load (or reload) required kernel modules.");
     CHECK_RC(rcf_foreach_ta(load_required_modules, NULL));
 
-    /*
-     * Bind net drivers to IUT and TST explicitly, because we can't
-     * rely on the driver to do this automatically.
-     */
+    TEST_STEP("Bind net drivers to IUT and TST explicitly, because we can't "
+              "rely on the driver to do this automatically.");
     rc = tapi_cfg_net_bind_driver_by_node(NET_NODE_TYPE_AGENT,
                                           NET_DRIVER_TYPE_NET);
     if (rc != 0)
@@ -155,15 +161,22 @@ main(int argc, char **argv)
     CFG_WAIT_CHANGES;
     CHECK_RC(rc = cfg_synchronize("/:", TRUE));
 
+    TEST_STEP("Update network configuration to use interfaces instead of "
+              "PCI functions.");
     CHECK_RC(tapi_cfg_net_nodes_update_pci_fn_to_interface(
                                               NET_NODE_TYPE_INVALID));
 
+    TEST_STEP("Bring all used interfaces up.");
     CHECK_RC(tapi_cfg_net_all_up(FALSE));
+    TEST_STEP("Delete previously assigned IPv4 addresses.");
     CHECK_RC(tapi_cfg_net_delete_all_ip4_addresses());
+    TEST_STEP("Allocate and assign IPv4 addresses to be used by tests.");
     CHECK_RC(tapi_cfg_net_all_assign_ip(AF_INET));
+    TEST_STEP("Allocate and assign IPv6 addresses to be used by tests.");
     CHECK_RC(tapi_cfg_net_all_assign_ip(AF_INET6));
     CFG_WAIT_CHANGES;
 
+    TEST_STEP("Dump configuration to logs.");
     CHECK_RC(rc = cfg_synchronize("/:", TRUE));
     CHECK_RC(rc = cfg_tree_print(NULL, TE_LL_RING, "/:"));
 
@@ -175,6 +188,7 @@ main(int argc, char **argv)
     TEST_GET_PCO(iut_rpcs);
     TEST_GET_PCO(tst_rpcs);
 
+    TEST_STEP("Collect and log TRC tags.");
     CHECK_RC(tapi_tags_add_linux_mm(iut_rpcs->ta, ""));
     CHECK_RC(add_driver_tag(iut_rpcs->ta, ""));
     CHECK_RC(add_driver_tag(tst_rpcs->ta, "peer-"));
@@ -189,5 +203,3 @@ cleanup:
 
     TEST_END;
 }
-
-#endif /* !DOXYGEN_TEST_SPEC */
