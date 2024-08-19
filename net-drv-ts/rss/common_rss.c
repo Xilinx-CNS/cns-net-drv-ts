@@ -438,7 +438,14 @@ net_drv_add_tcpudp_rx_rule(const char *ta, const char *if_name,
 
     flow_type = tapi_cfg_rx_rule_flow_by_socket(af, sock_type);
 
-    CHECK_RC(net_drv_rx_rules_find_loc(ta, if_name, &location));
+    rc = net_drv_rx_rules_find_loc(ta, if_name, &location);
+    if (rc != 0)
+    {
+        if (rc == TE_RC(TE_CS, TE_ENOENT))
+            TEST_SKIP("Rx rules are not supported");
+        else
+            TEST_VERDICT("Failed to find location for a new rule: %r", rc);
+    }
 
     CHECK_RC(tapi_cfg_rx_rule_add(ta, if_name, location, flow_type));
 
