@@ -488,5 +488,29 @@
         </results>
       </iter>
     </test>
+    <test name="loopback" type="script">
+      <objective>Check that loopback mode works correctly.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="tmpl"/>
+        <notes/>
+        <results tags="mlx5_core" key="NO-ETHTOOL-LOOPBACK" notes="mlx5_core does not support loopback">
+          <result value="SKIPPED">
+            <verdict>Feature 'loopback' is disabled and cannot be modified</verdict>
+          </result>
+        </results>
+        <results tags="sfc" key="NO-ETHTOOL-LOOPBACK" notes="sfc does not support loopback">
+          <result value="SKIPPED">
+            <verdict>Feature 'loopback' is disabled and cannot be modified</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="NO-ETHTOOL-LOOPBACK" notes="Virtio net does not support loopback">
+          <result value="SKIPPED">
+            <verdict>Feature 'loopback' is disabled and cannot be modified</verdict>
+          </result>
+        </results>
+      </iter>
+    </test>
   </iter>
 </test>

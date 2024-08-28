@@ -134,5 +134,23 @@
             </arg>
         </run>
 
+        <run>
+            <script name="loopback"/>
+            <arg name="env">
+                <value ref="env.peer2peer"/>
+            </arg>
+            <arg name="tmpl">
+                <value>{
+                  pdus {
+                    eth:{
+                      dst-addr env:{ name "env.addr.tst_lladdr" },
+                      src-addr env:{ name "env.addr.iut_lladdr" },
+                      length-type plain:8111
+                    }
+                  }
+                }</value>
+            </arg>
+        </run>
+
     </session>
 </package>

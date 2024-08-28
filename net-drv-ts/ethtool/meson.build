@@ -7,6 +7,7 @@ tests = [
     'dump_module_eeprom',
     'eee',
     'eeprom_dump',
+    'loopback',
     'msglvl',
     'register_dump',
     'reset_under_traffic',
