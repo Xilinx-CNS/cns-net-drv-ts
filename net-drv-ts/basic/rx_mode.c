@@ -252,6 +252,9 @@ main(int argc, char *argv[])
 
 cleanup:
 
+    CLEANUP_CHECK_RC(tapi_cfg_base_if_del_mcast_mac(if_oid,
+                        (const uint8_t *)mcast_addr->sa_data));
+
     CLEANUP_RPC_CLOSE(iut_rpcs, iut_s);
 
     CLEANUP_CHECK_RC(tapi_tad_csap_destroy(iut_rpcs->ta, 0, csap_iut));
