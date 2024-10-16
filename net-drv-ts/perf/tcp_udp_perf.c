@@ -49,6 +49,12 @@
  *                           - @c 64
  *                           - @c 512
  *                           - @c 1024
+ * @param tx_ring           Tx rings size:
+ *                           - @c -1 (keep default)
+ *                           - @c 0 (maximum)
+ *                           - @c 64
+ *                           - @c 512
+ *                           - @c 1024
  *
  * @type performance
  *
@@ -161,6 +167,7 @@ main(int argc, char *argv[])
     int                                     rx_coalesce_usecs;
     int                                     rx_max_coalesced_frames;
     int                                     rx_ring;
+    int                                     tx_ring;
 
     rcf_rpc_server                         *server_rpcs = NULL;
     rcf_rpc_server                         *client_rpcs = NULL;
@@ -215,6 +222,7 @@ main(int argc, char *argv[])
     TEST_GET_INT_PARAM(rx_coalesce_usecs);
     TEST_GET_INT_PARAM(rx_max_coalesced_frames);
     TEST_GET_INT_PARAM(rx_ring);
+    TEST_GET_INT_PARAM(tx_ring);
     TEST_GET_PCO(server_rpcs);
     TEST_GET_PCO(client_rpcs);
     TEST_GET_IF(server_if);
@@ -310,6 +318,23 @@ main(int argc, char *argv[])
             TEST_SKIP("Cannot change Rx ring size");
         else if (rc != 0)
             TEST_VERDICT("Failed to set Rx ring size: %r", rc);
+    }
+
+    if (tx_ring != -1)
+    {
+        TEST_STEP("Set Tx ring size according to @p tx_ring on IUT interface.");
+        if (tx_ring == 0)
+            rc = tapi_cfg_if_set_ring_size_to_max(iut_rpcs->ta,
+                                                  iut_if->if_name,
+                                                  FALSE, NULL);
+        else
+            rc = tapi_cfg_if_set_ring_size(iut_rpcs->ta, iut_if->if_name,
+                                           FALSE, tx_ring);
+
+        if (TE_RC_GET_ERROR(rc) == TE_EOPNOTSUPP)
+            TEST_SKIP("Cannot change Tx ring size");
+        else if (rc != 0)
+            TEST_VERDICT("Failed to set Tx ring size: %r", rc);
     }
 
     TEST_STEP("If @p rx_vlan_strip or @p tx_vlan_insert is not default, "
