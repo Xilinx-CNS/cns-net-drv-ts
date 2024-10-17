@@ -70,9 +70,6 @@ main(int argc, char *argv[])
     }
     else
     {
-        te_bool present = FALSE;
-        te_bool readonly = FALSE;
-
         if (iut_addr->sa_family == AF_INET)
             feature_name = "tx-checksum-ipv4";
         else
@@ -82,20 +79,9 @@ main(int argc, char *argv[])
          * If protocol-specific checksum is not supported,
          * try generic Tx IP checksum instead.
          */
-
-        CHECK_RC(tapi_cfg_if_feature_is_present(iut_rpcs->ta,
-                                                iut_if->if_name,
-                                                feature_name,
-                                                &present));
-        if (present)
-        {
-            CHECK_RC(tapi_cfg_if_feature_is_readonly(iut_rpcs->ta,
-                                                     iut_if->if_name,
-                                                     feature_name,
-                                                     &readonly));
-        }
-
-        if (!present || readonly)
+        if (!net_drv_req_if_feature_configurable(iut_rpcs->ta,
+                                                 iut_if->if_name,
+                                                 feature_name))
             feature_name = "tx-checksum-ip-generic";
     }
 

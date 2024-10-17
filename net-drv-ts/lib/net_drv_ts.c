@@ -122,6 +122,25 @@ net_drv_driver_set_loaded(const char *ta,
 }
 
 /* See description in net_drv_ts.h */
+bool
+net_drv_req_if_feature_configurable(const char *ta, const char *if_name,
+                                    const char *feature_name)
+{
+    bool present = FALSE;
+    bool readonly = FALSE;
+
+    CHECK_RC(tapi_cfg_if_feature_is_present(ta, if_name, feature_name,
+                                            &present));
+    if (present)
+    {
+        CHECK_RC(tapi_cfg_if_feature_is_readonly(ta, if_name, feature_name,
+                                                 &readonly));
+    }
+
+    return present && !readonly;
+}
+
+/* See description in net_drv_ts.h */
 void
 net_drv_req_if_feature_change(const char *ta, const char *if_name,
                               const char *feature_name)

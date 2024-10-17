@@ -66,6 +66,20 @@ extern te_errno net_drv_driver_set_loaded(const char *ta,
 /**
  * Check whether a given interface feature (/interface:/feature: node)
  * is present and can be modified for a given network interface.
+ *
+ * @param ta            Test Agent name
+ * @param if_name       Interface name
+ * @param feature_name  Feature name
+ *
+ * @return True if the feature is present and not read-only.
+ */
+extern bool net_drv_req_if_feature_configurable(const char *ta,
+                                                const char *if_name,
+                                                const char *feature_name);
+
+/**
+ * Check whether a given interface feature (/interface:/feature: node)
+ * is present and can be modified for a given network interface.
  * If it is not true, skip the test with TEST_SKIP().
  *
  * @param ta            Test Agent name
