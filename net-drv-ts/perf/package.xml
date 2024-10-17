@@ -174,6 +174,9 @@
                     <arg name="tx_ring">
                         <value>-1</value>
                     </arg>
+                    <arg name="channels">
+                        <value>-1</value>
+                    </arg>
                 </run>
 
                 <run name="tcp_perf3">
@@ -244,6 +247,9 @@
                     <arg name="tx_ring">
                         <value>-1</value>
                     </arg>
+                    <arg name="channels">
+                        <value>-1</value>
+                    </arg>
                 </run>
 
                 <run name="udp_perf2">
@@ -308,6 +314,9 @@
                         <value>-1</value>
                     </arg>
                     <arg name="tx_ring">
+                        <value>-1</value>
+                    </arg>
+                    <arg name="channels">
                         <value>-1</value>
                     </arg>
                 </run>
@@ -380,6 +389,9 @@
                     <arg name="tx_ring">
                         <value>-1</value>
                     </arg>
+                    <arg name="channels">
+                        <value>-1</value>
+                    </arg>
                 </run>
 
                 <run name="tcp_perf3_rx_offloads">
@@ -439,6 +451,9 @@
                         <value>-1</value>
                     </arg>
                     <arg name="tx_ring">
+                        <value>-1</value>
+                    </arg>
+                    <arg name="channels">
                         <value>-1</value>
                     </arg>
                 </run>
@@ -512,6 +527,9 @@
                     <arg name="tx_ring">
                         <value>-1</value>
                     </arg>
+                    <arg name="channels">
+                        <value>-1</value>
+                    </arg>
                 </run>
 
                 <run name="tcp_perf3_rx_coalesce">
@@ -579,6 +597,9 @@
                     <arg name="tx_ring">
                         <value>-1</value>
                     </arg>
+                    <arg name="channels">
+                        <value>-1</value>
+                    </arg>
                 </run>
 
                 <run name="tcp_perf3_rx_ring">
@@ -641,6 +662,9 @@
                         <value>0</value>
                     </arg>
                     <arg name="tx_ring">
+                        <value>-1</value>
+                    </arg>
+                    <arg name="channels">
                         <value>-1</value>
                     </arg>
                 </run>
@@ -706,6 +730,77 @@
                         <value>512</value>
                         <value>1024</value>
                         <value>0</value>
+                    </arg>
+                    <arg name="channels">
+                        <value>-1</value>
+                    </arg>
+                </run>
+
+                <run name="tcp_perf3_channels">
+                    <script name="tcp_udp_perf">
+                        <objective>Measure TCP performace using iperf3 depending on number of available combined channels</objective>
+                    </script>
+                    <arg name="env">
+                      <value ref="env.peer2peer.iut_client"/>
+                      <value ref="env.peer2peer.iut_server"/>
+                      <value ref="env.peer2peer.iut_client_ip6"/>
+                      <value ref="env.peer2peer.iut_server_ip6"/>
+                    </arg>
+                    <arg name="perf_bench" type="perf_bench.all">
+                        <value>iperf3</value>
+                    </arg>
+                    <arg name="dual_mode" type="boolean">
+                        <value>FALSE</value>
+                    </arg>
+                    <arg name="protocol">
+                        <value>IPPROTO_TCP</value>
+                    </arg>
+                    <arg name="n_perf_insts">
+                        <value>4</value>
+                    </arg>
+                    <arg name="n_streams">
+                        <value>4</value>
+                    </arg>
+                    <arg name="bandwidth">
+                        <value>-1</value>
+                    </arg>
+                    <arg name="rx_csum" type="bool_with_default">
+                        <value>DEFAULT</value>
+                    </arg>
+                    <arg name="rx_gro" type="bool_with_default">
+                        <value>DEFAULT</value>
+                    </arg>
+                    <arg name="rx_vlan_strip" type="bool_with_default">
+                        <value>DEFAULT</value>
+                    </arg>
+                    <arg name="tx_csum" type="bool_with_default">
+                        <value>DEFAULT</value>
+                    </arg>
+                    <arg name="tx_gso" type="bool_with_default">
+                        <value>DEFAULT</value>
+                    </arg>
+                    <arg name="tso" type="bool_with_default">
+                        <value>DEFAULT</value>
+                    </arg>
+                    <arg name="tx_vlan_insert" type="bool_with_default">
+                        <value>DEFAULT</value>
+                    </arg>
+                    <arg name="rx_coalesce_usecs" list="coalesce">
+                        <value>-1</value>
+                    </arg>
+                    <arg name="rx_max_coalesced_frames" list="coalesce">
+                        <value>-1</value>
+                    </arg>
+                    <arg name="rx_ring">
+                        <value>-1</value>
+                    </arg>
+                    <arg name="tx_ring">
+                        <value>-1</value>
+                    </arg>
+                    <arg name="channels">
+                        <value>1</value>
+                        <value>2</value>
+                        <value>4</value>
                     </arg>
                 </run>
 

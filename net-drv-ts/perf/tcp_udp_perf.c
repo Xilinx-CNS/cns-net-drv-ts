@@ -55,6 +55,11 @@
  *                           - @c 64
  *                           - @c 512
  *                           - @c 1024
+ * @param channels          Number of combined channels to use:
+ *                           - @c -1 (keep default)
+ *                           - @c 1
+ *                           - @c 2
+ *                           - @c 4
  *
  * @type performance
  *
@@ -75,6 +80,7 @@
 #include "tapi_job_factory_rpc.h"
 #include "tapi_cfg_cpu.h"
 #include "tapi_cfg_if.h"
+#include "tapi_cfg_if_chan.h"
 #include "tapi_cfg_if_coalesce.h"
 
 #define TEST_BENCH_DURATION_SEC 6
@@ -168,6 +174,7 @@ main(int argc, char *argv[])
     int                                     rx_max_coalesced_frames;
     int                                     rx_ring;
     int                                     tx_ring;
+    int                                     channels;
 
     rcf_rpc_server                         *server_rpcs = NULL;
     rcf_rpc_server                         *client_rpcs = NULL;
@@ -223,6 +230,7 @@ main(int argc, char *argv[])
     TEST_GET_INT_PARAM(rx_max_coalesced_frames);
     TEST_GET_INT_PARAM(rx_ring);
     TEST_GET_INT_PARAM(tx_ring);
+    TEST_GET_INT_PARAM(channels);
     TEST_GET_PCO(server_rpcs);
     TEST_GET_PCO(client_rpcs);
     TEST_GET_IF(server_if);
@@ -335,6 +343,18 @@ main(int argc, char *argv[])
             TEST_SKIP("Cannot change Tx ring size");
         else if (rc != 0)
             TEST_VERDICT("Failed to set Tx ring size: %r", rc);
+    }
+
+    if (channels != -1)
+    {
+        TEST_STEP("Set number of combined channels on IUT interface "
+                  "according to @p channels.");
+        rc = tapi_cfg_if_chan_cur_set(iut_rpcs->ta, iut_if->if_name,
+                                      TAPI_CFG_IF_CHAN_COMBINED, channels);
+        if (TE_RC_GET_ERROR(rc) == TE_EOPNOTSUPP)
+            TEST_SKIP("Cannot set number of combined channels");
+        else if (rc != 0)
+            TEST_VERDICT("Failed to set number of combined channels: %r", rc);
     }
 
     TEST_STEP("If @p rx_vlan_strip or @p tx_vlan_insert is not default, "
