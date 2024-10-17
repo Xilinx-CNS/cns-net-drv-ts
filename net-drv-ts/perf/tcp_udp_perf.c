@@ -186,6 +186,7 @@ main(int argc, char *argv[])
     char                                   *server_addr_str = NULL;
     char                                   *client_addr_str = NULL;
 
+    const char                             *tx_csum_feature;
     tapi_perf_server                       *perf_servers[MAX_PERF_INSTS];
     tapi_perf_client                       *perf_clients[MAX_PERF_INSTS];
     tapi_perf_opts                          perf_opts;
@@ -257,8 +258,13 @@ main(int argc, char *argv[])
                         rx_vlan_strip);
 
     TEST_STEP("Configure Tx checksum offload on IUT interface if specified");
+    tx_csum_feature = (server_addr->sa_family == AF_INET) ?
+        "tx-checksum-ipv4" : "tx-checksum-ipv6";
+    if (!net_drv_req_if_feature_configurable(iut_rpcs->ta, iut_if->if_name,
+                                             tx_csum_feature))
+        tx_csum_feature = "tx-checksum-ip-generic";
     test_set_if_feature(iut_rpcs->ta, iut_if->if_name,
-                        "tx-checksum-ip-generic", tx_csum);
+                        tx_csum_feature, tx_csum);
 
     TEST_STEP("Configure GSO offload on IUT interface if specified");
     test_set_if_feature(iut_rpcs->ta, iut_if->if_name,
