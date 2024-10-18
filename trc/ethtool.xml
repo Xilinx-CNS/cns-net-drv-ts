@@ -350,5 +350,31 @@
         </results>
       </iter>
     </test>
+    <test name="eeprom_dump" type="script">
+      <objective>Check that EEPROM dump can be obtained.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <notes/>
+        <results tags="mlx5_core" key="NO-EEPROM-DUMP" notes="mlx5 does support EEPROM dump">
+          <result value="FAILED">
+            <verdict>Ethtool command did not terminate successfully</verdict>
+            <verdict>Getting EEPROM dump is not supported</verdict>
+          </result>
+        </results>
+        <results tags="sfc" key="NO-EEPROM-DUMP" notes="sfc does support EEPROM dump">
+          <result value="FAILED">
+            <verdict>Ethtool command did not terminate successfully</verdict>
+            <verdict>Getting EEPROM dump is not supported</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="NO-EEPROM-DUMP" notes="virtio does support EEPROM dump">
+          <result value="FAILED">
+            <verdict>Ethtool command did not terminate successfully</verdict>
+            <verdict>Getting EEPROM dump is not supported</verdict>
+          </result>
+        </results>
+      </iter>
+    </test>
   </iter>
 </test>
