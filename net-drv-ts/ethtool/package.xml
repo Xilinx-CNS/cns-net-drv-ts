@@ -99,5 +99,12 @@
             </arg>
         </run>
 
+        <run>
+            <script name="dump_module_eeprom"/>
+            <arg name="env">
+                <value ref="env.iut_only"/>
+            </arg>
+        </run>
+
     </session>
 </package>

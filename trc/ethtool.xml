@@ -376,5 +376,19 @@
         </results>
       </iter>
     </test>
+    <test name="dump_module_eeprom" type="script">
+      <objective>Check that module EEPROM dump can be obtained.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <notes/>
+        <results tags="virtio-pci" key="NO-MODULE-EEPROM-DUMP" notes="virtio does support module EEPROM dump">
+          <result value="FAILED">
+            <verdict>Ethtool command did not terminate successfully</verdict>
+            <verdict>Getting module EEPROM dump is not supported</verdict>
+          </result>
+        </results>
+      </iter>
+    </test>
   </iter>
 </test>

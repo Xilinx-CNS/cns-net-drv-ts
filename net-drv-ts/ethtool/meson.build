@@ -4,6 +4,7 @@
 tests = [
     'check_ring',
     'dev_properties',
+    'dump_module_eeprom',
     'eeprom_dump',
     'msglvl',
     'register_dump',
