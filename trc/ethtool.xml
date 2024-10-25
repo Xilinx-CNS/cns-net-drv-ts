@@ -396,5 +396,38 @@
         </results>
       </iter>
     </test>
+    <test name="show_eee" type="script">
+      <objective>Check that ethtool can show EEE parameters for a tested interface.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <notes/>
+        <results tags="i40e" key="NO-ETHTOOL-EEE">
+          <result value="SKIPPED">
+            <verdict>Ethtool command is not supported</verdict>
+          </result>
+        </results>
+        <results tags="ice" key="NO-ETHTOOL-EEE">
+          <result value="SKIPPED">
+            <verdict>Ethtool command is not supported</verdict>
+          </result>
+        </results>
+        <results tags="mlx5_core" key="NO-ETHTOOL-EEE">
+          <result value="SKIPPED">
+            <verdict>Ethtool command is not supported</verdict>
+          </result>
+        </results>
+        <results tags="sfc" key="NO-ETHTOOL-EEE">
+          <result value="SKIPPED">
+            <verdict>Ethtool command is not supported</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="NO-ETHTOOL-EEE">
+          <result value="SKIPPED">
+            <verdict>Ethtool command is not supported</verdict>
+          </result>
+        </results>
+      </iter>
+    </test>
   </iter>
 </test>
