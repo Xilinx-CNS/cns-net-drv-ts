@@ -50,6 +50,7 @@ main(int argc, char *argv[])
               "stderr and its output can be parsed.");
 
     opts.cmd = TAPI_ETHTOOL_CMD_SHOW_PAUSE;
+    opts.stats = true;
     opts.if_name = iut_if->if_name;
 
     rc = tapi_ethtool(factory, &opts, &report);
@@ -71,6 +72,10 @@ main(int argc, char *argv[])
         RING_VERDICT("Reception of pause frames is disabled");
     if (!report.data.pause.tx)
         RING_VERDICT("Transmission of pause frames is disabled");
+    if (!report.data.pause.rx_pause_frames.defined)
+        RING_VERDICT("Rx pause frames counter is not available");
+    if (!report.data.pause.tx_pause_frames.defined)
+        RING_VERDICT("Tx pause frames counter is not available");
 
     TEST_SUCCESS;
 

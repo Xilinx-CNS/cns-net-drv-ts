@@ -279,6 +279,8 @@
             <verdict>Pause autonegotiation is disabled</verdict>
             <verdict>Reception of pause frames is disabled</verdict>
             <verdict>Transmission of pause frames is disabled</verdict>
+            <verdict>Rx pause frames counter is not available</verdict>
+            <verdict>Tx pause frames counter is not available</verdict>
           </result>
         </results>
         <results tags="ice&amp;linux-mm&lt;511">
@@ -286,12 +288,16 @@
             <verdict>Pause autonegotiation is disabled</verdict>
             <verdict>Reception of pause frames is disabled</verdict>
             <verdict>Transmission of pause frames is disabled</verdict>
+            <verdict>Rx pause frames counter is not available</verdict>
+            <verdict>Tx pause frames counter is not available</verdict>
           </result>
         </results>
         <results tags="ice">
           <result value="PASSED">
             <verdict>Reception of pause frames is disabled</verdict>
             <verdict>Transmission of pause frames is disabled</verdict>
+            <verdict>Rx pause frames counter is not available</verdict>
+            <verdict>Tx pause frames counter is not available</verdict>
           </result>
         </results>
         <results tags="virtio-pci" key="NO-ETHTOOL-PAUSE">
