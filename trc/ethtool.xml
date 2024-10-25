@@ -429,5 +429,23 @@
         </results>
       </iter>
     </test>
+    <test name="show_fec" type="script">
+      <objective>Check that ethtool can show FEC parameters for a tested interface.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <notes/>
+        <results tags="sfc" key="NO-ETHTOOL-FEC">
+          <result value="SKIPPED">
+            <verdict>Ethtool command is not supported</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="NO-ETHTOOL-FEC">
+          <result value="SKIPPED">
+            <verdict>Ethtool command is not supported</verdict>
+          </result>
+        </results>
+      </iter>
+    </test>
   </iter>
 </test>

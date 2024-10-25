@@ -10,6 +10,7 @@ tests = [
     'register_dump',
     'reset_under_traffic',
     'show_eee',
+    'show_fec',
     'show_pause',
     'statistics',
     'ts_info',
