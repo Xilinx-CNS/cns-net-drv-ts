@@ -11,6 +11,7 @@ tests = [
     'reset_under_traffic',
     'show_eee',
     'show_fec',
+    'show_module',
     'show_pause',
     'statistics',
     'ts_info',

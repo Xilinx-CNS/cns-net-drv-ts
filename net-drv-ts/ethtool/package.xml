@@ -120,5 +120,12 @@
             </arg>
         </run>
 
+        <run>
+            <script name="show_module"/>
+            <arg name="env">
+                <value ref="env.peer2peer"/>
+            </arg>
+        </run>
+
     </session>
 </package>

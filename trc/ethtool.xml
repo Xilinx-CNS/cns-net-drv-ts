@@ -447,5 +447,13 @@
         </results>
       </iter>
     </test>
+    <test name="show_module" type="script">
+      <objective>Check that ethtool can show transceiver module parameters for a tested interface.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <notes/>
+      </iter>
+    </test>
   </iter>
 </test>
