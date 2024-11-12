@@ -118,7 +118,7 @@ main(int argc, char *argv[])
     if (extra_supported != 0)
     {
         te_string_reset(&str_flags);
-        CHECK_RC(hwtstamp_tx_types_flags_rpc2te_str(not_supported,
+        CHECK_RC(hwtstamp_tx_types_flags_rpc2te_str(extra_supported,
                                                     &str_flags));
 
         RING_VERDICT("Additional TX types flags are reported: %s",
@@ -144,7 +144,7 @@ main(int argc, char *argv[])
     if (extra_supported != 0)
     {
         te_string_reset(&str_flags);
-        CHECK_RC(hwtstamp_rx_filters_flags_rpc2te_str(not_supported,
+        CHECK_RC(hwtstamp_rx_filters_flags_rpc2te_str(extra_supported,
                                                       &str_flags));
 
         RING_VERDICT("Additional RX filters flags are reported: %s",
