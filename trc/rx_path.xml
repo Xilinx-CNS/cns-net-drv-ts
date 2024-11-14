@@ -159,6 +159,11 @@
             <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
           </result>
         </results>
+        <results tags="ice" key="NO-RX-IRQ-MODER-FRAMES" notes="ice does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
         <results tags="virtio-pci" key="NO-RX-IRQ-MODER-CONTROL" notes="VirtIO net does not support interrupt moderation control">
           <result value="FAILED">
             <verdict>Failed to set rx_max_coalesced_frames, rc=TA_UNIX-EINVAL</verdict>
