@@ -808,5 +808,14 @@
         </results>
       </iter>
     </test>
+    <test name="set_rx_headroom" type="script">
+      <objective>Check ndo_set_rx_headroom callback</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="if_down_up"/>
+        <notes/>
+      </iter>
+    </test>
   </iter>
 </test>

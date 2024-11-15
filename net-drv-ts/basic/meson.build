@@ -14,6 +14,7 @@ tests = [
     'rx_mode',
     'send_receive',
     'set_if_down',
+    'set_rx_headroom',
 ]
 
 foreach test : tests

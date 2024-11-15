@@ -249,5 +249,16 @@
             </arg>
         </run>
 
+        <run>
+            <script name="set_rx_headroom">
+                <req id="SOCK_STREAM"/>
+            </script>
+            <arg name="env">
+                <value ref="env.peer2peer"/>
+                <value ref="env.peer2peer_ipv6"/>
+            </arg>
+            <arg name="if_down_up" type="boolean"/>
+        </run>
+
     </session>
 </package>
