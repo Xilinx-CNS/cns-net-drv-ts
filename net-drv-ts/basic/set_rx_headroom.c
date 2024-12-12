@@ -158,7 +158,7 @@ main(int argc, char *argv[])
     rc = tapi_cfg_if_msglvl_set(iut_rpcs->ta, iut_if->if_name,
                                 TAPI_NETIF_MSG_ALL);
     if (rc != 0)
-        TEST_VERDICT("Failed to enable all flags in msglvl");
+        RING_VERDICT("Failed to enable all flags in msglvl");
 
     TEST_STEP("Create TAP interface on IUT.");
     CHECK_RC(tapi_cfg_tap_add(iut_rpcs->ta, TAP_NAME));
