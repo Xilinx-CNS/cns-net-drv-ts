@@ -815,6 +815,11 @@
         <arg name="env"/>
         <arg name="if_down_up"/>
         <notes/>
+        <results tags="virtio-pci" key="NO-ETHTOOL-MSGLVL" notes="VirtIO net does not support message level change via ethtool">
+          <result value="PASSED">
+            <verdict>Failed to enable all flags in msglvl</verdict>
+          </result>
+        </results>
       </iter>
     </test>
   </iter>
