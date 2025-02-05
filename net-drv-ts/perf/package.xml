@@ -110,7 +110,7 @@
 
         <run name="tcp_udp_perf">
             <session track_conf="silent" track_conf_handdown="descendants">
-                <run name="tcp_perf2">
+                <run-template name="tcp_udp_perf">
                     <script name="tcp_udp_perf"/>
                     <arg name="env">
                       <value ref="env.peer2peer.iut_client"/>
@@ -118,25 +118,19 @@
                       <value ref="env.peer2peer.iut_client_ip6"/>
                       <value ref="env.peer2peer.iut_server_ip6"/>
                     </arg>
-                    <arg name="perf_bench" type="perf_bench.all">
-                        <value>iperf</value>
-                    </arg>
+                    <arg name="perf_bench" type="perf_bench.all"/>
                     <arg name="dual_mode" type="boolean">
                         <value>FALSE</value>
-                        <value>TRUE</value>
                     </arg>
                     <arg name="protocol">
                         <value>IPPROTO_TCP</value>
+                        <value>IPPROTO_UDP</value>
                     </arg>
                     <arg name="n_perf_insts">
                         <value>1</value>
                     </arg>
                     <arg name="n_streams">
                         <value>1</value>
-                        <value>2</value>
-                        <value>4</value>
-                        <value>8</value>
-                        <value>16</value>
                     </arg>
                     <arg name="bandwidth">
                         <value>-1</value>
@@ -177,23 +171,32 @@
                     <arg name="channels">
                         <value>-1</value>
                     </arg>
+                </run-template>
+
+                <run name="tcp_perf2" template="tcp_udp_perf">
+                    <script name="tcp_udp_perf"/>
+                    <arg name="perf_bench" type="perf_bench.all">
+                        <value>iperf</value>
+                    </arg>
+                    <arg name="dual_mode" type="boolean"/>
+                    <arg name="protocol">
+                        <value>IPPROTO_TCP</value>
+                    </arg>
+                    <arg name="n_streams">
+                        <value>1</value>
+                        <value>2</value>
+                        <value>4</value>
+                        <value>8</value>
+                        <value>16</value>
+                    </arg>
                 </run>
 
-                <run name="tcp_perf3">
+                <run name="tcp_perf3" template="tcp_udp_perf">
                     <script name="tcp_udp_perf"/>
-                    <arg name="env">
-                      <value ref="env.peer2peer.iut_client"/>
-                      <value ref="env.peer2peer.iut_server"/>
-                      <value ref="env.peer2peer.iut_client_ip6"/>
-                      <value ref="env.peer2peer.iut_server_ip6"/>
-                    </arg>
                     <arg name="perf_bench" type="perf_bench.all">
                         <value>iperf3</value>
                     </arg>
-                    <arg name="dual_mode" type="boolean">
-                        <value>FALSE</value>
-                        <value>TRUE</value>
-                    </arg>
+                    <arg name="dual_mode" type="boolean"/>
                     <arg name="protocol">
                         <value>IPPROTO_TCP</value>
                     </arg>
@@ -211,67 +214,16 @@
                         <value>2</value>
                         <value>1</value>
                     </arg>
-                    <arg name="bandwidth">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_gro" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_vlan_strip" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_gso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_vlan_insert" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_coalesce_usecs">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_max_coalesced_frames">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_ring">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="tx_ring">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="channels">
-                        <value>-1</value>
-                    </arg>
                 </run>
 
-                <run name="udp_perf2">
+                <run name="udp_perf2" template="tcp_udp_perf">
                     <script name="tcp_udp_perf"/>
-                    <arg name="env">
-                      <value ref="env.peer2peer.iut_client"/>
-                      <value ref="env.peer2peer.iut_server"/>
-                      <value ref="env.peer2peer.iut_client_ip6"/>
-                      <value ref="env.peer2peer.iut_server_ip6"/>
-                    </arg>
                     <arg name="perf_bench" type="perf_bench.all">
                         <value>iperf</value>
                     </arg>
-                    <arg name="dual_mode" type="boolean">
-                        <value>FALSE</value>
-                        <value>TRUE</value>
-                    </arg>
+                    <arg name="dual_mode" type="boolean"/>
                     <arg name="protocol">
                         <value>IPPROTO_UDP</value>
-                    </arg>
-                    <arg name="n_perf_insts">
-                        <value>1</value>
                     </arg>
                     <arg name="n_streams">
                         <value>1</value>
@@ -283,59 +235,14 @@
                     <arg name="bandwidth">
                         <value>1000</value>
                     </arg>
-                    <arg name="rx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_gro" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_vlan_strip" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_gso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_vlan_insert" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_coalesce_usecs">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_max_coalesced_frames">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_ring">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="tx_ring">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="channels">
-                        <value>-1</value>
-                    </arg>
                 </run>
 
-                <run name="udp_perf3">
+                <run name="udp_perf3" template="tcp_udp_perf">
                     <script name="tcp_udp_perf"/>
-                    <arg name="env">
-                      <value ref="env.peer2peer.iut_client"/>
-                      <value ref="env.peer2peer.iut_server"/>
-                      <value ref="env.peer2peer.iut_client_ip6"/>
-                      <value ref="env.peer2peer.iut_server_ip6"/>
-                    </arg>
                     <arg name="perf_bench" type="perf_bench.all">
                         <value>iperf3</value>
                     </arg>
-                    <arg name="dual_mode" type="boolean">
-                        <value>FALSE</value>
-                        <value>TRUE</value>
-                    </arg>
+                    <arg name="dual_mode" type="boolean"/>
                     <arg name="protocol">
                         <value>IPPROTO_UDP</value>
                     </arg>
@@ -356,45 +263,9 @@
                     <arg name="bandwidth">
                         <value>1000</value>
                     </arg>
-                    <arg name="rx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_gro" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_vlan_strip" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_gso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_vlan_insert" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_coalesce_usecs">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_max_coalesced_frames">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_ring">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="tx_ring">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="channels">
-                        <value>-1</value>
-                    </arg>
                 </run>
 
-                <run name="tcp_perf3_rx_offloads">
+                <run name="tcp_perf3_rx_offloads" template="tcp_udp_perf">
                     <script name="tcp_udp_perf">
                         <objective>Measure TCP performace using iperf3 depending on Rx offloads</objective>
                     </script>
@@ -405,20 +276,8 @@
                     <arg name="perf_bench" type="perf_bench.all">
                         <value>iperf3</value>
                     </arg>
-                    <arg name="dual_mode" type="boolean">
-                        <value>FALSE</value>
-                    </arg>
                     <arg name="protocol">
                         <value>IPPROTO_TCP</value>
-                    </arg>
-                    <arg name="n_perf_insts">
-                        <value>1</value>
-                    </arg>
-                    <arg name="n_streams">
-                        <value>1</value>
-                    </arg>
-                    <arg name="bandwidth">
-                        <value>-1</value>
                     </arg>
                     <arg name="rx_csum" type="bool_with_default">
                         <value>FALSE</value>
@@ -429,36 +288,9 @@
                         <value>TRUE</value>
                     </arg>
                     <arg name="rx_vlan_strip" type="bool_with_default"/>
-                    <arg name="tx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_gso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_vlan_insert" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_coalesce_usecs">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_max_coalesced_frames">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_ring">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="tx_ring">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="channels">
-                        <value>-1</value>
-                    </arg>
                 </run>
 
-                <run name="tcp_perf3_tx_offloads">
+                <run name="tcp_perf3_tx_offloads" template="tcp_udp_perf">
                     <script name="tcp_udp_perf">
                         <objective>Measure TCP performace using iperf3 depending on Tx offloads</objective>
                     </script>
@@ -469,29 +301,8 @@
                     <arg name="perf_bench" type="perf_bench.all">
                         <value>iperf3</value>
                     </arg>
-                    <arg name="dual_mode" type="boolean">
-                        <value>FALSE</value>
-                    </arg>
                     <arg name="protocol">
                         <value>IPPROTO_TCP</value>
-                    </arg>
-                    <arg name="n_perf_insts">
-                        <value>1</value>
-                    </arg>
-                    <arg name="n_streams">
-                        <value>1</value>
-                    </arg>
-                    <arg name="bandwidth">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_gro" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_vlan_strip" type="bool_with_default">
-                        <value>DEFAULT</value>
                     </arg>
                     <arg name="tx_csum" type="bool_with_default"
                         list="offloads">
@@ -515,24 +326,9 @@
                         <value>TRUE</value>
                     </arg>
                     <arg name="tx_vlan_insert" type="bool_with_default"/>
-                    <arg name="rx_coalesce_usecs">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_max_coalesced_frames">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_ring">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="tx_ring">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="channels">
-                        <value>-1</value>
-                    </arg>
                 </run>
 
-                <run name="tcp_perf3_rx_coalesce">
+                <run name="tcp_perf3_rx_coalesce" template="tcp_udp_perf">
                     <script name="tcp_udp_perf">
                         <objective>Measure TCP performace using iperf3 depending on Rx coalesce settings</objective>
                     </script>
@@ -543,41 +339,8 @@
                     <arg name="perf_bench" type="perf_bench.all">
                         <value>iperf3</value>
                     </arg>
-                    <arg name="dual_mode" type="boolean">
-                        <value>FALSE</value>
-                    </arg>
                     <arg name="protocol">
                         <value>IPPROTO_TCP</value>
-                    </arg>
-                    <arg name="n_perf_insts">
-                        <value>1</value>
-                    </arg>
-                    <arg name="n_streams">
-                        <value>1</value>
-                    </arg>
-                    <arg name="bandwidth">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_gro" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_vlan_strip" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_gso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_vlan_insert" type="bool_with_default">
-                        <value>DEFAULT</value>
                     </arg>
                     <arg name="rx_coalesce_usecs" list="coalesce">
                         <value>-1</value>
@@ -591,18 +354,9 @@
                         <value>0</value>
                         <value>0</value>
                     </arg>
-                    <arg name="rx_ring">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="tx_ring">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="channels">
-                        <value>-1</value>
-                    </arg>
                 </run>
 
-                <run name="tcp_perf3_rx_ring">
+                <run name="tcp_perf3_rx_ring" template="tcp_udp_perf">
                     <script name="tcp_udp_perf">
                         <objective>Measure TCP performace using iperf3 depending on Rx ring size</objective>
                     </script>
@@ -613,47 +367,8 @@
                     <arg name="perf_bench" type="perf_bench.all">
                         <value>iperf3</value>
                     </arg>
-                    <arg name="dual_mode" type="boolean">
-                        <value>FALSE</value>
-                    </arg>
                     <arg name="protocol">
                         <value>IPPROTO_TCP</value>
-                    </arg>
-                    <arg name="n_perf_insts">
-                        <value>1</value>
-                    </arg>
-                    <arg name="n_streams">
-                        <value>1</value>
-                    </arg>
-                    <arg name="bandwidth">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_gro" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_vlan_strip" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_gso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_vlan_insert" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_coalesce_usecs" list="coalesce">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_max_coalesced_frames" list="coalesce">
-                        <value>-1</value>
                     </arg>
                     <arg name="rx_ring">
                         <value>64</value>
@@ -661,15 +376,9 @@
                         <value>1024</value>
                         <value>0</value>
                     </arg>
-                    <arg name="tx_ring">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="channels">
-                        <value>-1</value>
-                    </arg>
                 </run>
 
-                <run name="tcp_perf3_tx_ring">
+                <run name="tcp_perf3_tx_ring" template="tcp_udp_perf">
                     <script name="tcp_udp_perf">
                         <objective>Measure TCP performace using iperf3 depending on Tx ring size</objective>
                     </script>
@@ -680,50 +389,8 @@
                     <arg name="perf_bench" type="perf_bench.all">
                         <value>iperf3</value>
                     </arg>
-                    <arg name="dual_mode" type="boolean">
-                        <value>FALSE</value>
-                    </arg>
                     <arg name="protocol">
                         <value>IPPROTO_TCP</value>
-                    </arg>
-                    <arg name="n_perf_insts">
-                        <value>1</value>
-                    </arg>
-                    <arg name="n_streams">
-                        <value>1</value>
-                    </arg>
-                    <arg name="bandwidth">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_gro" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_vlan_strip" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_gso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_vlan_insert" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_coalesce_usecs" list="coalesce">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_max_coalesced_frames" list="coalesce">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_ring">
-                        <value>-1</value>
                     </arg>
                     <arg name="tx_ring">
                         <value>64</value>
@@ -731,26 +398,14 @@
                         <value>1024</value>
                         <value>0</value>
                     </arg>
-                    <arg name="channels">
-                        <value>-1</value>
-                    </arg>
                 </run>
 
-                <run name="tcp_perf3_channels">
+                <run name="tcp_perf3_channels" template="tcp_udp_perf">
                     <script name="tcp_udp_perf">
                         <objective>Measure TCP performace using iperf3 depending on number of available combined channels</objective>
                     </script>
-                    <arg name="env">
-                      <value ref="env.peer2peer.iut_client"/>
-                      <value ref="env.peer2peer.iut_server"/>
-                      <value ref="env.peer2peer.iut_client_ip6"/>
-                      <value ref="env.peer2peer.iut_server_ip6"/>
-                    </arg>
                     <arg name="perf_bench" type="perf_bench.all">
                         <value>iperf3</value>
-                    </arg>
-                    <arg name="dual_mode" type="boolean">
-                        <value>FALSE</value>
                     </arg>
                     <arg name="protocol">
                         <value>IPPROTO_TCP</value>
@@ -760,42 +415,6 @@
                     </arg>
                     <arg name="n_streams">
                         <value>4</value>
-                    </arg>
-                    <arg name="bandwidth">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_gro" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_vlan_strip" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_csum" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_gso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tso" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="tx_vlan_insert" type="bool_with_default">
-                        <value>DEFAULT</value>
-                    </arg>
-                    <arg name="rx_coalesce_usecs" list="coalesce">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_max_coalesced_frames" list="coalesce">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="rx_ring">
-                        <value>-1</value>
-                    </arg>
-                    <arg name="tx_ring">
-                        <value>-1</value>
                     </arg>
                     <arg name="channels">
                         <value>1</value>
