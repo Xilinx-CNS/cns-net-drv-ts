@@ -213,6 +213,7 @@ conf_dirs="${conf_dirs}:${SF_TS_CONFDIR}"
 GEN_OPTS+=(--conf-dirs="${conf_dirs}")
 
 GEN_OPTS+=(--trc-db="${TE_TS_TRC_DB}")
+[[ -z "${TE_TS_RIGS_TRC_DB}" ]] || GEN_OPTS+=(--trc-db="${TE_TS_RIGS_TRC_DB}")
 GEN_OPTS+=(--trc-comparison=normalised)
 GEN_OPTS+=(--trc-html=trc-brief.html)
 GEN_OPTS+=(--trc-no-expected)

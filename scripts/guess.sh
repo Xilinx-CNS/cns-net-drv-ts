@@ -92,3 +92,8 @@ fi
 if [[ -n "${TE_TS_RIGSDIR}" && -r "${TE_TS_RIGSDIR}/scripts/guess.sh" ]] ; then
     source "${TE_TS_RIGSDIR}/scripts/guess.sh"
 fi
+
+if [[ -z "${TE_TS_RIGS_TRC_DB}" && -n "${TE_TS_RIGSDIR}" ]] ; then
+    ts_rigs_trc_db="${TE_TS_RIGSDIR}/suites/net-drv-ts/trc/top.xml"
+    [[ ! -e "${ts_rigs_trc_db}" ]] || TE_TS_RIGS_TRC_DB="${ts_rigs_trc_db}"
+fi
