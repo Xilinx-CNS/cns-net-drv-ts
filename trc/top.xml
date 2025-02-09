@@ -4,13 +4,11 @@
 <trc_db>
   <test name="net-drv-ts" type="package">
     <objective>Net Driver Test Suite</objective>
-
-    <xi:include href="globals.xml" parse="xml"
-                xmlns:xi="http://www.w3.org/2003/XInclude"/>
-
+    <notes/>
+    <xi:include xmlns:xi="http://www.w3.org/2003/XInclude"
+                href="globals.xml" parse="xml"/>
     <iter result="PASSED">
       <notes/>
-
       <test name="prologue" type="script" auxiliary="true">
         <objective/>
         <notes/>
@@ -19,34 +17,24 @@
           <notes/>
         </iter>
       </test>
-
-      <xi:include href="basic.xml" parse="xml"
-                  xmlns:xi="http://www.w3.org/2003/XInclude"/>
-
-      <xi:include href="devlink.xml" parse="xml"
-                  xmlns:xi="http://www.w3.org/2003/XInclude"/>
-
-      <xi:include href="ethtool.xml" parse="xml"
-                  xmlns:xi="http://www.w3.org/2003/XInclude"/>
-
-      <xi:include href="offload.xml" parse="xml"
-                  xmlns:xi="http://www.w3.org/2003/XInclude"/>
-
-      <xi:include href="ptp.xml" parse="xml"
-                  xmlns:xi="http://www.w3.org/2003/XInclude"/>
-
-      <xi:include href="rss.xml" parse="xml"
-                  xmlns:xi="http://www.w3.org/2003/XInclude"/>
-
-      <xi:include href="rx_path.xml" parse="xml"
-                  xmlns:xi="http://www.w3.org/2003/XInclude"/>
-
-      <xi:include href="perf.xml" parse="xml"
-                  xmlns:xi="http://www.w3.org/2003/XInclude"/>
-
-      <xi:include href="stress.xml" parse="xml"
-                  xmlns:xi="http://www.w3.org/2003/XInclude"/>
-
+      <xi:include xmlns:xi="http://www.w3.org/2003/XInclude"
+                  href="basic.xml" parse="xml"/>
+      <xi:include xmlns:xi="http://www.w3.org/2003/XInclude"
+                  href="devlink.xml" parse="xml"/>
+      <xi:include xmlns:xi="http://www.w3.org/2003/XInclude"
+                  href="ethtool.xml" parse="xml"/>
+      <xi:include xmlns:xi="http://www.w3.org/2003/XInclude"
+                  href="offload.xml" parse="xml"/>
+      <xi:include xmlns:xi="http://www.w3.org/2003/XInclude"
+                  href="ptp.xml" parse="xml"/>
+      <xi:include xmlns:xi="http://www.w3.org/2003/XInclude"
+                  href="rss.xml" parse="xml"/>
+      <xi:include xmlns:xi="http://www.w3.org/2003/XInclude"
+                  href="rx_path.xml" parse="xml"/>
+      <xi:include xmlns:xi="http://www.w3.org/2003/XInclude"
+                  href="perf.xml" parse="xml"/>
+      <xi:include xmlns:xi="http://www.w3.org/2003/XInclude"
+                  href="stress.xml" parse="xml"/>
     </iter>
   </test>
 </trc_db>

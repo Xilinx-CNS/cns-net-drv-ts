@@ -572,7 +572,7 @@
         <arg name="tso_on">FALSE</arg>
         <arg name="pkt_size"/>
         <arg name="sends_num"/>
-	<notes/>
+        <notes/>
       </iter>
       <iter result="PASSED">
         <arg name="env">VAR.env.peer2peer_ipv6</arg>
@@ -743,7 +743,7 @@
         <arg name="sends_num"/>
         <notes/>
       </iter>
-     <iter result="PASSED">
+      <iter result="PASSED">
         <arg name="env"/>
         <arg name="mtu">9000</arg>
         <arg name="tx"/>

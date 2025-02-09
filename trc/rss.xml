@@ -253,10 +253,10 @@
         <notes/>
         <results tags="sfc" key="SWNETLINUX-5172">
           <result value="FAILED">
-              <verdict>Cannot change indirection table after changing number of combined channels</verdict>
-              <verdict>Indirection table can be changed if only Rx queues allowed by the initial number of combined channels are used</verdict>
+            <verdict>Cannot change indirection table after changing number of combined channels</verdict>
+            <verdict>Indirection table can be changed if only Rx queues allowed by the initial number of combined channels are used</verdict>
           </result>
-	  <result value="PASSED"/>
+          <result value="PASSED"/>
         </results>
       </iter>
     </test>
