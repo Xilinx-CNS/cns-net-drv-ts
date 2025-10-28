@@ -114,6 +114,7 @@ int
 main(int argc, char **argv)
 {
     const struct if_nameindex *iut_if = NULL;
+    const struct if_nameindex *tst_if = NULL;
     rcf_rpc_server *iut_rpcs = NULL;
     rcf_rpc_server *tst_rpcs = NULL;
     te_bool env_init = FALSE;
@@ -187,8 +188,15 @@ main(int argc, char **argv)
     TEST_START_ENV;
 
     TEST_GET_IF(iut_if);
+    TEST_GET_IF(tst_if);
     TEST_GET_PCO(iut_rpcs);
     TEST_GET_PCO(tst_rpcs);
+
+    TEST_STEP("Bring all used interfaces PHY setup.");
+    CHECK_RC(net_drv_set_phy_link(iut_rpcs->ta, iut_if->if_name));
+    CHECK_RC(net_drv_set_phy_link(tst_rpcs->ta, tst_if->if_name));
+
+    CHECK_RC(rc = cfg_tree_print(NULL, TE_LL_RING, "/:"));
 
     TEST_STEP("Collect and log TRC tags.");
     CHECK_RC(tapi_tags_add_linux_mm(iut_rpcs->ta, ""));

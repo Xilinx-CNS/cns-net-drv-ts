@@ -458,6 +458,112 @@ net_drv_cat_all_files(rcf_rpc_server *rpcs, uint32_t timeout,
 #undef FIND_FMT
 }
 
+static te_errno
+net_drv_get_phy_local_param(const char *ta, const char *param, char **value)
+{
+    te_errno rc;
+
+    rc = cfg_get_instance_string_fmt(value, "/local:%s/phy:/%s:", ta, param);
+    if (rc != 0)
+    {
+        if (rc != TE_RC(TE_CS, TE_ENOENT))
+            return rc;
+
+        *value = NULL;
+    }
+
+    return 0;
+}
+
+/* See description in net_drv_ts.h */
+te_errno
+net_drv_set_phy_link(const char *ta, const char *if_name)
+{
+    char *autoneg_str;
+    char *duplex_str;
+    char *speed_str;
+    int autoneg;
+    int duplex;
+    int speed;
+    te_errno rc = TE_RC(TE_CS, TE_ENOENT);
+
+    CHECK_RC(net_drv_get_phy_local_param(ta, "autoneg", &autoneg_str));
+    CHECK_RC(net_drv_get_phy_local_param(ta, "duplex", &duplex_str));
+    CHECK_RC(net_drv_get_phy_local_param(ta, "speed", &speed_str));
+
+    autoneg = net_drv_ts_phy_autoneg_str2id(autoneg_str);
+    duplex = net_drv_ts_phy_duplex_str2id(duplex_str);
+    speed = net_drv_ts_phy_speed_str2id(speed_str);
+
+    free(autoneg_str);
+    free(duplex_str);
+    free(speed_str);
+
+    if (autoneg != TE_PHY_AUTONEG_UNKNOWN)
+        CHECK_RC(rc = tapi_cfg_phy_autoneg_set(ta, if_name, autoneg));
+
+    if (duplex != TE_PHY_DUPLEX_UNKNOWN)
+        CHECK_RC(rc = tapi_cfg_phy_duplex_admin_set(ta, if_name, duplex));
+
+    if (speed != TE_PHY_SPEED_UNKNOWN)
+        CHECK_RC(rc = tapi_cfg_phy_speed_admin_set(ta, if_name, speed));
+
+    /* Commit only if at least one parameter is changed */
+    if (rc == 0)
+    {
+        rc = tapi_cfg_phy_commit(ta, if_name);
+        if (rc != 0)
+            return rc;
+    }
+
+    return 0;
+}
+
+/* See description in net_drv_ts.h */
+int net_drv_ts_phy_autoneg_str2id(const char *autoneg_str)
+{
+    int autoneg;
+
+    if (te_str_is_null_or_empty(autoneg_str))
+        return TE_PHY_AUTONEG_UNKNOWN;
+
+    autoneg = tapi_cfg_phy_autoneg_str2id(autoneg_str);
+    if (autoneg < 0)
+        TEST_FAIL("Invalid PHY link autonegatiation state '%s'", autoneg_str);
+
+    return autoneg;
+}
+
+/* See description in net_drv_ts.h */
+int net_drv_ts_phy_duplex_str2id(const char *duplex_str)
+{
+    int duplex;
+
+    if (te_str_is_null_or_empty(duplex_str))
+        return TE_PHY_DUPLEX_UNKNOWN;
+
+    duplex = tapi_cfg_phy_duplex_str2id(duplex_str);
+    if (duplex < 0)
+        TEST_FAIL("Invalid PHY link duplex state '%s'", duplex_str);
+
+    return duplex;
+}
+
+/* See description in net_drv_ts.h */
+int net_drv_ts_phy_speed_str2id(const char *speed_str)
+{
+    int speed;
+
+    if (te_str_is_null_or_empty(speed_str))
+        return TE_PHY_SPEED_UNKNOWN;
+
+    speed = tapi_cfg_phy_speed_str2id(speed_str);
+    if (speed == 0)
+        TEST_FAIL("Invalid PHY link speed state '%s'", speed_str);
+
+    return speed;
+}
+
 /* See description in net_drv_ts.h */
 te_errno
 net_drv_set_check_mac(const char *ta, const char *if_name,
