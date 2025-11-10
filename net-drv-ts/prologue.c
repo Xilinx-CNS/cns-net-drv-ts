@@ -110,6 +110,70 @@ add_driver_tag(const char *ta, const char *prefix)
     return rc;
 }
 
+static te_errno
+get_phy_local_param(const char *ta, const char *param, char **value)
+{
+    te_errno rc;
+
+    rc = cfg_get_instance_string_fmt(value, "/local:%s/phy:/%s:", ta, param);
+    if (rc != 0)
+    {
+        if (rc != TE_RC(TE_CS, TE_ENOENT))
+            return rc;
+
+        *value = NULL;
+    }
+
+    return 0;
+}
+
+static void
+add_local_phy_tags(const char *ta, const char *prefix)
+{
+    char *autoneg_str;
+    char *duplex_str;
+    char *speed_str;
+    int autoneg;
+    int duplex;
+    int speed;
+
+    CHECK_RC(get_phy_local_param(ta, "autoneg", &autoneg_str));
+    CHECK_RC(get_phy_local_param(ta, "duplex", &duplex_str));
+    CHECK_RC(get_phy_local_param(ta, "speed", &speed_str));
+
+    autoneg = net_drv_ts_phy_autoneg_str2id(autoneg_str);
+    duplex = net_drv_ts_phy_duplex_str2id(duplex_str);
+    speed = net_drv_ts_phy_speed_str2id(speed_str);
+
+    if (autoneg != TE_PHY_AUTONEG_UNKNOWN)
+    {
+        te_string str = TE_STRING_INIT_STATIC(DEF_STR_LEN);
+
+        te_string_append(&str, "%sphy-autoneg-%s", prefix, autoneg_str);
+        CHECK_RC(tapi_tags_add_tag(te_string_value(&str), NULL));
+    }
+
+    if (duplex != TE_PHY_DUPLEX_UNKNOWN)
+    {
+        te_string str = TE_STRING_INIT_STATIC(DEF_STR_LEN);
+
+        te_string_append(&str, "%sphy-duplex-%s", prefix, duplex_str);
+        CHECK_RC(tapi_tags_add_tag(te_string_value(&str), NULL));
+    }
+
+    if (speed != TE_PHY_SPEED_UNKNOWN)
+    {
+        te_string str = TE_STRING_INIT_STATIC(DEF_STR_LEN);
+
+        te_string_append(&str, "%sphy-speed-%sMbps", prefix, speed_str);
+        CHECK_RC(tapi_tags_add_tag(te_string_value(&str), NULL));
+    }
+
+    free(autoneg_str);
+    free(duplex_str);
+    free(speed_str);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -207,6 +271,8 @@ main(int argc, char **argv)
     CHECK_RC(tapi_tags_add_net_pci_tags(iut_rpcs->ta, iut_if->if_name));
     CHECK_RC(tapi_tags_add_phy_tags(iut_rpcs->ta, iut_if->if_name,
                                     tst_rpcs->ta, tst_if->if_name, ""));
+    add_local_phy_tags(iut_rpcs->ta, "iut-");
+    add_local_phy_tags(tst_rpcs->ta, "tst-");
 
     TEST_SUCCESS;
 
