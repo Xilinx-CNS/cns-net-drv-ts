@@ -12,6 +12,11 @@
       <iter result="PASSED">
         <arg name="env"/>
         <notes/>
+        <results tags="max_rx_queues&lt;=1" key="NO-MQ">
+          <result value="SKIPPED">
+            <verdict>There is no multiple Rx queues</verdict>
+          </result>
+        </results>
         <results tags="virtio-pci" key="NO-RSS" notes="VirtIO net does not support RSS">
           <result value="SKIPPED">
             <verdict>RSS is not supported for IUT interface</verdict>
