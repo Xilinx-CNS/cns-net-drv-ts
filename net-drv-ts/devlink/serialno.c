@@ -20,7 +20,7 @@
  * @author Yurij Plotnikov <Yurij.Plotnikov@arknetworks.am>
  */
 
-#define TE_TEST_NAME "devlink/devinfo"
+#define TE_TEST_NAME "devlink/serialno"
 
 #include "net_drv_test.h"
 #include "tapi_cfg_pci.h"
