@@ -143,6 +143,11 @@
       <iter result="PASSED">
         <arg name="env"/>
         <notes/>
+        <results tags="virtio-pci" key="NO-DEVLINK" notes="VirtIO net does not provide devlink parameters">
+          <result value="FAILED">
+            <verdict>Serial number is absent</verdict>
+          </result>
+        </results>
       </iter>
     </test>
   </iter>
