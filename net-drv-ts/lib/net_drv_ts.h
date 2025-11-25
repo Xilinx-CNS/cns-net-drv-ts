@@ -18,6 +18,7 @@
 #include "tapi_rpcsock_macros.h"
 #include "te_sleep.h"
 #include "tapi_cfg_pci.h"
+#include "tapi_cfg_phy.h"
 
 /* X3 driver name */
 #define NET_DRV_X3_DRIVER_NAME "xilinx_efct"
@@ -222,6 +223,60 @@ extern void net_drv_conn_check(rcf_rpc_server *rpcs1,
 extern te_errno net_drv_cat_all_files(rcf_rpc_server *rpcs,
                                       uint32_t timeout,
                                       const char *path_fmt, ...);
+
+/**
+ * Set PHY interface mode (autoneg, duplex and speed state)
+ * using @c "/local/phy/" subtree.
+ *
+ * @param ta        Test Agent name.
+ * @param if_name   Interface name.
+ *
+ * @return Status code.
+ */
+extern te_errno net_drv_set_phy_link(const char *ta, const char *if_name);
+
+/**
+ * Get PHY autoneg state by name string.
+ *
+ * @param autoneg_str   Autoneg state name string. Valid values:
+ *                      - @c TE_PHY_AUTONEG_OFF_STRING     - autoneg OFF
+ *                      - @c TE_PHY_AUTONEG_ON_STRING      - autoneg ON
+ *                      - @c TE_PHY_AUTONEG_UNKNOWN_STRING - autoneg UNKNOWN.
+ *
+ * @return @c TE_PHY_AUTONEG_ON      - autonegatiation on
+ *         @c TE_PHY_AUTONEG_OFF     - autonegatiation off
+ *         @c TE_PHY_AUTONEG_UNKNOWN - if autoneg_str is
+ *                                     @c TE_PHY_AUTONEG_UNKNOWN_STRING, @c NULL
+ *                                     or empty.
+ */
+extern int net_drv_ts_phy_autoneg_str2id(const char *autoneg_str);
+
+/**
+ * Get PHY duplex state by name string.
+ *
+ * @param duplex_str    Duplex state name string. Valid values:
+ *                      - @c TE_PHY_DUPLEX_FULL_STRING    - full duplex mode
+ *                      - @c TE_PHY_DUPLEX_HALF_STRING    - half duplex mode
+ *                      - @c TE_PHY_DUPLEX_UNKNOWN_STRING - unknown duplex mode.
+ *
+ * @return @c TE_PHY_DUPLEX_FULL    - full duplex mode
+ *         @c TE_PHY_DUPLEX_HALF    - half duplex mode
+ *         @c TE_PHY_DUPLEX_UNKNOWN - if autoneg_str is
+ *                                    @c TE_PHY_DUPLEX_UNKNOWN_STRING, @c NULL
+ *                                    or empty.
+ */
+extern int net_drv_ts_phy_duplex_str2id(const char *duplex_str);
+
+/**
+ * Get PHY speed state by name string.
+ *
+ * @param speed_str     Speed state name string, in Mb/sec.
+ *
+ * @return TE_PHY_SPEED_*
+ *         or @c TE_PHY_SPEED_UNKNOWN - if speed_str is @c TE_PHY_SPEED_UNKNOWN,
+ *                                      @c NULL or empty.
+ */
+extern int net_drv_ts_phy_speed_str2id(const char *speed_str);
 
 /**
  * Set a new MAC address on a network interface, check that the

@@ -53,6 +53,36 @@ EOF
     cat <<EOF
   --reuse-pco               Do not restart RPC servers in each test
                             (it makes testing significantly faster)
+  --phy-autoneg=(on|off)
+                            PHY link autonegatiation state to be used by each
+                            interface on IUT and TST (the same as
+                            --iut-phy-autoneg and --tst-phy-autoneg at the same
+                            time)
+  --phy-duplex=(full|half)
+                            PHY link duplex mode to be used by each
+                            interface on IUT and TST (the same as
+                            --iut-phy-duplex and --tst-phy-duplex at the same
+                            time)
+  --phy-speed=(10|100|1000|10000)
+                            PHY link speed to be used by each interface on IUT
+                            and TST (the same as --iut-phy-speed and
+                            --tst-phy-speed at the same time)
+  --iut-phy-autoneg=(on|off)
+                            PHY link autonegatiation state to be used by each
+                            interface on IUT
+  --iut-phy-duplex=(full|half)
+                            PHY link duplex mode to be used by each
+                            interface on IUT
+  --iut-phy-speed=(10|100|1000|10000)
+                            PHY link speed to be used by each interface on IUT
+  --tst-phy-autoneg=(on|off)
+                            PHY link autonegatiation state to be used by each
+                            interface on TST
+  --tst-phy-duplex=(full|half)
+                            PHY link duplex mode to be used by each
+                            interface on TST
+  --tst-phy-speed=(10|100|1000|10000)
+                            PHY link speed to be used by each interface on TST
   --net-driver-ndebug       Build net drivers with NDEBUG=1 option
   --no-meta                 Do not generate testing metadata
   --publish                 Publish testing logs to Bublik
@@ -169,6 +199,45 @@ while test -n "$1" ; do
 
         --reuse-pco)
             export TE_ENV_REUSE_PCO=yes
+            ;;
+
+        --phy-autoneg=*)
+            export NET_DRV_TS_IUT_PHY_AUTONEG="${1#--phy-autoneg=}"
+            export NET_DRV_TS_TST1_PHY_AUTONEG="${1#--phy-autoneg=}"
+            ;;
+
+        --phy-duplex=*)
+            export NET_DRV_TS_IUT_PHY_DUPLEX="${1#--phy-duplex=}"
+            export NET_DRV_TS_TST1_PHY_DUPLEX="${1#--phy-duplex=}"
+            ;;
+
+        --phy-speed=*)
+            export NET_DRV_TS_IUT_PHY_SPEED="${1#--phy-speed=}"
+            export NET_DRV_TS_TST1_PHY_SPEED="${1#--phy-speed=}"
+            ;;
+
+        --iut-phy-autoneg=*)
+            export NET_DRV_TS_IUT_PHY_AUTONEG="${1#--iut-phy-autoneg=}"
+            ;;
+
+        --iut-phy-duplex=*)
+            export NET_DRV_TS_IUT_PHY_DUPLEX="${1#--iut-phy-duplex=}"
+            ;;
+
+        --iut-phy-speed=*)
+            export NET_DRV_TS_IUT_PHY_SPEED="${1#--iut-phy-speed=}"
+            ;;
+
+        --tst-phy-autoneg=*)
+            export NET_DRV_TS_TST1_PHY_AUTONEG="${1#--tst-phy-autoneg=}"
+            ;;
+
+        --tst-phy-duplex=*)
+            export NET_DRV_TS_TST1_PHY_DUPLEX="${1#--tst-phy-duplex=}"
+            ;;
+
+        --tst-phy-speed=*)
+            export NET_DRV_TS_TST1_PHY_SPEED="${1#--tst-phy-speed=}"
             ;;
 
         --net-driver-ndebug)
