@@ -66,7 +66,7 @@ config_sfptpd(const char *ta, const char *if_name,
     CHECK_RC(cfg_get_instance_string_fmt(&agt_dir,
                                          "/agent:%s/dir:", ta));
 
-    CHECK_RC(te_string_append(&rem_path, "%s/sfptpd", agt_dir));
+    te_string_append(&rem_path, "%s/sfptpd", agt_dir);
 
     RING("Copy %s to %s:%s", sfptpd_path, ta, rem_path.ptr);
     CHECK_RC(rcf_ta_put_file(ta, 0, sfptpd_path, rem_path.ptr));
@@ -77,7 +77,7 @@ config_sfptpd(const char *ta, const char *if_name,
                                   "/agent:%s/sfptpd:/ifname:", ta));
 
     te_string_reset(&rem_path);
-    CHECK_RC(te_string_append(&rem_path, "%s/sfptpd.cfg", agt_dir));
+    te_string_append(&rem_path, "%s/sfptpd.cfg", agt_dir);
 
     RING("Copy %s to %s:%s", cfg, ta, rem_path.ptr);
     CHECK_RC(rcf_ta_put_file(ta, 0, cfg, rem_path.ptr));
@@ -200,8 +200,7 @@ print_stats_diff(tapi_ethtool_report *before, tapi_ethtool_report *after)
     te_bool found;
     te_string str = TE_STRING_INIT;
 
-    CHECK_RC(te_string_append(&str, ROW_FMT, "Name", "Before",
-                              "After"));
+    te_string_append(&str, ROW_FMT, "Name", "Before", "After");
 
     /*
      * Print statistics which changed or disappeared in the second
@@ -221,9 +220,9 @@ print_stats_diff(tapi_ethtool_report *before, tapi_ethtool_report *after)
 
         if (!found || strcmp(kv_before->value, kv_after->value) != 0)
         {
-            CHECK_RC(te_string_append(&str, ROW_FMT,
-                                      kv_before->key, kv_before->value,
-                                      (found ? kv_after->value : "NONE")));
+            te_string_append(&str, ROW_FMT,
+                             kv_before->key, kv_before->value,
+                             (found ? kv_after->value : "NONE"));
         }
 
         TAILQ_REMOVE(&before->data.stats, kv_before, links);
@@ -234,8 +233,8 @@ print_stats_diff(tapi_ethtool_report *before, tapi_ethtool_report *after)
     /* Print statistics which appeared only in the second report. */
     TAILQ_FOREACH(kv_after, &after->data.stats, links)
     {
-        CHECK_RC(te_string_append(&str, ROW_FMT, kv_after->key,
-                                  "NONE", kv_after->value));
+        te_string_append(&str, ROW_FMT, kv_after->key,
+                         "NONE", kv_after->value);
     }
 
     RING("Changed PTP statistics:\n%s",

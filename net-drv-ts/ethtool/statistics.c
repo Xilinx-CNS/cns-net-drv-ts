@@ -76,8 +76,7 @@ get_stats(tapi_ethtool_report *report, te_bool tx)
              * and ignore the rest.
              */
             te_string_reset(&str);
-            CHECK_RC(te_string_append(&str, "%s: %s\n",
-                                      kv->key, kv->value));
+            te_string_append(&str, "%s: %s\n", kv->key, kv->value);
             CHECK_RC(te_strtoul(kv->value, 10, &total));
             break;
         }
@@ -86,8 +85,7 @@ get_stats(tapi_ethtool_report *report, te_bool tx)
              (!tx && strcmp_start("rx_queue_", kv->key) == 0)) &&
             strcmp_end("_bytes", kv->key) == 0)
         {
-            CHECK_RC(te_string_append(&str, "%s: %s\n",
-                                      kv->key, kv->value));
+            te_string_append(&str, "%s: %s\n", kv->key, kv->value);
             CHECK_RC(te_strtoul(kv->value, 10, &val));
             total += val;
         }

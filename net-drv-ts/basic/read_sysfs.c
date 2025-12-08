@@ -61,7 +61,6 @@ main(int argc, char *argv[])
         char     *device_path;
         char     *bdf;
         ssize_t   ret;
-        te_errno  rc;
 
         device_path = te_string_fmt("/sys/class/net/%s/device",
                                     iut_if->if_name);
@@ -79,16 +78,13 @@ main(int argc, char *argv[])
         bdf_buf[ret + 1] = '\0';
 
         bdf = te_basename(bdf_buf);
-        rc = te_string_append(&path, "/sys/kernel/debug/%s/%s/",
-                              iut_drv_name, bdf);
+        te_string_append(&path, "/sys/kernel/debug/%s/%s/", iut_drv_name, bdf);
         free(bdf);
-        if (rc != 0)
-            TEST_FAIL("Failed to construct efct sysfs debug path");
     }
     else
     {
-        CHECK_RC(te_string_append(&path, "/sys/kernel/debug/%s/nic_%s/",
-                                  iut_drv_name, iut_if->if_name));
+        te_string_append(&path, "/sys/kernel/debug/%s/nic_%s/",
+                         iut_drv_name, iut_if->if_name);
     }
 
 
@@ -113,7 +109,7 @@ main(int argc, char *argv[])
         TEST_VERDICT("Failed to read files from /sys/kernel/debug/");
 
     te_string_reset(&path);
-    CHECK_RC(te_string_append(&path, "/sys/module/%s/", iut_drv_name));
+    te_string_append(&path, "/sys/module/%s/", iut_drv_name);
 
     TEST_STEP("Check whether driver subdirectory can be found "
               "in /sys/module/.");

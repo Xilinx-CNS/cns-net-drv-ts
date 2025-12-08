@@ -101,9 +101,8 @@ add_driver_tag(const char *ta, const char *prefix)
 
     if (!te_str_is_null_or_empty(drv_name))
     {
-        rc = te_string_append(&str, "%s%s", prefix, drv_name);
-        if (rc == 0)
-            rc = tapi_tags_add_tag(te_string_value(&str), NULL);
+        te_string_append(&str, "%s%s", prefix, drv_name);
+        rc = tapi_tags_add_tag(te_string_value(&str), NULL);
     }
 
     free(drv_name);

@@ -392,13 +392,13 @@ net_drv_conn_check(rcf_rpc_server *rpcs1,
 {
     te_string pref_str = TE_STRING_INIT;
 
-    CHECK_RC(te_string_append(&pref_str, "%s, sending data from %s to %s",
-                              vpref, s1_name, s2_name));
+    te_string_append(&pref_str, "%s, sending data from %s to %s",
+                     vpref, s1_name, s2_name);
     net_drv_send_recv_check(rpcs1, s1, rpcs2, s2, pref_str.ptr);
 
     te_string_reset(&pref_str);
-    CHECK_RC(te_string_append(&pref_str, "%s, sending data from %s to %s",
-                              vpref, s2_name, s1_name));
+    te_string_append(&pref_str, "%s, sending data from %s to %s",
+                     vpref, s2_name, s1_name);
     net_drv_send_recv_check(rpcs2, s2, rpcs1, s1, pref_str.ptr);
 
     te_string_free(&pref_str);
@@ -412,17 +412,13 @@ net_drv_cat_all_files(rcf_rpc_server *rpcs, uint32_t timeout,
 #define FIND_FMT "find '%s' -perm /a+r ! -type d ! -type l ! -name \".*\""
 
     va_list ap;
-    te_errno rc;
     rpc_wait_status status;
 
     te_string path = TE_STRING_INIT;
 
     va_start(ap, path_fmt);
-    rc = te_string_append_va(&path, path_fmt, ap);
+    te_string_append_va(&path, path_fmt, ap);
     va_end(ap);
-
-    if (rc != 0)
-        return TE_RC(TE_TAPI, rc);
 
     RPC_AWAIT_ERROR(rpcs);
     status = rpc_system_ex(rpcs, FIND_FMT " | grep . >/dev/null", path.ptr);
