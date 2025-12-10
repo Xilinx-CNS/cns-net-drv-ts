@@ -612,6 +612,37 @@
                     </arg>
                 </run>
 
+                <run name="tcp_perf3_dual_port_scaling" template="tcp_udp_perf">
+                    <script name="tcp_udp_perf">
+                        <objective>Report TCP Rx performance using iperf3 on two ports simultaneously</objective>
+                    </script>
+                    <arg name="env">
+                      <value ref="env.peer2peerX2.iut_server"/>
+                      <value ref="env.peer2peerX2.iut_server_ip6"/>
+                    </arg>
+                    <arg name="perf_bench" type="perf_bench.all">
+                        <value>iperf3</value>
+                    </arg>
+                    <arg name="dual_mode" type="boolean">
+                        <value>FALSE</value>
+                    </arg>
+                    <arg name="protocol">
+                        <value>IPPROTO_TCP</value>
+                    </arg>
+                    <arg name="n_perf_insts" list="streams_insts">
+                        <value>1</value>
+                        <value>2</value>
+                        <value>4</value>
+                        <value>4</value>
+                    </arg>
+                    <arg name="n_streams" list="streams_insts">
+                        <value>1</value>
+                        <value>2</value>
+                        <value>2</value>
+                        <value>4</value>
+                    </arg>
+                </run>
+
             </session>
         </run>
 
