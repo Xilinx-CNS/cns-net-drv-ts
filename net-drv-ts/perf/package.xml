@@ -582,6 +582,36 @@
                     </arg>
                 </run>
 
+                <run name="udp_perf3_dual_port_bidir" template="tcp_udp_perf">
+                    <script name="tcp_udp_perf">
+                        <objective>Report UDP bidirectional performance using iperf3 on two ports simultaneously</objective>
+                    </script>
+                    <arg name="env">
+                      <value ref="env.peer2peerX2.iut_client"/>
+                      <value ref="env.peer2peerX2.iut_server"/>
+                      <value ref="env.peer2peerX2.iut_client_ip6"/>
+                      <value ref="env.peer2peerX2.iut_server_ip6"/>
+                    </arg>
+                    <arg name="perf_bench" type="perf_bench.all">
+                        <value>iperf3</value>
+                    </arg>
+                    <arg name="dual_mode" type="boolean">
+                        <value>TRUE</value>
+                    </arg>
+                    <arg name="protocol">
+                        <value>IPPROTO_UDP</value>
+                    </arg>
+                    <arg name="n_perf_insts" list="streams_insts">
+                        <value>1</value>
+                    </arg>
+                    <arg name="n_streams" list="streams_insts">
+                        <value>4</value>
+                    </arg>
+                    <arg name="bandwidth">
+                        <value>5000</value>
+                    </arg>
+                </run>
+
             </session>
         </run>
 
