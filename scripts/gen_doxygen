@@ -1,7 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: Apache-2.0
 # (c) Copyright 2021 - 2022 Xilinx, Inc. All rights reserved.
-
 set -e
 
 export TS_TOPDIR="$(cd "$(dirname "$(which "$0")")/.."; pwd -P)"
@@ -9,13 +8,23 @@ export TS_TOPDIR="$(cd "$(dirname "$(which "$0")")/.."; pwd -P)"
 
 doxygen_debug=false
 
+do_default=true
+do_pdf=false
+do_html=false
+
 help() {
     cat <<EOF
 Tool is used to generate documentation for the net-drv-ts test suite.
 
 It's based on doxygen and doxyrest.
 
-Usage: ./$0 [--help] [--debug]
+Usage: ./$0 [--help] [--debug] [--html] [--pdf]
+
+Options:
+    --html: generate html documentation (default)
+    --pdf: generate pdf documentation
+    --debug: enable debug mode
+    --help: show this help message
 EOF
 }
 
@@ -27,6 +36,14 @@ for opt ; do
             ;;
         -d|--debug)
             doxygen_debug=true
+            ;;
+        --html)
+            do_default=false
+            do_html=true
+            ;;
+        --pdf)
+            do_default=false
+            do_pdf=true
             ;;
         *)
             echo "Unknown option: $opt" >&2
@@ -65,12 +82,27 @@ DOXYREST_OPTS=(
 
 ${DOXYREST_BIN} "${DOXYREST_OPTS[@]}" || exit 1
 
-SPHINX_BUILD_OPTS=(
-    -j auto                         # use cpu count
-    -q                              # be quite: warn and error only
-    net-drv-ts/doc                  # input
-    net-drv-ts/doc/generated/html   # output
-)
+if $do_default; then
+    do_html=true
+    do_pdf=false
+fi
 
-${SPHINX_BUILD_BIN} "${SPHINX_BUILD_OPTS[@]}"
+if $do_html; then
+    SPHINX_BUILD_OPTS=(
+        -j auto                         # use cpu count
+        -q                              # be quite: warn and error only
+        net-drv-ts/doc                  # input
+        net-drv-ts/doc/generated/html   # output
+    )
+
+    ${SPHINX_BUILD_BIN} "${SPHINX_BUILD_OPTS[@]}"
+fi
+
+if $do_pdf; then
+    make -C "${TS_TOPDIR}/net-drv-ts/doc" latexpdf
+
+    # Note, the name depends on conf.py!
+    echo Open: $(realpath net-drv-ts/doc/generated/latex/net_driver_test_suite.pdf)
+fi
+
 popd >/dev/null

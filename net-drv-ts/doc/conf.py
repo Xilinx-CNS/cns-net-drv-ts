@@ -7,6 +7,15 @@ copyright = u'(c) Copyright 2021 - 2022 Xilinx, Inc. All rights reserved.'
 author = u'Dmitry Izbitsky'
 version = u'1.0'
 release = u'release'
+latex_documents = [
+    (
+        'index',
+        'net_driver_test_suite.tex',
+        u'Net Driver Test Suite',
+        u'Dmitry Izbitsky',
+        'manual',
+    ),
+]
 
 # Specify the path to Doxyrest extensions for Sphinx:
 
