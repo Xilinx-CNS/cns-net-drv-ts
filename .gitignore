@@ -29,3 +29,4 @@ ta_cores.*
 vg.test.*
 trc-report.html
 trc-brief.html
+doxygen.warn
