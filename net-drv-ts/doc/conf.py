@@ -17,6 +17,10 @@ latex_documents = [
     ),
 ]
 
+latex_elements = {
+    'printindex': '',  # do not include the index in the PDF
+}
+
 # Specify the path to Doxyrest extensions for Sphinx:
 
 import sys
