@@ -99,6 +99,12 @@ if $do_html; then
 fi
 
 if $do_pdf; then
+    ${TE_BASE}/scripts/rst_adjust \
+        --toctree-move-to-end \
+        --refs-remove \
+        --authors-strip \
+        net-drv-ts/doc/generated/rst/group_*.rst
+
     make -C "${TS_TOPDIR}/net-drv-ts/doc" latexpdf
 
     # Note, the name depends on conf.py!
