@@ -13,6 +13,8 @@ do_pdf=false
 do_html=false
 doc_language=""
 rst_override_dir=""
+use_xml2dox=true
+DOXYFILE_TMP=""
 
 help() {
     cat <<EOF
@@ -20,7 +22,7 @@ Tool is used to generate documentation for the net-drv-ts test suite.
 
 It's based on doxygen and doxyrest.
 
-Usage: ./$0 [--help] [--debug] [--html] [--pdf] [--rst-override-generated=DIR] [--lang=LANG]
+Usage: ./$0 [--help] [--debug] [--html] [--pdf] [--rst-override-generated=DIR] [--no-xml2dox] [--lang=LANG]
 
 Options:
     --html: generate html documentation (default)
@@ -28,6 +30,7 @@ Options:
     --debug: enable debug mode
     --rst-override-generated=DIR: copy contents of DIR into 
                                   net-drv-ts/doc/generated/rst after doxyrest
+    --no-xml2dox: disable xml2dox filters in Doxygen (keep c2dox)
     --lang=LANG: set Sphinx document language (e.g. en, ru)
     --help: show this help message
 EOF
@@ -52,6 +55,9 @@ for opt ; do
             ;;
         --rst_override_generated=*|--rst-override-generated=*)
             rst_override_dir="${opt#*=}"
+            ;;
+        --no-xml2dox)
+            use_xml2dox=false
             ;;
         --lang=*|--language=*)
             doc_language="${opt#*=}"
@@ -79,10 +85,26 @@ fi
 
 pushd ${TS_TOPDIR} >/dev/null
 
+# Choose Doxyfile, optionally overriding FILTER_PATTERNS to disable xml2dox
+DOXYFILE="net-drv-ts/Doxyfile"
+if ! $use_xml2dox; then
+    DOXYFILE_TMP="$(mktemp -t Doxyfile.XXXXXXXX)" || {
+        echo "Failed to create temporary Doxyfile" >&2
+        exit 6
+    }
+    cp "$DOXYFILE" "$DOXYFILE_TMP"
+    cat >>"$DOXYFILE_TMP" <<'EOF'
+
+# Overridden by gen_doxygen: disable xml2dox, keep c2dox
+FILTER_PATTERNS        = *.c="${TE_BASE}/scripts/c2dox"
+EOF
+    DOXYFILE="$DOXYFILE_TMP"
+fi
+
 if $doxygen_debug ; then
-   doxygen -d extcmd -d filteroutput net-drv-ts/Doxyfile
+   doxygen -d extcmd -d filteroutput "$DOXYFILE"
 else
-    doxygen net-drv-ts/Doxyfile >/dev/null
+  doxygen "$DOXYFILE" >/dev/null
 fi
 
 DOXYREST_OPTS=(
@@ -136,6 +158,11 @@ if $do_pdf; then
 
     # Note, the name depends on conf.py!
     echo Open: $(realpath net-drv-ts/doc/generated/latex/net_driver_test_suite.pdf)
+fi
+
+# Cleanup temporary Doxyfile if used
+if [ -n "$DOXYFILE_TMP" ] && [ -f "$DOXYFILE_TMP" ]; then
+    rm -f "$DOXYFILE_TMP"
 fi
 
 popd >/dev/null
