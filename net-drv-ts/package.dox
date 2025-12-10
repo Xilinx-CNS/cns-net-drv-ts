@@ -1,7 +1,13 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 /* (c) Copyright 2021 - 2022 Xilinx, Inc. All rights reserved. */
 /**
-@defgroup net_drv_tests Net Driver Tests
-@{
-@}
+
+@mainpage
+
+@defgroup net_drv_tests Net Driver Tests Description
+
 */
+
+/**
+ * @defgroup arg_types Common test parameters
+ */

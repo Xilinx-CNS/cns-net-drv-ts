@@ -1,121 +1,33 @@
 ..
    SPDX-License-Identifier: Apache-2.0
    (c) Copyright 2021 - 2022 Xilinx, Inc. All rights reserved.
-
-.. toctree::
-   :hidden:
-
-   generated/rst/group_net_drv_tests.rst
-   generated/rst/group_arg_types.rst
-   dox_resources/terminology.rst
-   dox_resources/refs.rst
-   dox_resources/internal.rst
+   (c) Copyright 2022 - 2025 OKTET Labs Ltd. All rights reserved.
 
 Net Driver Test Suite Documentation
 ==============================================
 
+This is documentation for the Net Driver Test Suite. The test suite is
+a result of opensource collaboration of several development teams, we're welcome
+your contributions!
+
+Start with :ref:`Introduction <introduction>`.
+
 .. contents:: Table of Contents
 
-------------
-Introduction
-------------
+.. toctree::
+   :maxdepth: 4
 
-Net Driver Test Suite is aimed to check certain implementation of an
-Ethernet NIC driver. It uses TE as its engine.
+   dox_resources/introduction.rst
+   dox_resources/terminology.rst
+   dox_resources/refs.rst
+   dox_resources/tags.rst
+   dox_resources/reqs.rst
+   generated/rst/group_net_drv_tests.rst
 
-See :ref:`Abbreviations<term_abbrev>`
+.. only:: html
 
-----------
-References
-----------
+    .. toctree::
+      :maxdepth: 2
 
-Find list of documentation mentioned on the
-:ref:`References page<refs_details>`
-
------------
-Conventions
------------
-
-Parameters of tests are referred in the text using bold italic (for example,
-**iut_rpcs**).
-
-Standard defines, elements of enumerations as well as **errno** values
-appear in monotype font (for example, `AF_INET`, `ENOMEM`).
-
--------
-Testbed
--------
-
-The following setup is required to run the test suite. In theory, Test Engine
-may run on either Test machine or Auxiliary test machine.
-
-.. image:: dox_resources/images/testbed.png
-  :alt: Testbed Topology
-
----------------
-Test parameters
----------------
-
-The test suite uses extensive parametrization. Details of the XML syntax and
-how to read the XML that describes the parameters can be found in
-`TE Tester`_
-documentation.
-
-****************************
-Parameter naming conventions
-****************************
-
-.. list-table::
-  :header-rows: 1
-
-  *
-    - Name
-    - Description
-  *
-    - iut_rpcs
-    - RPC server on IUT
-  *
-    - iut_if
-    - Network interface on the IUT
-  *
-    - iut_mac
-    - MAC address of the **iut_if**
-  *
-    - iut_addr
-    - IPv4/6 unicast address allocated for IUT interface
-  *
-    - tst_rpcs
-    - RPC server on TST
-  *
-    - tst_if
-    - Network interface on TST connected to the **iut_if**
-  *
-    - tst_mac
-    - MAC address of the **tst_if**
-  *
-    - tst_addr
-    - IPv4/6 unicast address assigned to the **tst_if**
-  *
-    - other_mac
-    - Other unicast MAC address
-
-
---------------------
-Test Suite Structure
---------------------
-
-* :ref:`Tests <doxid-group__net__drv__tests>`
-
-********
-TRC Tags
-********
-
-List of TRC tags can be found on the
-:ref:`corresponding page<tags_details>`.
-
-********************
-Tester Requirements
-********************
-
-List of Tester requirements can be found on the
-:ref:`corresponding page<reqs_details>`.
+      generated/rst/group_arg_types.rst
+      dox_resources/internal.rst
