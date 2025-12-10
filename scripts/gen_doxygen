@@ -11,6 +11,7 @@ doxygen_debug=false
 do_default=true
 do_pdf=false
 do_html=false
+doc_language=""
 
 help() {
     cat <<EOF
@@ -18,12 +19,13 @@ Tool is used to generate documentation for the net-drv-ts test suite.
 
 It's based on doxygen and doxyrest.
 
-Usage: ./$0 [--help] [--debug] [--html] [--pdf]
+Usage: ./$0 [--help] [--debug] [--html] [--pdf] [--lang=LANG]
 
 Options:
     --html: generate html documentation (default)
     --pdf: generate pdf documentation
     --debug: enable debug mode
+    --lang=LANG: set Sphinx document language (e.g. en, ru)
     --help: show this help message
 EOF
 }
@@ -44,6 +46,9 @@ for opt ; do
         --pdf)
             do_default=false
             do_pdf=true
+            ;;
+        --lang=*|--language=*)
+            doc_language="${opt#*=}"
             ;;
         *)
             echo "Unknown option: $opt" >&2
@@ -91,6 +96,11 @@ if $do_html; then
     SPHINX_BUILD_OPTS=(
         -j auto                         # use cpu count
         -q                              # be quite: warn and error only
+    )
+    if [ -n "$doc_language" ]; then
+        SPHINX_BUILD_OPTS+=( -D "language=$doc_language" )
+    fi
+    SPHINX_BUILD_OPTS+=(
         net-drv-ts/doc                  # input
         net-drv-ts/doc/generated/html   # output
     )
@@ -105,7 +115,8 @@ if $do_pdf; then
         --authors-strip \
         net-drv-ts/doc/generated/rst/group_*.rst
 
-    make -C "${TS_TOPDIR}/net-drv-ts/doc" latexpdf
+    if [ -n "$doc_language" ]; then PDF_SPHINXOPTS="-D language=$doc_language"; else PDF_SPHINXOPTS=""; fi
+    make -C "${TS_TOPDIR}/net-drv-ts/doc" latexpdf SPHINXOPTS="$PDF_SPHINXOPTS"
 
     # Note, the name depends on conf.py!
     echo Open: $(realpath net-drv-ts/doc/generated/latex/net_driver_test_suite.pdf)
