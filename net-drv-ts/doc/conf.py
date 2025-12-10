@@ -27,6 +27,17 @@ sys.path.insert(1, os.path.abspath(doxyrest_path + '/share/doxyrest/sphinx'))
 source_suffix = '.rst'
 master_doc = 'index'
 language = "c"
+# Configure exclude patterns based on builder type
+def setup(app):
+    def on_builder_inited(app):
+        if app.builder.name != 'html':
+            # Exclude global.rst for non-HTML builders (like latex/pdf)
+            app.config.exclude_patterns.append('generated/rst/global.rst')
+            app.config.exclude_patterns.append('generated/rst/enum*.rst')
+            app.config.exclude_patterns.append('generated/rst/struct*.rst')
+
+
+    app.connect('builder-inited', on_builder_inited)
 
 exclude_patterns = [
     'generated/rst/index.rst',

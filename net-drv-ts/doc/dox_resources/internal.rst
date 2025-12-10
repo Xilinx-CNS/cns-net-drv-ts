@@ -7,5 +7,8 @@ Internal details
 
 .. toctree::
 
-   tags.rst
-   ../generated/rst/global.rst
+.. only:: html
+
+   .. toctree::
+
+      ../generated/rst/global.rst
