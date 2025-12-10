@@ -29,6 +29,7 @@ for opt ; do
             doxygen_debug=true
             ;;
         *)
+            echo "Unknown option: $opt" >&2
             help
             exit 1
             ;;
