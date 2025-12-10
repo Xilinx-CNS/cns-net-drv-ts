@@ -12,6 +12,7 @@ do_default=true
 do_pdf=false
 do_html=false
 doc_language=""
+rst_override_dir=""
 
 help() {
     cat <<EOF
@@ -19,12 +20,14 @@ Tool is used to generate documentation for the net-drv-ts test suite.
 
 It's based on doxygen and doxyrest.
 
-Usage: ./$0 [--help] [--debug] [--html] [--pdf] [--lang=LANG]
+Usage: ./$0 [--help] [--debug] [--html] [--pdf] [--rst-override-generated=DIR] [--lang=LANG]
 
 Options:
     --html: generate html documentation (default)
     --pdf: generate pdf documentation
     --debug: enable debug mode
+    --rst-override-generated=DIR: copy contents of DIR into 
+                                  net-drv-ts/doc/generated/rst after doxyrest
     --lang=LANG: set Sphinx document language (e.g. en, ru)
     --help: show this help message
 EOF
@@ -46,6 +49,9 @@ for opt ; do
         --pdf)
             do_default=false
             do_pdf=true
+            ;;
+        --rst_override_generated=*|--rst-override-generated=*)
+            rst_override_dir="${opt#*=}"
             ;;
         --lang=*|--language=*)
             doc_language="${opt#*=}"
@@ -86,6 +92,16 @@ DOXYREST_OPTS=(
 )
 
 ${DOXYREST_BIN} "${DOXYREST_OPTS[@]}" || exit 1
+
+# If rst_override is specified, copy its contents into generated RST
+if [ -n "$rst_override_dir" ]; then
+    if [ ! -d "$rst_override_dir" ]; then
+        echo "rst_override directory does not exist: $rst_override_dir" >&2
+        exit 3
+    fi
+    mkdir -p net-drv-ts/doc/generated/rst
+    cp -a "$rst_override_dir"/. net-drv-ts/doc/generated/rst/
+fi
 
 if $do_default; then
     do_html=true
