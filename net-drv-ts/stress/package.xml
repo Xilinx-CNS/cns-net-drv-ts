@@ -10,7 +10,6 @@
 
         <!--- @autogroupprefix stress- -->
 
-        <!--- @autogroup -->
         <run>
             <script name="driver_unload" track_conf="nohistory">
                 <req id="IF_DOWN"/>
@@ -34,7 +33,6 @@
             </arg>
         </run>
 
-        <!--- @autogroup -->
         <run>
             <script name="driver_unload_traffic" track_conf="nohistory"/>
             <arg name="env">
