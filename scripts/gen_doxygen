@@ -14,6 +14,9 @@ do_html=false
 doc_language=""
 rst_override_dir=""
 use_xml2dox=true
+manual_override_dir=""
+DOC_SRC_DIR="net-drv-ts/doc"
+TMP_DOC_SRC_DIR=""
 DOXYFILE_TMP=""
 
 help() {
@@ -22,7 +25,7 @@ Tool is used to generate documentation for the net-drv-ts test suite.
 
 It's based on doxygen and doxyrest.
 
-Usage: ./$0 [--help] [--debug] [--html] [--pdf] [--rst-override-generated=DIR] [--no-xml2dox] [--lang=LANG]
+Usage: ./$0 [--help] [--debug] [--html] [--pdf] [--rst-override-generated=DIR] [--rst-override-manual=DIR] [--no-xml2dox] [--lang=LANG]
 
 Options:
     --html: generate html documentation (default)
@@ -30,6 +33,7 @@ Options:
     --debug: enable debug mode
     --rst-override-generated=DIR: copy contents of DIR into 
                                   net-drv-ts/doc/generated/rst after doxyrest
+    --rst-override-manual=DIR: override manual sources (index.rst; manual/*.rst -> net-drv-ts/doc/dox_resources)
     --no-xml2dox: disable xml2dox filters in Doxygen (keep c2dox)
     --lang=LANG: set Sphinx document language (e.g. en, ru)
     --help: show this help message
@@ -55,6 +59,9 @@ for opt ; do
             ;;
         --rst_override_generated=*|--rst-override-generated=*)
             rst_override_dir="${opt#*=}"
+            ;;
+        --rst_override_manual=*|--rst-override-manual=*)
+            manual_override_dir="${opt#*=}"
             ;;
         --no-xml2dox)
             use_xml2dox=false
@@ -125,6 +132,35 @@ if [ -n "$rst_override_dir" ]; then
     cp -a "$rst_override_dir"/. net-drv-ts/doc/generated/rst/
 fi
 
+# If manual overrides are specified, prepare a temporary doc source tree
+if [ -n "$manual_override_dir" ]; then
+    if [ ! -d "$manual_override_dir" ]; then
+        echo "rst_override_manual directory does not exist: $manual_override_dir" >&2
+        exit 4
+    fi
+    TMP_DOC_SRC_DIR="$(mktemp -d -t docsrc.XXXXXXXX)" || {
+        echo "Failed to create temporary doc source directory" >&2
+        exit 5
+    }
+    # Copy the whole docs tree into temp to avoid touching git-tracked files
+    cp -a net-drv-ts/doc/. "${TMP_DOC_SRC_DIR}/"
+    # Override index.rst if provided
+    if [ -f "${manual_override_dir}/index.rst" ]; then
+        cp -a "${manual_override_dir}/index.rst" "${TMP_DOC_SRC_DIR}/index.rst"
+    fi
+    # Override dox_resources/*.rst from manual/*.rst
+    if [ -d "${manual_override_dir}/resources" ]; then
+        mkdir -p "${TMP_DOC_SRC_DIR}/dox_resources"
+        for f in "${manual_override_dir}"/resources/*.rst; do
+            [ -e "$f" ] || continue
+            cp -a "$f" "${TMP_DOC_SRC_DIR}/dox_resources/$(basename "$f")"
+        done
+    fi
+    DOC_SRC_DIR="${TMP_DOC_SRC_DIR}"
+else
+    DOC_SRC_DIR="$PWD/net-drv-ts/doc"
+fi
+
 if $do_default; then
     do_html=true
     do_pdf=false
@@ -139,8 +175,8 @@ if $do_html; then
         SPHINX_BUILD_OPTS+=( -D "language=$doc_language" )
     fi
     SPHINX_BUILD_OPTS+=(
-        net-drv-ts/doc                  # input
-        net-drv-ts/doc/generated/html   # output
+        "$DOC_SRC_DIR"              # input
+        net-drv-ts/doc/generated/html       # output
     )
 
     ${SPHINX_BUILD_BIN} "${SPHINX_BUILD_OPTS[@]}"
@@ -154,10 +190,16 @@ if $do_pdf; then
         net-drv-ts/doc/generated/rst/group_*.rst
 
     if [ -n "$doc_language" ]; then PDF_SPHINXOPTS="-D language=$doc_language"; else PDF_SPHINXOPTS=""; fi
-    make -C "${TS_TOPDIR}/net-drv-ts/doc" latexpdf SPHINXOPTS="$PDF_SPHINXOPTS"
+    # Build PDF using Sphinx Makefile while pointing SOURCEDIR to our (possibly temporary) source tree
+    make -C "${TS_TOPDIR}/net-drv-ts/doc" latexpdf SPHINXOPTS="$PDF_SPHINXOPTS" SOURCEDIR="$DOC_SRC_DIR"
 
     # Note, the name depends on conf.py!
     echo Open: $(realpath net-drv-ts/doc/generated/latex/net_driver_test_suite.pdf)
+fi
+
+# Cleanup temporary source dir if used
+if [ -n "$TMP_DOC_SRC_DIR" ] && [ -d "$TMP_DOC_SRC_DIR" ]; then
+    rm -rf "$TMP_DOC_SRC_DIR"
 fi
 
 # Cleanup temporary Doxyfile if used
