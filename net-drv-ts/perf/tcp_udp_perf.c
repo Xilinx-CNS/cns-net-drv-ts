@@ -164,6 +164,7 @@ main(int argc, char *argv[])
 {
     rcf_rpc_server                         *iut_rpcs = NULL;
     const struct if_nameindex              *iut_ifs[TEST_MAX_LINKS] = {};
+    unsigned int                            n_iut_ports = 0;
     unsigned int                            n_ports = 0;
     te_bool3                                rx_csum;
     te_bool3                                rx_gro;
@@ -243,18 +244,22 @@ main(int argc, char *argv[])
     TEST_GET_INT64_PARAM(bandwidth);
     TEST_GET_PROTOCOL(protocol);
 
-    for (i = 0; i < TE_ARRAY_LEN(iut_ifs); ++i, ++n_ports)
+    for (i = 0; i < TE_ARRAY_LEN(iut_ifs); ++i, ++n_iut_ports)
     {
         te_string_reset(&str);
         te_string_append(&str, "iut_if%u", i);
         iut_ifs[i] = tapi_env_get_if(&env, te_string_value(&str));
         if (iut_ifs[i] == NULL)
             break;
+    }
 
+    for (i = 0; i < TE_ARRAY_LEN(iut_ifs); ++i, ++n_ports)
+    {
         te_string_reset(&str);
         te_string_append(&str, "server_if%u", i);
-        CHECK_NOT_NULL(server_ifs[i] =
-            tapi_env_get_if(&env, te_string_value(&str)));
+        server_ifs[i] = tapi_env_get_if(&env, te_string_value(&str));
+        if (server_ifs[i] == NULL)
+            break;
 
         te_string_reset(&str);
         te_string_append(&str, "client_if%u", i);
@@ -277,13 +282,10 @@ main(int argc, char *argv[])
 
     CHECK_RC(n_perf_insts * n_ports < MAX_PERF_INSTS ? 0 : TE_EINVAL);
 
-    for (i = 0; i < n_ports; ++i)
+    for (i = 0; i < n_iut_ports; ++i)
     {
-        const struct if_nameindex  *iut_if = iut_ifs[i];
-        const struct if_nameindex  *server_if = server_ifs[i];
-        const struct if_nameindex  *client_if = client_ifs[i];
-        const struct sockaddr      *server_addr = server_addrs[i];
-        const struct sockaddr      *client_addr = client_addrs[i];
+        int family = server_addrs[i < n_ports ? i : 0]->sa_family;
+        const struct if_nameindex *iut_if = iut_ifs[i];
 
         TEST_STEP("Configure Rx checksum offload on IUT interface if specified");
         test_set_if_feature(iut_rpcs->ta, iut_if->if_name, "rx-checksum", rx_csum);
@@ -296,7 +298,7 @@ main(int argc, char *argv[])
                             rx_vlan_strip);
 
         TEST_STEP("Configure Tx checksum offload on IUT interface if specified");
-        tx_csum_feature = (server_addr->sa_family == AF_INET) ?
+        tx_csum_feature = (family == AF_INET) ?
             "tx-checksum-ipv4" : "tx-checksum-ipv6";
         if (!net_drv_req_if_feature_configurable(iut_rpcs->ta, iut_if->if_name,
                                                  tx_csum_feature))
@@ -310,7 +312,7 @@ main(int argc, char *argv[])
 
         TEST_STEP("Configure TSO offload on IUT interface if specified");
         test_set_if_feature(iut_rpcs->ta, iut_if->if_name,
-                            (server_addr->sa_family == AF_INET) ?
+                            (family == AF_INET) ?
                             "tx-tcp-segmentation" : "tx-tcp6-segmentation",
                             tso);
 
@@ -400,6 +402,14 @@ main(int argc, char *argv[])
             else if (rc != 0)
                 TEST_VERDICT("Failed to set number of combined channels: %r", rc);
         }
+    }
+
+    for (i = 0; i < n_ports; i++)
+    {
+        const struct if_nameindex  *server_if = server_ifs[i];
+        const struct if_nameindex  *client_if = client_ifs[i];
+        const struct sockaddr      *server_addr = server_addrs[i];
+        const struct sockaddr      *client_addr = client_addrs[i];
 
         TEST_STEP("If @p rx_vlan_strip or @p tx_vlan_insert is not default, "
                   "create VLANs, assign addresses and use it for traffic "

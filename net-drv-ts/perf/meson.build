@@ -2,6 +2,7 @@
 # (c) Copyright 2024 OKTET Labs Ltd. All rights reserved.
 
 tests = [
+    'fwd_prologue',
     'tcp_udp_perf',
 ]
 

@@ -678,6 +678,196 @@
                     </arg>
                 </run>
 
+                <run name="tcp_udp_perf_fwd">
+                    <session>
+
+                        <var name="env.peer2peerX2" global="true">
+                            <value>
+                                'net0':IUT{
+                                    'iut_host'{
+                                        if:'iut_if0',
+                                        addr:'iut4_addr0':inet:unicast,
+                                        addr:'iut6_addr0':inet6:unicast
+                                    },
+                                    'tst_host'{
+                                        if:'tst_if0',
+                                        addr:'tst4_addr0':inet:unicast,
+                                        addr:'tst6_addr0':inet6:unicast
+                                    }
+                                },
+                                'net1':IUT{
+                                    'iut_host'{
+                                        if:'iut_if1',
+                                        addr:'iut4_addr1':inet:unicast,
+                                        addr:'iut6_addr1':inet6:unicast
+                                    },
+                                    'tst_host'{
+                                        if:'tst_if1',
+                                        addr:'tst4_addr1':inet:unicast,
+                                        addr:'tst6_addr1':inet6:unicast
+                                    }
+                                }
+                            </value>
+                        </var>
+
+                        <var name="env.peer2peerX2.fwd" global="true">
+                            <value reqs="IP4">
+                                'net0':IUT{
+                                    'gw_host'{
+                                        {'iut_rpcs':IUT},
+                                        if:'iut_if0',
+                                        addr:'client_gw_addr0':inet:unicast
+                                    },
+                                    'client_host'{
+                                        {'client_rpcs':tester},
+                                        if:'client_if0',
+                                        addr:'client_addr0':inet:unicast
+                                    }
+                                },
+                                'net1':IUT{
+                                    'gw_host'{
+                                        if:'iut_if1',
+                                        addr:'server_gw_addr0':inet:unicast
+                                    },
+                                    'server_host'{
+                                        {'server_rpcs':tester},
+                                        if:'server_if0',
+                                        addr:'server_addr0':inet:unicast
+                                    }
+                                }
+                            </value>
+                        </var>
+
+                        <var name="env.peer2peerX2.fwd_ip6" global="true">
+                            <value reqs="IP6">
+                                'net0':IUT{
+                                    'gw_host'{
+                                        {'iut_rpcs':IUT},
+                                        if:'iut_if0',
+                                        addr:'client_gw_addr0':inet6:unicast
+                                    },
+                                    'client_host'{
+                                        {'client_rpcs':tester},
+                                        if:'client_if0',
+                                        addr:'client_addr0':inet6:unicast
+                                    }
+                                },
+                                'net1':IUT{
+                                    'gw_host'{
+                                        if:'iut_if1',
+                                        addr:'server_gw_addr0':inet6:unicast
+                                    },
+                                    'server_host'{
+                                        {'server_rpcs':tester},
+                                        if:'server_if0',
+                                        addr:'server_addr0':inet6:unicast
+                                    }
+                                }
+                            </value>
+                        </var>
+
+                        <prologue>
+                            <script name="fwd_prologue"/>
+                            <arg name="env">
+                              <value ref="env.peer2peerX2"/>
+                            </arg>
+                        </prologue>
+
+                        <run name="tcp_perf3_fwd_basic" template="tcp_udp_perf">
+                            <script name="tcp_udp_perf">
+                                <objective>Report TCP forwarding performance using iperf3</objective>
+                            </script>
+                            <arg name="env">
+                              <value ref="env.peer2peerX2.fwd"/>
+                              <value ref="env.peer2peerX2.fwd_ip6"/>
+                            </arg>
+                            <arg name="perf_bench" type="perf_bench.all">
+                                <value>iperf3</value>
+                            </arg>
+                            <arg name="dual_mode" type="boolean">
+                                <value>FALSE</value>
+                            </arg>
+                            <arg name="protocol">
+                                <value>IPPROTO_TCP</value>
+                            </arg>
+                            <arg name="n_perf_insts" list="streams_insts">
+                                <value>1</value>
+                                <value>1</value>
+                                <value>2</value>
+                                <value>4</value>
+                            </arg>
+                            <arg name="n_streams" list="streams_insts">
+                                <value>1</value>
+                                <value>4</value>
+                                <value>2</value>
+                                <value>2</value>
+                            </arg>
+                        </run>
+
+                        <run name="udp_perf3_fwd_basic" template="tcp_udp_perf">
+                            <script name="tcp_udp_perf">
+                                <objective>Report UDP forwarding performance using iperf3</objective>
+                            </script>
+                            <arg name="env">
+                              <value ref="env.peer2peerX2.fwd"/>
+                              <value ref="env.peer2peerX2.fwd_ip6"/>
+                            </arg>
+                            <arg name="perf_bench" type="perf_bench.all">
+                                <value>iperf3</value>
+                            </arg>
+                            <arg name="dual_mode" type="boolean">
+                                <value>FALSE</value>
+                            </arg>
+                            <arg name="protocol">
+                                <value>IPPROTO_UDP</value>
+                            </arg>
+                            <arg name="n_perf_insts" list="streams_insts">
+                                <value>1</value>
+                                <value>1</value>
+                                <value>2</value>
+                                <value>4</value>
+                            </arg>
+                            <arg name="n_streams" list="streams_insts">
+                                <value>1</value>
+                                <value>4</value>
+                                <value>2</value>
+                                <value>2</value>
+                            </arg>
+                            <arg name="bandwidth">
+                                <value>5000</value>
+                            </arg>
+                        </run>
+
+                        <run name="tcp_perf3_fwd_bidir" template="tcp_udp_perf">
+                            <script name="tcp_udp_perf">
+                                <objective>Report TCP bidirectional forwarding performance using iperf3</objective>
+                            </script>
+                            <arg name="env">
+                              <value ref="env.peer2peerX2.fwd"/>
+                              <value ref="env.peer2peerX2.fwd_ip6"/>
+                            </arg>
+                            <arg name="perf_bench" type="perf_bench.all">
+                                <value>iperf3</value>
+                            </arg>
+                            <arg name="dual_mode" type="boolean">
+                                <value>TRUE</value>
+                            </arg>
+                            <arg name="protocol">
+                                <value>IPPROTO_TCP</value>
+                            </arg>
+                            <arg name="n_perf_insts" list="streams_insts">
+                                <value>1</value>
+                                <value>1</value>
+                            </arg>
+                            <arg name="n_streams" list="streams_insts">
+                                <value>1</value>
+                                <value>4</value>
+                            </arg>
+                        </run>
+
+                    </session>
+                </run>
+
             </session>
         </run>
 

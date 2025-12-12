@@ -97,4 +97,86 @@
         'server_if'='tst_if'
     </value>
   </global>
+  <global name="env.peer2peerX2">
+    <value>
+        'net0':IUT{
+            'iut_host'{
+                if:'iut_if0',
+                addr:'iut4_addr0':inet:unicast,
+                addr:'iut6_addr0':inet6:unicast
+            },
+            'tst_host'{
+                if:'tst_if0',
+                addr:'tst4_addr0':inet:unicast,
+                addr:'tst6_addr0':inet6:unicast
+            }
+        },
+        'net1':IUT{
+            'iut_host'{
+                if:'iut_if1',
+                addr:'iut4_addr1':inet:unicast,
+                addr:'iut6_addr1':inet6:unicast
+            },
+            'tst_host'{
+                if:'tst_if1',
+                addr:'tst4_addr1':inet:unicast,
+                addr:'tst6_addr1':inet6:unicast
+            }
+        }
+    </value>
+  </global>
+  <global name="env.peer2peerX2.fwd">
+    <value reqs="IP4">
+        'net0':IUT{
+            'gw_host'{
+                {'iut_rpcs':IUT},
+                if:'iut_if0',
+                addr:'client_gw_addr0':inet:unicast
+            },
+            'client_host'{
+                {'client_rpcs':tester},
+                if:'client_if0',
+                addr:'client_addr0':inet:unicast
+            }
+        },
+        'net1':IUT{
+            'gw_host'{
+                if:'iut_if1',
+                addr:'server_gw_addr0':inet:unicast
+            },
+            'server_host'{
+                {'server_rpcs':tester},
+                if:'server_if0',
+                addr:'server_addr0':inet:unicast
+            }
+        }
+    </value>
+  </global>
+  <global name="env.peer2peerX2.fwd_ip6">
+    <value reqs="IP6">
+        'net0':IUT{
+            'gw_host'{
+                {'iut_rpcs':IUT},
+                if:'iut_if0',
+                addr:'client_gw_addr0':inet6:unicast
+            },
+            'client_host'{
+                {'client_rpcs':tester},
+                if:'client_if0',
+                addr:'client_addr0':inet6:unicast
+            }
+        },
+        'net1':IUT{
+            'gw_host'{
+                if:'iut_if1',
+                addr:'server_gw_addr0':inet6:unicast
+            },
+            'server_host'{
+                {'server_rpcs':tester},
+                if:'server_if0',
+                addr:'server_addr0':inet6:unicast
+            }
+        }
+    </value>
+  </global>
 </globals>
