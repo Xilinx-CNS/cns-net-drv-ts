@@ -60,6 +60,7 @@
       <iter result="PASSED">
         <arg name="env"/>
         <arg name="coalesce_usecs">0</arg>
+        <arg name="per_queue"/>
         <notes/>
         <results tags="igb" key="IGB-RX-COALESCE" notes="igb does not handle 0 coalesce properly">
           <result value="FAILED">
@@ -87,6 +88,7 @@
       <iter result="PASSED">
         <arg name="env"/>
         <arg name="coalesce_usecs">300</arg>
+        <arg name="per_queue"/>
         <notes/>
         <results tags="sfc_ef100" key="SWNETLINUX-3314" notes="ethtool coalesce ops are not implemented in sfc_ef100">
           <result value="FAILED">
@@ -108,6 +110,7 @@
       <iter result="PASSED">
         <arg name="env"/>
         <arg name="coalesce_usecs">511</arg>
+        <arg name="per_queue"/>
         <notes/>
         <results tags="ice&amp;linux-mm&lt;506" key="RX-USECS-EVEN" notes="intel/ice requires rx-usecs to be even before Linux 5.6">
           <result value="FAILED">
@@ -134,6 +137,7 @@
       <iter result="PASSED">
         <arg name="env"/>
         <arg name="coalesce_usecs">800</arg>
+        <arg name="per_queue"/>
         <notes/>
         <results tags="sfc_ef100" key="SWNETLINUX-3314" notes="ethtool coalesce ops are not implemented in sfc_ef100">
           <result value="FAILED">

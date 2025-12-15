@@ -41,6 +41,7 @@
                 <!-- See bug net-52 -->
                 <value reqs="X3_BROKEN">800</value>
             </arg>
+            <arg name="per_queue" type="boolean"/>
         </run>
 
         <run>
