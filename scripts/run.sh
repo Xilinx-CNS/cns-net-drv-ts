@@ -271,6 +271,9 @@ if [[ "${TE_RUN_META}" = "yes" ]] ; then
 
     te_meta_set CFG "${CFG}"
     te_meta_set_git "${SF_TS_CONFDIR}" TSCONF
+
+    [[ -z "${TE_IUT_NET_DRV_SRC}" ]] \
+        || te_meta_set_git "${TE_IUT_NET_DRV_SRC}" NET_DRV
 fi
 
 RUN_OPTS+=(--opts=opts.ts)
