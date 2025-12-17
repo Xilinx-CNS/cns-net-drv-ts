@@ -37,6 +37,7 @@ load_required_modules(const char *ta, void *cookie)
     char *driver = NULL;
     char *net_driver = NULL;
     bool is_net_driver_needed = false;
+    bool unloadable = true;
 
     UNUSED(cookie);
 
@@ -46,6 +47,17 @@ load_required_modules(const char *ta, void *cookie)
 
     if (driver != NULL)
     {
+        rc = tapi_cfg_module_add(ta, driver, false);
+        if (rc == 0)
+            unloadable = net_drv_driver_unloadable(ta, driver);
+        rc = 0;
+
+        if (!unloadable)
+        {
+            WARN("Driver %s cannot be reloaded", driver);
+            goto cleanup;
+        }
+
         net_driver = net_drv_driver_name(ta);
         if (strcmp(driver, net_driver) != 0)
             is_net_driver_needed = true;
