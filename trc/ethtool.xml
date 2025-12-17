@@ -455,5 +455,13 @@
         <notes/>
       </iter>
     </test>
+    <test name="eee" type="script">
+      <objective>Check that Energy Efficient Ethernet configuration works as expected.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <notes/>
+      </iter>
+    </test>
   </iter>
 </test>
