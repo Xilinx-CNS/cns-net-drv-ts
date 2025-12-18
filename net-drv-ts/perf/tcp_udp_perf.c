@@ -504,6 +504,7 @@ main(int argc, char *argv[])
     }
 
     VSLEEP(1, "ensure all perf servers has started");
+    CHECK_RC(tapi_env_stats_gather(&env));
 
     TEST_STEP("Start perf clients");
     for (i = 0; i < n_perf_insts * n_ports; i++)
@@ -554,6 +555,8 @@ cleanup:
     free(client_addr_str);
     tapi_job_factory_destroy(client_factory);
     tapi_job_factory_destroy(server_factory);
+
+    CLEANUP_CHECK_RC(tapi_env_stats_gather_and_log_diff(&env));
 
     TEST_END;
 }
