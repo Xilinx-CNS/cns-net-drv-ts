@@ -402,6 +402,7 @@ main(int argc, char *argv[])
     int rx_num = 0;
     int tx_num = 0;
     int queues_num = 0;
+    te_errno te_rc;
 
     TEST_START;
     TEST_GET_PCO(iut_rpcs);
@@ -439,8 +440,13 @@ main(int argc, char *argv[])
         flow_type = tapi_cfg_rx_rule_flow_by_socket(iut_addr->sa_family,
                                                     RPC_SOCK_DGRAM);
 
-        CHECK_RC(tapi_cfg_rx_rule_find_location(iut_rpcs->ta, iut_if->if_name,
-                                                0, 0, &location));
+        te_rc = tapi_cfg_rx_rule_find_location(iut_rpcs->ta,
+                                               iut_if->if_name,
+                                               0, 0, &location);
+        if (TE_RC_GET_ERROR(te_rc) == TE_ENOENT)
+            TEST_SKIP("Rx classification rules are not supported");
+        else if (te_rc != 0)
+            TEST_FAIL("Cannot find location for Rx rule: %r", te_rc);
 
         CHECK_RC(tapi_cfg_rx_rule_add(iut_rpcs->ta, iut_if->if_name,
                                       location, flow_type));

@@ -60,7 +60,7 @@
       <iter result="PASSED">
         <arg name="env"/>
         <arg name="coalesce_usecs">0</arg>
-        <arg name="per_queue"/>
+        <arg name="per_queue">FALSE</arg>
         <notes/>
         <results tags="igb" key="IGB-RX-COALESCE" notes="igb does not handle 0 coalesce properly">
           <result value="FAILED">
@@ -88,7 +88,7 @@
       <iter result="PASSED">
         <arg name="env"/>
         <arg name="coalesce_usecs">300</arg>
-        <arg name="per_queue"/>
+        <arg name="per_queue">FALSE</arg>
         <notes/>
         <results tags="sfc_ef100" key="SWNETLINUX-3314" notes="ethtool coalesce ops are not implemented in sfc_ef100">
           <result value="FAILED">
@@ -110,7 +110,7 @@
       <iter result="PASSED">
         <arg name="env"/>
         <arg name="coalesce_usecs">511</arg>
-        <arg name="per_queue"/>
+        <arg name="per_queue">FALSE</arg>
         <notes/>
         <results tags="ice&amp;linux-mm&lt;506" key="RX-USECS-EVEN" notes="intel/ice requires rx-usecs to be even before Linux 5.6">
           <result value="FAILED">
@@ -137,7 +137,7 @@
       <iter result="PASSED">
         <arg name="env"/>
         <arg name="coalesce_usecs">800</arg>
-        <arg name="per_queue"/>
+        <arg name="per_queue">FALSE</arg>
         <notes/>
         <results tags="sfc_ef100" key="SWNETLINUX-3314" notes="ethtool coalesce ops are not implemented in sfc_ef100">
           <result value="FAILED">
@@ -147,6 +147,104 @@
         <results tags="virtio-pci" key="NO-RX-IRQ-MODER-CONTROL" notes="VirtIO net does not support interrupt moderation control">
           <result value="SKIPPED">
             <verdict>rx_coalesce_usecs=800 is not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="coalesce_usecs">0</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="igb" key="IGB-RX-COALESCE" notes="igb does not handle 0 coalesce properly">
+          <result value="FAILED">
+            <verdict>Too many big delays between packets</verdict>
+          </result>
+        </results>
+        <results tags="sfc_ef100" key="SWNETLINUX-3314" notes="ethtool coalesce ops are not implemented in sfc_ef100">
+          <result value="FAILED">
+            <verdict>Failed to set use_adaptive_rx_coalesce, rc=CS-ENOENT</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="NO-RX-RULES" notes="VirtIO net does not support Rx classification rules">
+          <result value="SKIPPED">
+            <verdict>Rx classification rules are not supported</verdict>
+          </result>
+        </results>
+        <results tags="qemu-virtio-net" key="RX-COALESCE-0-UNSTABLE" notes="These iterations are unstable on QEMU Virtio-Net">
+          <result value="PASSED"/>
+          <result value="FAILED">
+            <verdict>Too many big delays between packets</verdict>
+          </result>
+        </results>
+        <results tags="xilinx-virtio-net" key="NET-48" notes="These iterations are unstable on Xilinx Virtio-Net">
+          <result value="PASSED"/>
+          <result value="FAILED">
+            <verdict>Too many big delays between packets</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="coalesce_usecs">300</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="sfc_ef100" key="SWNETLINUX-3314" notes="ethtool coalesce ops are not implemented in sfc_ef100">
+          <result value="FAILED">
+            <verdict>Failed to set use_adaptive_rx_coalesce, rc=CS-ENOENT</verdict>
+          </result>
+        </results>
+        <results tags="xilinx_efct" key="XNET-423">
+          <result value="PASSED"/>
+          <result value="FAILED">
+            <verdict>Actual timestamps of received packets differ too much from the expected distribution</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="NO-RX-RULES" notes="VirtIO net does not support Rx classification rules">
+          <result value="SKIPPED">
+            <verdict>Rx classification rules are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="coalesce_usecs">511</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="ice&amp;linux-mm&lt;506" key="RX-USECS-EVEN" notes="intel/ice requires rx-usecs to be even before Linux 5.6">
+          <result value="FAILED">
+            <verdict>Failed to set rx_coalesce_usecs, rc=TA_UNIX-EINVAL</verdict>
+          </result>
+        </results>
+        <results tags="sfc_ef100" key="SWNETLINUX-3314" notes="ethtool coalesce ops are not implemented in sfc_ef100">
+          <result value="FAILED">
+            <verdict>Failed to set use_adaptive_rx_coalesce, rc=CS-ENOENT</verdict>
+          </result>
+        </results>
+        <results tags="xilinx_efct" key="XNET-423">
+          <result value="PASSED"/>
+          <result value="FAILED">
+            <verdict>Actual timestamps of received packets differ too much from the expected distribution</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="NO-RX-RULES" notes="VirtIO net does not support Rx classification rules">
+          <result value="SKIPPED">
+            <verdict>Rx classification rules are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="coalesce_usecs">800</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="sfc_ef100" key="SWNETLINUX-3314" notes="ethtool coalesce ops are not implemented in sfc_ef100">
+          <result value="FAILED">
+            <verdict>Failed to set use_adaptive_rx_coalesce, rc=CS-ENOENT</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="NO-RX-RULES" notes="VirtIO net does not support Rx classification rules">
+          <result value="SKIPPED">
+            <verdict>Rx classification rules are not supported</verdict>
           </result>
         </results>
       </iter>
