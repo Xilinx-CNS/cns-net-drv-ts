@@ -44,8 +44,8 @@ main(int argc, char *argv[])
     unsigned int                payload_len;
     uint8_t                     payload[ETHER_DATA_LEN];
     asn_value                  *ptrn = NULL;
-    csap_handle_t               iut_rx;
-    csap_handle_t               tst_rx;
+    csap_handle_t               iut_rx = CSAP_INVALID_HANDLE;
+    csap_handle_t               tst_rx = CSAP_INVALID_HANDLE;
     unsigned int                tst_received;
     unsigned int                tst_no_match_pkts;
     unsigned int                iut_received;
