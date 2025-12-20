@@ -176,6 +176,8 @@ cleanup:
 
     CLEANUP_CHECK_RC(tapi_tad_csap_destroy(iut_rpcs->ta, 0, iut_rx));
     CLEANUP_CHECK_RC(tapi_tad_csap_destroy(tst_rpcs->ta, 0, tst_rx));
+    asn_free_value(ptrn);
+    asn_free_value(tmpl);
 
     TEST_END;
 }
