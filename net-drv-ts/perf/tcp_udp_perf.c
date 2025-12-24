@@ -482,7 +482,7 @@ main(int argc, char *argv[])
         perf_servers[i] = tapi_perf_server_create(perf_bench, &perf_opts,
                                                   server_factory);
 
-        cpu_id_val = cpu_id.package_id;
+        cpu_id_val = cpu_id.thread_id;
         sched_affinity_param.cpu_ids = &cpu_id_val;
         CHECK_RC(tapi_job_add_exec_param(perf_servers[i]->app.job,
                                          exec_param));
@@ -497,7 +497,7 @@ main(int argc, char *argv[])
         perf_clients[i] = tapi_perf_client_create(perf_bench, &perf_opts,
                                                   client_factory);
 
-        cpu_id_val = cpu_id.package_id;
+        cpu_id_val = cpu_id.thread_id;
         sched_affinity_param.cpu_ids = &cpu_id_val;
         CHECK_RC(tapi_job_add_exec_param(perf_clients[i]->app.job,
                                          exec_param));
