@@ -362,7 +362,9 @@ cleanup:
 
     net_drv_rss_ctx_release(&rss_ctx);
 
-    CLEANUP_CHECK_RC(tapi_bpf_rxq_stats_reset(iut_rpcs->ta, bpf_id));
+    rc = tapi_bpf_rxq_stats_reset(iut_rpcs->ta, bpf_id);
+    if (rc != TE_RC(TE_CS, TE_ENOENT))
+        CLEANUP_CHECK_RC(rc);
 
     TEST_END;
 }
