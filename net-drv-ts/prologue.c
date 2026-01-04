@@ -21,6 +21,7 @@
 #include "net_drv_test.h"
 
 #include "tapi_cfg_base.h"
+#include "tapi_cfg_if_rss.h"
 #include "tapi_cfg_net.h"
 #include "tapi_cfg_modules.h"
 #include "tapi_cfg_pci.h"
@@ -194,6 +195,8 @@ main(int argc, char **argv)
     rcf_rpc_server *tst_rpcs = NULL;
     te_bool env_init = FALSE;
     char *iut_drv_name = NULL;
+    te_string rx_queues_str = TE_STRING_INIT;
+    int rx_queues;
 
 /* Redefine as empty to avoid environment processing here */
 #undef TEST_START_VARS
@@ -290,10 +293,16 @@ main(int argc, char **argv)
     if (!net_drv_driver_unloadable(iut_rpcs->ta, iut_drv_name))
         CHECK_RC(tapi_tags_add_tag("net-drv-shared", NULL));
 
+    CHECK_RC(tapi_cfg_if_rss_rx_queues_get(iut_rpcs->ta, iut_if->if_name,
+                                           &rx_queues));
+    te_string_append(&rx_queues_str, "%d", rx_queues);
+    CHECK_RC(tapi_tags_add_tag("rx-queues", te_string_value(&rx_queues_str)));
+
     TEST_SUCCESS;
 
 cleanup:
 
+    te_string_free(&rx_queues_str);
     free(iut_drv_name);
 
     if (env_init)
