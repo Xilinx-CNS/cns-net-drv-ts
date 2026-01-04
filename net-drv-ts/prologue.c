@@ -193,6 +193,7 @@ main(int argc, char **argv)
     rcf_rpc_server *iut_rpcs = NULL;
     rcf_rpc_server *tst_rpcs = NULL;
     te_bool env_init = FALSE;
+    char *iut_drv_name = NULL;
 
 /* Redefine as empty to avoid environment processing here */
 #undef TEST_START_VARS
@@ -285,9 +286,15 @@ main(int argc, char **argv)
     add_local_phy_tags(iut_rpcs->ta, "iut-");
     add_local_phy_tags(tst_rpcs->ta, "tst-");
 
+    CHECK_NOT_NULL(iut_drv_name = net_drv_driver_name(iut_rpcs->ta));
+    if (!net_drv_driver_unloadable(iut_rpcs->ta, iut_drv_name))
+        CHECK_RC(tapi_tags_add_tag("net-drv-shared", NULL));
+
     TEST_SUCCESS;
 
 cleanup:
+
+    free(iut_drv_name);
 
     if (env_init)
         TEST_END_ENV;
