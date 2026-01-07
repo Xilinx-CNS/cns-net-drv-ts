@@ -55,6 +55,9 @@
                 <value>100</value>
                 <value>1000</value>
             </arg>
+            <arg name="send_delay">
+                <value>10</value>
+            </arg>
         </run>
 
     </session>

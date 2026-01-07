@@ -21,6 +21,8 @@
  *                        - @c 13
  *                        - @c 100
  *                        - @c 1000
+ * @param send_delay      Delay between periodically sent packets:
+ *                        - @c 10
  *
  * @par Scenario:
  *
@@ -370,9 +372,11 @@ main(int argc, char *argv[])
     TEST_GET_ADDR(iut_rpcs, iut_addr);
     TEST_GET_ADDR(tst_rpcs, tst_addr);
     TEST_GET_INT_PARAM(coalesce_frames);
+    TEST_GET_INT_PARAM(send_delay);
 
-    send_delay = MIN_SEND_DELAY;
-    RING("%u us delay between packets is chosen", send_delay);
+    if (send_delay < MIN_SEND_DELAY)
+        TEST_FAIL("Requested %u us delay between packets is too small (min is %u us)",
+                  send_delay, MIN_SEND_DELAY);
 
     if (coalesce_frames == 0)
         TEST_FAIL("coalesce_frames must be non zero");

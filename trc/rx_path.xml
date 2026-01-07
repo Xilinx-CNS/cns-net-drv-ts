@@ -255,6 +255,7 @@
       <iter result="PASSED">
         <arg name="env"/>
         <arg name="coalesce_frames"/>
+        <arg name="send_delay"/>
         <notes/>
         <results tags="i40e" key="NO-RX-IRQ-MODER-FRAMES" notes="i40e does not support interrupt moderation by number of frames">
           <result value="SKIPPED">
