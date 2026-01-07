@@ -18,10 +18,19 @@
  *                        - @ref env-peer2peer
  *                        - @ref env-peer2peer_ipv6
  * @param coalesce_frames Value to set for @b rx_max_coalesced_frames:
- *                        - @c 13
- *                        - @c 100
- *                        - @c 1000
- * @param send_delay      Delay between periodically sent packets:
+ *                        - @c 1
+ *                        - @c 10
+ *                        - @c 16
+ *                        - @c 32
+ *                        - @c 60
+ *                        - @c 80
+ * @param send_delay      Delay between periodically sent packets
+ *                        (one per @p coalesce_frames):
+ *                        - @c 200
+ *                        - @c 90
+ *                        - @c 40
+ *                        - @c 28
+ *                        - @c 15
  *                        - @c 10
  *
  * @par Scenario:
