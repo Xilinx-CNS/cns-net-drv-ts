@@ -53,6 +53,9 @@
 /** Minimum delay between packet sends on Tester, in microseconds. */
 #define MIN_SEND_DELAY 10
 
+/** How long to send packets from Tester to warm up, in milliseconds */
+#define WARNUP_TIME_MS 100
+
 /** How long to send packets from Tester, in milliseconds */
 #define SEND_TIME 2000
 
@@ -433,6 +436,16 @@ main(int argc, char *argv[])
     }
     if (rc != 0)
         TEST_VERDICT("Failed to set rx_max_coalesced_frames, rc=%r", rc);
+
+    TEST_STEP("Warm up Tx on Tester and Rx on IUT (e.g. to wrap Rx ring).");
+
+    tst_rpcs->op = RCF_RPC_CALL;
+    rpc_net_drv_send_pkts_exact_delay(tst_rpcs, tst_s, MIN_SEND_DELAY,
+                                      WARNUP_TIME_MS);
+    rpc_net_drv_recv_pkts_exact_delay(iut_rpcs, iut_s,
+                                      TAPI_WAIT_NETWORK_DELAY);
+    rpc_net_drv_send_pkts_exact_delay(tst_rpcs, tst_s, MIN_SEND_DELAY,
+                                      WARNUP_TIME_MS);
 
     TEST_STEP("Create a CSAP on Tester to capture packets sent from it "
               "to IUT.");
