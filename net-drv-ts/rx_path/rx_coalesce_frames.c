@@ -332,17 +332,17 @@ finalize_stats(test_cb_args *args)
 {
     if (args->n_groups == 0)
     {
-        RING("No packet groups with measurable size was detected");
+        WARN_ARTIFACT("No packet groups with measurable size was detected");
         return;
     }
 
     args->avg_group_size = (double)args->total_group_size / args->n_groups;
     args->group_size_dev = sqrt(args->squared_dev_sum / args->n_groups);
 
-    RING("Number of packet groups: %u\n"
-         "Average group size: %.3f\n"
-         "Group size deviation: %.3f",
-         args->n_groups, args->avg_group_size, args->group_size_dev);
+    RING_ARTIFACT("Number of packet groups: %u\n"
+                  "Average group size: %.3f\n"
+                  "Group size deviation: %.3f",
+                  args->n_groups, args->avg_group_size, args->group_size_dev);
 }
 
 int
@@ -372,6 +372,8 @@ main(int argc, char *argv[])
     tapi_tad_trrecv_cb_data csap_cb_data;
     test_cb_args cb_args = TEST_CB_ARGS_INIT;
     int rc_aux;
+    double avg_err;
+    double dev_err;
 
     TEST_START;
     TEST_GET_PCO(iut_rpcs);
@@ -562,9 +564,14 @@ main(int argc, char *argv[])
     if (cb_args.n_groups == 0)
         TEST_FAIL("Failed to get statistics for packet groups");
 
-    if (fabs(cb_args.avg_group_size - coalesce_frames) / coalesce_frames >
-                                                      ERR_MARGIN ||
-        fabs(cb_args.group_size_dev / coalesce_frames) > ERR_MARGIN)
+    avg_err = fabs(cb_args.avg_group_size - coalesce_frames) / coalesce_frames;
+    dev_err = cb_args.group_size_dev / coalesce_frames;
+
+    RING_ARTIFACT("Average group size error: %.3f\n"
+                  "Group size deviation error: %.3f",
+                  avg_err, dev_err);
+
+    if (avg_err > ERR_MARGIN || dev_err > ERR_MARGIN)
     {
         TEST_VERDICT("Actual groups of received packets differ "
                      "too much from the expected distribution");

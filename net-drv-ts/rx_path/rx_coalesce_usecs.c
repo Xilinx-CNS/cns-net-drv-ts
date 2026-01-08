@@ -351,17 +351,17 @@ finalize_stats(test_cb_args *args)
 {
     if (args->n_groups == 0)
     {
-        RING("No packet groups with measurable duration was detected");
+        WARN_ARTIFACT("No packet groups with measurable duration was detected");
         return;
     }
 
     args->avg_group_time = args->total_groups_time / args->n_groups;
     args->group_time_dev = sqrt(args->squared_dev_sum / args->n_groups);
 
-    RING("Number of packet groups: %u\n"
-         "Average group time: %.3f microseconds\n"
-         "Group time deviation: %.3f",
-         args->n_groups, args->avg_group_time, args->group_time_dev);
+    RING_ARTIFACT("Number of packet groups: %u\n"
+                  "Average group time: %.3f microseconds\n"
+                  "Group time deviation: %.3f",
+                  args->n_groups, args->avg_group_time, args->group_time_dev);
 }
 
 int
@@ -663,12 +663,21 @@ main(int argc, char *argv[])
     finalize_stats(&cb_args);
     if (coalesce_usecs > 0)
     {
+        double avg_err;
+        double dev_err;
+
         if (cb_args.n_groups == 0)
             TEST_FAIL("Failed to get statistics for packet groups");
 
-        if (fabs(cb_args.avg_group_time - coalesce_usecs) / coalesce_usecs >
-                                                          ERR_MARGIN ||
-            fabs(cb_args.group_time_dev / coalesce_usecs) > ERR_MARGIN)
+        avg_err = fabs(cb_args.avg_group_time - coalesce_usecs) /
+            coalesce_usecs;
+        dev_err = cb_args.group_time_dev / coalesce_usecs;
+
+        RING_ARTIFACT("Average group size error: %.3f\n"
+                      "Group size deviation error: %.3f",
+                      avg_err, dev_err);
+
+        if (avg_err > ERR_MARGIN || dev_err > ERR_MARGIN)
         {
             TEST_VERDICT("Actual timestamps of received packets differ "
                          "too much from the expected distribution");
