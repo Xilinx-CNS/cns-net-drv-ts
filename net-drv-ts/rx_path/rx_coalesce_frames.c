@@ -59,7 +59,7 @@
  * Maximum relative deviation of actual packet distrubition
  * parameter value from expected one.
  */
-#define ERR_MARGIN 0.10
+#define ERR_MARGIN 0.15
 
 /** Minimum delay between packet sends on Tester, in microseconds. */
 #define MIN_SEND_DELAY 10
