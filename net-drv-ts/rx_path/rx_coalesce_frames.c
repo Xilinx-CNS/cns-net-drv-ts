@@ -43,6 +43,7 @@
 #include "net_drv_test.h"
 #include "tapi_eth.h"
 #include "tapi_udp.h"
+#include "tapi_cfg_base.h"
 #include "tapi_cfg_if_coalesce.h"
 #include "tapi_mem.h"
 
@@ -451,6 +452,12 @@ main(int argc, char *argv[])
     }
     if (rc != 0)
         TEST_VERDICT("Failed to set rx_max_coalesced_frames, rc=%r", rc);
+
+    TEST_STEP("If applicable disable Rx HW timestamping on IUT since it "
+              "could affect coalesce on number frames using Rx "
+              "descriptors and extra descriptors used for timestamps.");
+    CHECK_RC(tapi_cfg_base_if_disable_rx_hwtstamp(iut_rpcs->ta,
+                                                  iut_if->if_name));
 
     TEST_STEP("Warm up Tx on Tester and Rx on IUT (e.g. to wrap Rx ring).");
 
