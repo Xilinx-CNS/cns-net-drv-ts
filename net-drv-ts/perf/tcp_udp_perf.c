@@ -82,6 +82,7 @@
 #include "tapi_cfg_if.h"
 #include "tapi_cfg_if_chan.h"
 #include "tapi_cfg_if_coalesce.h"
+#include "tapi_cfg_if_rss.h"
 
 #define TEST_BENCH_DURATION_SEC 6
 #define MAX_PERF_INSTS 32
@@ -393,14 +394,52 @@ main(int argc, char *argv[])
 
         if (channels != -1)
         {
+            int rx_queues;
+
             TEST_STEP("Set number of combined channels on IUT interface "
                       "according to @p channels.");
+
+            TEST_SUBSTEP("Get current number of Rx queues on IUT interface");
+            CHECK_RC(tapi_cfg_if_rss_rx_queues_get(iut_rpcs->ta,
+                                                   iut_if->if_name,
+                                                   &rx_queues));
+
+            TEST_SUBSTEP("If current number of Rx queues is more than number "
+                         "channels to be set, update RSS indirection table to "
+                         "use only Rx queues which remain after channels set.");
+            if (rx_queues > channels)
+            {
+                CHECK_RC(tapi_cfg_if_rss_fill_indir_table(iut_rpcs->ta,
+                                                          iut_if->if_name,
+                                                          0, 0, channels - 1));
+                CHECK_RC(tapi_cfg_if_rss_hash_indir_commit(iut_rpcs->ta,
+                                                           iut_if->if_name, 0));
+            }
+
+            TEST_SUBSTEP("Apply number of combined channels on IUT interface "
+                         "according to @p channels.");
             rc = tapi_cfg_if_chan_cur_set(iut_rpcs->ta, iut_if->if_name,
                                           TAPI_CFG_IF_CHAN_COMBINED, channels);
             if (TE_RC_GET_ERROR(rc) == TE_EOPNOTSUPP)
                 TEST_SKIP("Cannot set number of combined channels");
             else if (rc != 0)
                 TEST_VERDICT("Failed to set number of combined channels: %r", rc);
+
+            TEST_SUBSTEP("If previously used number of Rx queues is less than "
+                         "number of channels, update RSS indirection table to "
+                         "use all Rx queues available after channels set.");
+            if (rx_queues < channels)
+            {
+                CHECK_RC(tapi_cfg_if_rss_fill_indir_table(iut_rpcs->ta,
+                                                          iut_if->if_name,
+                                                          0, 0, channels - 1));
+                CHECK_RC(tapi_cfg_if_rss_hash_indir_commit(iut_rpcs->ta,
+                                                           iut_if->if_name, 0));
+            }
+
+            TEST_SUBSTEP("Print RSS indirection table to be able to double-check.");
+            CHECK_RC(tapi_cfg_if_rss_print_indir_table(iut_rpcs->ta,
+                                                       iut_if->if_name, 0));
         }
     }
 
