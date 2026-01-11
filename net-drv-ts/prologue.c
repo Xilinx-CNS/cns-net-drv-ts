@@ -21,6 +21,7 @@
 #include "net_drv_test.h"
 
 #include "tapi_cfg_base.h"
+#include "tapi_cfg_if.h"
 #include "tapi_cfg_if_chan.h"
 #include "tapi_cfg_if_rss.h"
 #include "tapi_cfg_net.h"
@@ -99,6 +100,29 @@ cleanup:
     free(driver);
     free(net_driver);
     return rc;
+}
+
+static te_errno
+disable_fw_lldp(cfg_net_t *, cfg_net_node_t *, const char *,
+                cfg_oid *oid, void *)
+{
+    const char *agent = CFG_OID_GET_INST_NAME(oid, 1);
+    const char *iface = CFG_OID_GET_INST_NAME(oid, 2);
+    te_errno rc;
+
+    /*
+     * Try to disable FW LLDP using private flag if it is present.
+     * FW LLDP generates packets from Intel X710 which randomly break
+     * tests because of unexpected packets observed.
+     */
+    rc = tapi_cfg_if_priv_flag_set(agent, iface, "disable-fw-lldp", true);
+    if (rc != 0 && rc != TE_RC(TE_CS, TE_ENOENT))
+    {
+        TEST_VERDICT("Attempt to disable FW LLDP on TA %s interface %s using private flag failed unexpectedly: %r",
+                     agent, iface, rc);
+    }
+
+    return 0;
 }
 
 /* Add TRC tag named after network interface driver */
@@ -258,6 +282,8 @@ main(int argc, char **argv)
     CHECK_RC(tapi_cfg_net_all_assign_ip(AF_INET));
     TEST_STEP("Allocate and assign IPv6 addresses to be used by tests.");
     CHECK_RC(tapi_cfg_net_all_assign_ip(AF_INET6));
+    TEST_STEP("Ensure that FW LLDP is disabled if applicable.");
+    CHECK_RC(tapi_cfg_net_foreach_node(disable_fw_lldp, NULL));
     CFG_WAIT_CHANGES;
 
     TEST_STEP("Dump configuration to logs.");
