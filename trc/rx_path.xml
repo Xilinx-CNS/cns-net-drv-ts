@@ -160,6 +160,11 @@
             <verdict>Too many big delays between packets</verdict>
           </result>
         </results>
+        <results tags="mlx5_core" key="COALESCE-PER-QUEUE" notes="mlx5 does not support per-queue Rx coalesce control">
+          <result value="SKIPPED">
+            <verdict>Interrupt coalescing settings are not supported</verdict>
+          </result>
+        </results>
         <results tags="sfc_ef100" key="SWNETLINUX-3314" notes="ethtool coalesce ops are not implemented in sfc_ef100">
           <result value="FAILED">
             <verdict>Failed to set use_adaptive_rx_coalesce, rc=CS-ENOENT</verdict>
@@ -188,6 +193,11 @@
         <arg name="coalesce_usecs">300</arg>
         <arg name="per_queue">TRUE</arg>
         <notes/>
+        <results tags="mlx5_core" key="COALESCE-PER-QUEUE" notes="mlx5 does not support per-queue Rx coalesce control">
+          <result value="SKIPPED">
+            <verdict>Interrupt coalescing settings are not supported</verdict>
+          </result>
+        </results>
         <results tags="sfc_ef100" key="SWNETLINUX-3314" notes="ethtool coalesce ops are not implemented in sfc_ef100">
           <result value="FAILED">
             <verdict>Failed to set use_adaptive_rx_coalesce, rc=CS-ENOENT</verdict>
@@ -215,6 +225,11 @@
             <verdict>Failed to set rx_coalesce_usecs, rc=TA_UNIX-EINVAL</verdict>
           </result>
         </results>
+        <results tags="mlx5_core" key="COALESCE-PER-QUEUE" notes="mlx5 does not support per-queue Rx coalesce control">
+          <result value="SKIPPED">
+            <verdict>Interrupt coalescing settings are not supported</verdict>
+          </result>
+        </results>
         <results tags="sfc_ef100" key="SWNETLINUX-3314" notes="ethtool coalesce ops are not implemented in sfc_ef100">
           <result value="FAILED">
             <verdict>Failed to set use_adaptive_rx_coalesce, rc=CS-ENOENT</verdict>
@@ -237,6 +252,11 @@
         <arg name="coalesce_usecs">800</arg>
         <arg name="per_queue">TRUE</arg>
         <notes/>
+        <results tags="mlx5_core" key="COALESCE-PER-QUEUE" notes="mlx5 does not support per-queue Rx coalesce control">
+          <result value="SKIPPED">
+            <verdict>Interrupt coalescing settings are not supported</verdict>
+          </result>
+        </results>
         <results tags="sfc_ef100" key="SWNETLINUX-3314" notes="ethtool coalesce ops are not implemented in sfc_ef100">
           <result value="FAILED">
             <verdict>Failed to set use_adaptive_rx_coalesce, rc=CS-ENOENT</verdict>
