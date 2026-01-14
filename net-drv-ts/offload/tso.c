@@ -38,6 +38,13 @@
 #include "tapi_cfg_if.h"
 #include "tapi_tcp.h"
 #include "tapi_eth.h"
+#include "te_vector.h"
+
+/** Auxiliary structure to store information for TCP segments. */
+typedef struct tcp_seg_info {
+    uint32_t seqn;
+    unsigned int len;
+} tcp_seg_info;
 
 /** Auxiliary structure to pass information to/from CSAP callback */
 typedef struct pkts_info {
@@ -47,10 +54,11 @@ typedef struct pkts_info {
     uint32_t first_seqn;
     uint32_t last_seqn;
     uint32_t total_len;
-    int64_t first_small_seqn;
 
     te_bool large_pkts_detected;
     te_bool failed;
+
+    te_vec segs;
 } pkts_info;
 
 /** Callback to process packets captured by CSAP */
@@ -60,6 +68,7 @@ process_pkts(asn_value *pkt, void *arg)
     pkts_info *info = (pkts_info *)arg;
     unsigned int pld_len;
     unsigned int total_len;
+    tcp_seg_info seg_info;
     uint32_t seqn;
     te_errno rc;
 
@@ -86,7 +95,6 @@ process_pkts(asn_value *pkt, void *arg)
         info->first_seqn = seqn;
         info->last_seqn = seqn;
         info->total_len = pld_len;
-        info->first_small_seqn = -1;
     }
     else
     {
@@ -104,6 +112,10 @@ process_pkts(asn_value *pkt, void *arg)
             info->total_len = total_len;
     }
 
+    seg_info.seqn = seqn;
+    seg_info.len = pld_len;
+    TE_VEC_APPEND(&info->segs, seg_info);
+
     RING("Captured packet with TCP payload of %u bytes which is "
          "%s MSS", pld_len,
          pld_len > info->mss ?
@@ -112,21 +124,7 @@ process_pkts(asn_value *pkt, void *arg)
                             "equal to" : "smaller than"));
 
     if (pld_len > info->mss)
-    {
         info->large_pkts_detected = TRUE;
-    }
-    else if (pld_len < info->mss)
-    {
-        if (info->first_small_seqn < 0)
-        {
-            info->first_small_seqn = seqn;
-        }
-        else if (tapi_tcp_compare_seqn(
-                        seqn, (uint32_t)(info->first_small_seqn)) < 0)
-        {
-            info->first_small_seqn = seqn;
-        }
-    }
 
 cleanup:
 
@@ -155,12 +153,80 @@ check_csap_gen(pkts_info *info, unsigned int sent, const char *csap_name)
     }
 }
 
+/** Split Tx packets by MSS. */
+static void
+split_pkts_by_mss(const te_vec *tx_segs, unsigned int mss, te_vec *expected)
+{
+    size_t i;
+
+    te_vec_reset(expected);
+
+    for (i = 0; i < te_vec_size(tx_segs); i++)
+    {
+        const tcp_seg_info seg_info = TE_VEC_GET(tcp_seg_info, tx_segs, i);
+        unsigned int off = 0;
+
+        while (off < seg_info.len)
+        {
+            unsigned int cur_len = seg_info.len - off;
+            tcp_seg_info seg_out;
+
+            if (cur_len > mss)
+                cur_len = mss;
+
+            seg_out.seqn = seg_info.seqn + off;
+            seg_out.len = cur_len;
+            TE_VEC_APPEND(expected, seg_out);
+
+            off += cur_len;
+        }
+    }
+}
+
+/** Compare Rx packets' info with expected one. */
+static void
+check_rx_pkts(te_vec *rx_segs, te_vec *expected)
+{
+    size_t exp_num = te_vec_size(expected);
+    size_t rx_num = te_vec_size(rx_segs);
+    bool fail = false;
+    size_t check_num;
+    size_t i;
+
+    if (rx_num != exp_num)
+    {
+        fail = true;
+        ERROR("Expected %u TCP segments on Tester after splitting, got %u",
+              exp_num, rx_num);
+        ERROR_VERDICT("Unexpected number of TCP segments captured on Tester");
+    }
+
+    check_num = MIN(exp_num, rx_num);
+
+    for (i = 0; i < check_num; i++)
+    {
+        tcp_seg_info exp = TE_VEC_GET(tcp_seg_info, expected, i);
+        tcp_seg_info got = TE_VEC_GET(tcp_seg_info, rx_segs, i);
+
+        if (tapi_tcp_compare_seqn(got.seqn, exp.seqn) != 0 ||
+            got.len != exp.len)
+        {
+            fail = true;
+            ERROR("Tester CSAP: mismatch at index %u: expected {seq=%u len=%u}, got {seq=%u len=%u}",
+                  i, exp.seqn, exp.len, got.seqn, got.len);
+        }
+    }
+
+    if (fail)
+        TEST_VERDICT("TCP segments captured on Tester do not match expected TSO splitting result");
+}
+
 /**
  * Check packets captured by two CSAPs - one capturing outgoing
  * packets on sender and another one capturing incoming packets
  * on receiver. If TSO is enabled, bigger-than-MSS packets should
- * be observed on sender. On receiver, all packets except the last
- * one must be of MSS size.
+ * be observed on sender. On receiver, all packets must be of MSS
+ * size or less.
  */
 static void
 check_captured_pkts(const char *ta_tx, csap_handle_t csap_tx,
@@ -169,22 +235,23 @@ check_captured_pkts(const char *ta_tx, csap_handle_t csap_tx,
                     te_bool tso_on)
 {
     tapi_tad_trrecv_cb_data csap_cb_data;
-    pkts_info stats;
-
-    memset(&stats, 0, sizeof(stats));
-    stats.mss = mss;
+    pkts_info tx_stats = { .mss = (unsigned int)mss,
+                           .segs = TE_VEC_INIT(tcp_seg_info) };
+    pkts_info rx_stats = { .mss = (unsigned int)mss,
+                           .segs = TE_VEC_INIT(tcp_seg_info) };
+    te_vec expected = TE_VEC_INIT(tcp_seg_info);
 
     memset(&csap_cb_data, 0, sizeof(csap_cb_data));
     csap_cb_data.callback = &process_pkts;
-    csap_cb_data.user_data = &stats;
+    csap_cb_data.user_data = &tx_stats;
 
     CHECK_RC(tapi_tad_trrecv_get(ta_tx, 0, csap_tx,
                                  &csap_cb_data, NULL));
-    check_csap_gen(&stats, send_len, "IUT");
+    check_csap_gen(&tx_stats, send_len, "IUT");
 
     if (tso_on)
     {
-        if (!stats.large_pkts_detected)
+        if (!tx_stats.large_pkts_detected)
         {
             TEST_VERDICT("TSO is on, however no bigger than MSS Tx packets "
                          "were captured");
@@ -192,36 +259,28 @@ check_captured_pkts(const char *ta_tx, csap_handle_t csap_tx,
     }
     else
     {
-        if (stats.large_pkts_detected)
+        if (tx_stats.large_pkts_detected)
         {
             TEST_VERDICT("TSO is off, however bigger than MSS Tx packets "
                          "were captured");
         }
-
-        if (stats.first_small_seqn >= 0 &&
-            stats.first_small_seqn != stats.last_seqn)
-        {
-            ERROR_VERDICT("The first captured Tx packet of smaller than MSS "
-                          "size was not the last one");
-        }
     }
 
-    memset(&stats, 0, sizeof(stats));
-    stats.mss = mss;
-
+    csap_cb_data.user_data = &rx_stats;
     CHECK_RC(tapi_tad_trrecv_get(ta_rx, 0, csap_rx,
                                  &csap_cb_data, NULL));
 
-    check_csap_gen(&stats, send_len, "Tester");
+    check_csap_gen(&rx_stats, send_len, "Tester");
 
-    if (stats.large_pkts_detected)
+    if (rx_stats.large_pkts_detected)
         TEST_VERDICT("Larger than MSS packets were captured on Tester");
-    if (stats.first_small_seqn >= 0 &&
-        stats.first_small_seqn != stats.last_seqn)
-    {
-        TEST_VERDICT("The first smaller than MSS packet captured on Tester "
-                     "was not the last one");
-    }
+
+    split_pkts_by_mss(&tx_stats.segs, (unsigned int)mss, &expected);
+    check_rx_pkts(&rx_stats.segs, &expected);
+
+    te_vec_free(&expected);
+    te_vec_free(&tx_stats.segs);
+    te_vec_free(&rx_stats.segs);
 }
 
 int
