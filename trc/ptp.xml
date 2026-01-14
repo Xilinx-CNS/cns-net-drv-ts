@@ -113,6 +113,7 @@
         </results>
         <results tags="mlx5_core" key="CLOCK-CAPS">
           <result value="PASSED">
+            <verdict>Frequency adjustment range is less than expected</verdict>
             <verdict>No external timestamp channels</verdict>
             <verdict>Pulse Per Second is not supported</verdict>
           </result>
