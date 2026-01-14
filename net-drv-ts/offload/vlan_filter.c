@@ -35,6 +35,7 @@
 #include "tapi_ndn.h"
 
 #define MAX_PKT_LEN 1024
+#define PKTS_NUM_WAIT 1
 
 static rcf_rpc_server *iut_rpcs = NULL;
 static rcf_rpc_server *tst_rpcs = NULL;
@@ -76,9 +77,11 @@ send_recv_pkt(int af, uint16_t vlan_tci, bool exp_receive, bool fail,
     CHECK_RC(tapi_tad_trsend_start(tst_rpcs->ta, 0, csap_tst,
                                    pkt_templ, RCF_MODE_BLOCKING));
 
-    CHECK_RC(tapi_tad_trrecv_get(iut_rpcs->ta, 0, csap_iut, NULL,
-                                 &rx_pkts_num));
-    if (rx_pkts_num > 1)
+    CHECK_RC(tapi_tad_trrecv_wait_pkts_get_num(iut_rpcs->ta, 0, csap_iut,
+                                               PKTS_NUM_WAIT,
+                                               TAPI_WAIT_NETWORK_DELAY,
+                                               &rx_pkts_num));
+    if (rx_pkts_num > PKTS_NUM_WAIT)
     {
         TEST_VERDICT("%s: CSAP on IUT captured more than one packet",
                      stage);
