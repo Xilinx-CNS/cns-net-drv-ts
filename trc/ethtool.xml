@@ -44,9 +44,9 @@
             <verdict>No logs from the driver were detected when all flags in msglvl are switched on</verdict>
           </result>
         </results>
-        <results tags="mlx5_core" key="NO-ETHTOOL-MSGLVL">
+        <results tags="mlx5_core" key="NO-ETHTOOL-MSGLVL" notes="mlx5 does not support message level change via ethtool">
           <result value="FAILED">
-            <verdict>Some logs from driver were detected when msglvl is set to zero</verdict>
+            <verdict>Failed to enable all flags in msglvl</verdict>
           </result>
         </results>
         <results tags="ionic" key="PS-12182" notes="msglvl style logging control is not supported in ionic">
