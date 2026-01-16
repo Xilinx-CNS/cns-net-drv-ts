@@ -274,7 +274,7 @@
       <notes/>
       <iter result="PASSED">
         <arg name="env"/>
-        <arg name="coalesce_frames"/>
+        <arg name="coalesce_frames">1</arg>
         <arg name="send_delay"/>
         <notes/>
         <results tags="i40e" key="NO-RX-IRQ-MODER-FRAMES" notes="i40e does not support interrupt moderation by number of frames">
@@ -292,7 +292,138 @@
             <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
           </result>
         </results>
-        <results tags="virtio-pci" key="NO-RX-IRQ-MODER-CONTROL" notes="VirtIO net does not support interrupt moderation control">
+        <results tags="virtio-pci" key="RX-IRQ-MODER-FRAMES-1-UNSTABLE" notes="VirtIO net without NOTF_COAL feature does not provide stable RX interrupt moderation">
+          <result value="PASSED"/>
+          <result value="FAILED">
+            <verdict>Actual groups of received packets differ too much from the expected distribution</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="coalesce_frames">10</arg>
+        <arg name="send_delay"/>
+        <notes/>
+        <results tags="i40e" key="NO-RX-IRQ-MODER-FRAMES" notes="i40e does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="ice" key="NO-RX-IRQ-MODER-FRAMES" notes="ice does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="sfc" key="NO-RX-IRQ-MODER-FRAMES" notes="sfc does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="NO-RX-IRQ-MODER-FRAMES" notes="VirtIO net rejects values greater than one">
+          <result value="FAILED">
+            <verdict>Failed to set rx_max_coalesced_frames, rc=TA_UNIX-EINVAL</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="coalesce_frames">16</arg>
+        <arg name="send_delay"/>
+        <notes/>
+        <results tags="i40e" key="NO-RX-IRQ-MODER-FRAMES" notes="i40e does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="ice" key="NO-RX-IRQ-MODER-FRAMES" notes="ice does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="sfc" key="NO-RX-IRQ-MODER-FRAMES" notes="sfc does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="NO-RX-IRQ-MODER-FRAMES" notes="VirtIO net rejects values greater than one">
+          <result value="FAILED">
+            <verdict>Failed to set rx_max_coalesced_frames, rc=TA_UNIX-EINVAL</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="coalesce_frames">32</arg>
+        <arg name="send_delay"/>
+        <notes/>
+        <results tags="i40e" key="NO-RX-IRQ-MODER-FRAMES" notes="i40e does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="ice" key="NO-RX-IRQ-MODER-FRAMES" notes="ice does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="sfc" key="NO-RX-IRQ-MODER-FRAMES" notes="sfc does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="NO-RX-IRQ-MODER-FRAMES" notes="VirtIO net rejects values greater than one">
+          <result value="FAILED">
+            <verdict>Failed to set rx_max_coalesced_frames, rc=TA_UNIX-EINVAL</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="coalesce_frames">60</arg>
+        <arg name="send_delay"/>
+        <notes/>
+        <results tags="i40e" key="NO-RX-IRQ-MODER-FRAMES" notes="i40e does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="ice" key="NO-RX-IRQ-MODER-FRAMES" notes="ice does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="sfc" key="NO-RX-IRQ-MODER-FRAMES" notes="sfc does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="NO-RX-IRQ-MODER-FRAMES" notes="VirtIO net rejects values greater than one">
+          <result value="FAILED">
+            <verdict>Failed to set rx_max_coalesced_frames, rc=TA_UNIX-EINVAL</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="coalesce_frames">80</arg>
+        <arg name="send_delay"/>
+        <notes/>
+        <results tags="i40e" key="NO-RX-IRQ-MODER-FRAMES" notes="i40e does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="ice" key="NO-RX-IRQ-MODER-FRAMES" notes="ice does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="sfc" key="NO-RX-IRQ-MODER-FRAMES" notes="sfc does not support interrupt moderation by number of frames">
+          <result value="SKIPPED">
+            <verdict>Requested rx_max_coalesced_frames is not supported</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="NO-RX-IRQ-MODER-FRAMES" notes="VirtIO net rejects values greater than one">
           <result value="FAILED">
             <verdict>Failed to set rx_max_coalesced_frames, rc=TA_UNIX-EINVAL</verdict>
           </result>
