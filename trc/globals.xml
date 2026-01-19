@@ -125,6 +125,134 @@
         }
     </value>
   </global>
+  <global name="env.peer2peerX2.iut_server">
+    <value reqs="IP4">
+        'net0':IUT{
+            'server_host'{
+                {'iut_rpcs':IUT},
+                if:'iut_if0',
+                addr:'server_addr0':inet:unicast
+            },
+            'client_host'{
+                {'tst_rpcs':tester},
+                if:'tst_if0',
+                addr:'client_addr0':inet:unicast
+            }
+        },
+        'net1':IUT{
+            'server_host'{
+                if:'iut_if1',
+                addr:'server_addr1':inet:unicast
+            },
+            'client_host'{
+                if:'tst_if1',
+                addr:'client_addr1':inet:unicast
+            }
+        },
+        'client_rpcs'='tst_rpcs',
+        'client_if0'='tst_if0',
+        'client_if1'='tst_if1',
+        'server_rpcs'='iut_rpcs',
+        'server_if0'='iut_if0',
+        'server_if1'='iut_if1'
+    </value>
+  </global>
+  <global name="env.peer2peerX2.iut_client">
+    <value reqs="IP4">
+        'net0':IUT{
+            'client_host'{
+                {'iut_rpcs':IUT},
+                if:'iut_if0',
+                addr:'client_addr0':inet:unicast
+            },
+            'server_host'{
+                {'tst_rpcs':tester},
+                if:'tst_if0',
+                addr:'server_addr0':inet:unicast
+            }
+        },
+        'net1':IUT{
+            'client_host'{
+                if:'iut_if1',
+                addr:'client_addr1':inet:unicast
+            },
+            'server_host'{
+                if:'tst_if1',
+                addr:'server_addr1':inet:unicast
+            }
+        },
+        'client_rpcs'='iut_rpcs',
+        'client_if0'='iut_if0',
+        'client_if1'='iut_if1',
+        'server_rpcs'='tst_rpcs',
+        'server_if0'='tst_if0',
+        'server_if1'='tst_if1'
+    </value>
+  </global>
+  <global name="env.peer2peerX2.iut_server_ip6">
+    <value reqs="IP6">
+        'net0':IUT{
+            'server_host'{
+                {'iut_rpcs':IUT},
+                if:'iut_if0',
+                addr:'server_addr0':inet6:unicast
+            },
+            'client_host'{
+                {'tst_rpcs':tester},
+                if:'tst_if0',
+                addr:'client_addr0':inet6:unicast
+            }
+        },
+        'net1':IUT{
+            'server_host'{
+                if:'iut_if1',
+                addr:'server_addr1':inet6:unicast
+            },
+            'client_host'{
+                if:'tst_if1',
+                addr:'client_addr1':inet6:unicast
+            }
+        },
+        'client_rpcs'='tst_rpcs',
+        'client_if0'='tst_if0',
+        'client_if1'='tst_if1',
+        'server_rpcs'='iut_rpcs',
+        'server_if0'='iut_if0',
+        'server_if1'='iut_if1'
+    </value>
+  </global>
+  <global name="env.peer2peerX2.iut_client_ip6">
+    <value reqs="IP6">
+        'net0':IUT{
+            'client_host'{
+                {'iut_rpcs':IUT},
+                if:'iut_if0',
+                addr:'client_addr0':inet6:unicast
+            },
+            'server_host'{
+                {'tst_rpcs':tester},
+                if:'tst_if0',
+                addr:'server_addr0':inet6:unicast
+            }
+        },
+        'net1':IUT{
+            'client_host'{
+                if:'iut_if1',
+                addr:'client_addr1':inet6:unicast
+            },
+            'server_host'{
+                if:'tst_if1',
+                addr:'server_addr1':inet6:unicast
+            }
+        },
+        'client_rpcs'='iut_rpcs',
+        'client_if0'='iut_if0',
+        'client_if1'='iut_if1',
+        'server_rpcs'='tst_rpcs',
+        'server_if0'='tst_if0',
+        'server_if1'='tst_if1'
+    </value>
+  </global>
   <global name="env.peer2peerX2.fwd">
     <value reqs="IP4">
         'net0':IUT{
