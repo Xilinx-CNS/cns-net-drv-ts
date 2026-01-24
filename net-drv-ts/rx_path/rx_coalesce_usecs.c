@@ -673,8 +673,8 @@ main(int argc, char *argv[])
             coalesce_usecs;
         dev_err = cb_args.group_time_dev / coalesce_usecs;
 
-        RING_ARTIFACT("Average group size error: %.3f\n"
-                      "Group size deviation error: %.3f",
+        RING_ARTIFACT("Average group time error: %.3f\n"
+                      "Group time deviation error: %.3f",
                       avg_err, dev_err);
 
         if (avg_err > ERR_MARGIN || dev_err > ERR_MARGIN)
