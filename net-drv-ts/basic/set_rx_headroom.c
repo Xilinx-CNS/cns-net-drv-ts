@@ -224,6 +224,7 @@ main(int argc, char *argv[])
         TEST_STEP("If @p if_down_up is @c TRUE, set the IUT interface "
                   "DOWN and UP.");
         CHECK_RC(tapi_cfg_base_if_down_up(iut_rpcs->ta, iut_if->if_name));
+        net_drv_wait_up(iut_rpcs->ta, iut_if->if_name);
     }
 
     TEST_STEP("Create a CSAP on IUT to capture packets sent to @p iut_addr.");
