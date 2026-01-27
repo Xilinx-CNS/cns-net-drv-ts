@@ -29,6 +29,7 @@
 #include "tapi_cfg_pci.h"
 #include "tapi_sh_env.h"
 #include "tapi_cfg_pci.h"
+#include "tapi_reqs.h"
 #include "tapi_tags.h"
 
 #define DEF_STR_LEN 1024
@@ -211,6 +212,35 @@ add_local_phy_tags(const char *ta, const char *prefix)
     free(speed_str);
 }
 
+static void
+prepare_ipv6(void)
+{
+    te_errno rc;
+
+    TEST_SUBSTEP("Try to enable IPv6 support.");
+    rc = tapi_cfg_net_enable_ipv6_support();
+    if (rc != 0)
+    {
+        int err = TE_RC_GET_ERROR(rc);
+
+        if (err == TE_ENOENT || err == TE_ENOSYS || err == TE_EOPNOTSUPP)
+        {
+            WARN("All IPv6 tests will be skipped");
+            RING_VERDICT("IPv6 is not supported");
+            CHECK_RC(tapi_reqs_modify("!IP6"));
+        }
+        else
+        {
+            CHECK_RC(rc);
+        }
+    }
+    else
+    {
+        TEST_SUBSTEP("Allocate and assign IPv6 addresses to be used by tests.");
+        CHECK_RC(tapi_cfg_net_all_assign_ip(AF_INET6));
+    }
+}
+
 int
 main(int argc, char **argv)
 {
@@ -280,8 +310,9 @@ main(int argc, char **argv)
     CHECK_RC(tapi_cfg_net_delete_all_ip4_addresses());
     TEST_STEP("Allocate and assign IPv4 addresses to be used by tests.");
     CHECK_RC(tapi_cfg_net_all_assign_ip(AF_INET));
-    TEST_STEP("Allocate and assign IPv6 addresses to be used by tests.");
-    CHECK_RC(tapi_cfg_net_all_assign_ip(AF_INET6));
+    TEST_STEP("Prepare IPv6 configuration.");
+    prepare_ipv6();
+
     TEST_STEP("Ensure that FW LLDP is disabled if applicable.");
     CHECK_RC(tapi_cfg_net_foreach_node(disable_fw_lldp, NULL));
     CFG_WAIT_CHANGES;
