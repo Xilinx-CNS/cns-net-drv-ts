@@ -49,6 +49,28 @@
                        "logging are processed and msglvl change takes " \
                        "effect")
 
+static void
+set_id(tapi_parser_id *id)
+{
+    memset(id, 0, sizeof(*id));
+    id->ta = "LogListener";
+    id->name = "iut";
+}
+
+static void
+set_parser(tapi_parser_id *id, const char *pname, const char *ppatern)
+{
+    int rc;
+
+    rc = tapi_serial_parser_event_add(id, pname, "");
+    if (rc != 0)
+        TEST_FAIL("Failed to add %s parser event, rc=%r", pname, rc);
+
+    rc = tapi_serial_parser_pattern_add(id, pname, ppatern);
+    if (rc < 0)
+        TEST_FAIL("Failed to add a parser pattern: %s", ppatern);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -57,8 +79,12 @@ main(int argc, char *argv[])
     char *drv_name = NULL;
 
     tapi_parser_id id;
+    tapi_parser_id id_up;
+    tapi_parser_id id_down;
     int evt_count1 = 0;
     int evt_count2 = 0;
+    int evt_up_count = 0;
+    int evt_down_count = 0;
     int count_diff = 0;
 
     char *pci_oid = NULL;
@@ -69,9 +95,9 @@ main(int argc, char *argv[])
     TEST_GET_PCO(iut_rpcs);
     TEST_GET_IF(iut_if);
 
-    memset(&id, 0, sizeof(id));
-    id.ta = "LogListener";
-    id.name = "iut";
+    set_id(&id);
+    set_id(&id_up);
+    set_id(&id_down);
 
     rc = tapi_cfg_pci_oid_by_net_if(iut_rpcs->ta, iut_if->if_name,
                                     &pci_oid);
@@ -85,14 +111,15 @@ main(int argc, char *argv[])
 
     CHECK_RC(tapi_cfg_set_loglevel(iut_rpcs->ta, CONSOLE_LOGLEVEL));
 
-    rc = tapi_serial_parser_event_add(&id, "driver_log", "");
-    if (rc != 0)
-        TEST_VERDICT("Failed to add parser event, rc=%r", rc);
-
-    rc = tapi_serial_parser_pattern_add(&id, "driver_log",
-                                        te_string_value(&pattern_str));
-    if (rc < 0)
-        TEST_FAIL("Failed to add a parser pattern");
+    set_parser(&id, "driver_log", te_string_value(&pattern_str));
+    te_string_reset(&pattern_str);
+    te_string_append(&pattern_str, "%s %s %s: Link is Up", drv_name,
+                     pci_bus_num, iut_if->if_name);
+    set_parser(&id_up, "link_up_log", te_string_value(&pattern_str));
+    te_string_reset(&pattern_str);
+    te_string_append(&pattern_str, "%s %s %s: Link is Down", drv_name,
+                     pci_bus_num, iut_if->if_name);
+    set_parser(&id_down, "link_down_log", te_string_value(&pattern_str));
 
     TEST_STEP("Enable all flags in @b msglvl for IUT interface.");
     rc = tapi_cfg_if_msglvl_set(iut_rpcs->ta, iut_if->if_name,
@@ -102,17 +129,31 @@ main(int argc, char *argv[])
 
     TEST_STEP("Set IUT interface down and up.");
     CHECK_RC(tapi_cfg_base_if_down_up(iut_rpcs->ta, iut_if->if_name));
+    net_drv_wait_up(iut_rpcs->ta, iut_if->if_name);
     WAIT_AFTER_IF_UP;
 
     TEST_STEP("Check that driver printed some logs.");
     CHECK_RC(tapi_serial_parser_event_get_count(&id, "driver_log",
                                                 &evt_count1));
+    CHECK_RC(tapi_serial_parser_event_get_count(&id_up, "link_up_log",
+                                                &evt_up_count));
+    CHECK_RC(tapi_serial_parser_event_get_count(&id_down, "link_down_log",
+                                                &evt_down_count));
     RING("%d driver logs were detected when logging was enabled",
          evt_count1);
     if (evt_count1 <= 0)
     {
         TEST_VERDICT("No logs from the driver were detected when all "
                      "flags in msglvl are switched on");
+    }
+
+    if (evt_up_count > 0)
+    {
+        RING_VERDICT("'Link is Up' log message from driver was obtained.");
+    }
+    if (evt_down_count > 0)
+    {
+        RING_VERDICT("'Link is Down' log message from driver was obtained.");
     }
 
     TEST_STEP("Set @b msglvl to zero for IUT interface.");
@@ -132,6 +173,7 @@ main(int argc, char *argv[])
 
     TEST_STEP("Set IUT interface down and up.");
     CHECK_RC(tapi_cfg_base_if_down_up(iut_rpcs->ta, iut_if->if_name));
+    net_drv_wait_up(iut_rpcs->ta, iut_if->if_name);
     WAIT_AFTER_IF_UP;
 
     TEST_STEP("Check that driver did not print any logs.");
