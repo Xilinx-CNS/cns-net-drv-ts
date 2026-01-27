@@ -61,6 +61,10 @@ main(int argc, char *argv[])
     int evt_count2 = 0;
     int count_diff = 0;
 
+    char *pci_oid = NULL;
+    char *pci_bus_num = NULL;
+    te_string pattern_str = TE_STRING_INIT;
+
     TEST_START;
     TEST_GET_PCO(iut_rpcs);
     TEST_GET_IF(iut_if);
@@ -69,8 +73,15 @@ main(int argc, char *argv[])
     id.ta = "LogListener";
     id.name = "iut";
 
+    rc = tapi_cfg_pci_oid_by_net_if(iut_rpcs->ta, iut_if->if_name,
+                                    &pci_oid);
+    if (rc != 0)
+        TEST_SKIP("Cannot find PCI device for the tested interface");
+    pci_bus_num = strstr(pci_oid, "device:") + strlen("device:");
+
     TEST_STEP("Configure serial parser to check for driver logs on IUT.");
     drv_name = net_drv_driver_name(iut_rpcs->ta);
+    te_string_append(&pattern_str, "%s %s", drv_name, pci_bus_num);
 
     CHECK_RC(tapi_cfg_set_loglevel(iut_rpcs->ta, CONSOLE_LOGLEVEL));
 
@@ -78,7 +89,8 @@ main(int argc, char *argv[])
     if (rc != 0)
         TEST_VERDICT("Failed to add parser event, rc=%r", rc);
 
-    rc = tapi_serial_parser_pattern_add(&id, "driver_log", drv_name);
+    rc = tapi_serial_parser_pattern_add(&id, "driver_log",
+                                        te_string_value(&pattern_str));
     if (rc < 0)
         TEST_FAIL("Failed to add a parser pattern");
 
@@ -142,6 +154,7 @@ main(int argc, char *argv[])
 
 cleanup:
 
+    free(pci_oid);
     free(drv_name);
     TEST_END;
 }
