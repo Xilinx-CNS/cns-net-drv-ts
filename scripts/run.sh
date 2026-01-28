@@ -9,10 +9,16 @@ source "$(dirname "$(which "$0")")"/guess.sh
 
 source "${TE_BASE}/scripts/lib"
 source "${TE_BASE}/scripts/lib.grab_cfg"
+source "${TE_BASE}/scripts/lib.site_opts"
 source "${TE_BASE}/scripts/lib.meta"
 
 if [[ -e "${TE_TS_RIGSDIR}/scripts/lib/grab_cfg_handlers" ]] ; then
     source "${TE_TS_RIGSDIR}/scripts/lib/grab_cfg_handlers"
+fi
+
+if [[ -e "${TE_TS_RIGSDIR}/suites/net-drv-ts/opts" ]] ; then
+    ss_opts_init "${TE_TS_RIGSDIR}/suites/net-drv-ts/opts" \
+        "net-drv"
 fi
 
 TE_RUN_META=yes
@@ -89,6 +95,7 @@ EOF
 
 EOF
     "${TE_BASE}"/dispatcher.sh --help
+    ss_opts_print_help
     exit 1
 }
 
@@ -181,6 +188,12 @@ declare -a RUN_OPTS
 declare -a GEN_OPTS
 
 while test -n "$1" ; do
+
+    if ss_opts_check_opt "$1" ; then
+        ss_opts_call_opt "$1"
+        shift 1
+        continue
+    fi
 
     if call_if_defined grab_cfg_check_opt "$1" ; then
         shift 1
