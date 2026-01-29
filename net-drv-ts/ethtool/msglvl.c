@@ -96,8 +96,6 @@ main(int argc, char *argv[])
     TEST_GET_IF(iut_if);
 
     set_id(&id);
-    set_id(&id_up);
-    set_id(&id_down);
 
     rc = tapi_cfg_pci_oid_by_net_if(iut_rpcs->ta, iut_if->if_name,
                                     &pci_oid);
@@ -112,14 +110,6 @@ main(int argc, char *argv[])
     CHECK_RC(tapi_cfg_set_loglevel(iut_rpcs->ta, CONSOLE_LOGLEVEL));
 
     set_parser(&id, "driver_log", te_string_value(&pattern_str));
-    te_string_reset(&pattern_str);
-    te_string_append(&pattern_str, "%s %s %s: Link is Up", drv_name,
-                     pci_bus_num, iut_if->if_name);
-    set_parser(&id_up, "link_up_log", te_string_value(&pattern_str));
-    te_string_reset(&pattern_str);
-    te_string_append(&pattern_str, "%s %s %s: Link is Down", drv_name,
-                     pci_bus_num, iut_if->if_name);
-    set_parser(&id_down, "link_down_log", te_string_value(&pattern_str));
 
     TEST_STEP("Enable all flags in @b msglvl for IUT interface.");
     rc = tapi_cfg_if_msglvl_set(iut_rpcs->ta, iut_if->if_name,
@@ -135,10 +125,6 @@ main(int argc, char *argv[])
     TEST_STEP("Check that driver printed some logs.");
     CHECK_RC(tapi_serial_parser_event_get_count(&id, "driver_log",
                                                 &evt_count1));
-    CHECK_RC(tapi_serial_parser_event_get_count(&id_up, "link_up_log",
-                                                &evt_up_count));
-    CHECK_RC(tapi_serial_parser_event_get_count(&id_down, "link_down_log",
-                                                &evt_down_count));
     RING("%d driver logs were detected when logging was enabled",
          evt_count1);
     if (evt_count1 <= 0)
@@ -168,6 +154,23 @@ main(int argc, char *argv[])
     WAIT_AFTER_LOGS_DISABLE;
     CHECK_RC(tapi_serial_parser_event_get_count(&id, "driver_log",
                                                 &evt_count1));
+
+    /*
+     * Install 2 more patterns for console parset: for 'Link is Up'
+     * and for 'Linkg is Down' with driver name, PCI BUS number and
+     * interface name as a prefix to do not detect false-positives.
+     */
+    set_id(&id_up);
+    set_id(&id_down);
+    te_string_reset(&pattern_str);
+    te_string_append(&pattern_str, "%s %s %s: Link is Up", drv_name,
+                     pci_bus_num, iut_if->if_name);
+    set_parser(&id_up, "link_up_log", te_string_value(&pattern_str));
+    te_string_reset(&pattern_str);
+    te_string_append(&pattern_str, "%s %s %s: Link is Down", drv_name,
+                     pci_bus_num, iut_if->if_name);
+    set_parser(&id_down, "link_down_log", te_string_value(&pattern_str));
+
     if (evt_count1 < 0)
         TEST_FAIL("Negative event count");
 
@@ -179,6 +182,10 @@ main(int argc, char *argv[])
     TEST_STEP("Check that driver did not print any logs.");
     CHECK_RC(tapi_serial_parser_event_get_count(&id, "driver_log",
                                                 &evt_count2));
+    CHECK_RC(tapi_serial_parser_event_get_count(&id_up, "link_up_log",
+                                                &evt_up_count));
+    CHECK_RC(tapi_serial_parser_event_get_count(&id_down, "link_down_log",
+                                                &evt_down_count));
     count_diff = evt_count2 - evt_count1;
     if (count_diff < 0)
         TEST_FAIL("Event count decreased");
@@ -186,7 +193,22 @@ main(int argc, char *argv[])
     RING("%d driver logs were detected when logging was disabled",
          count_diff);
 
-    if (count_diff > 0)
+    if (evt_up_count > 0)
+    {
+        RING_VERDICT("'Link is Up' log message from driver was obtained "
+                     "when msglvl is set to zero");
+    }
+    if (evt_down_count > 0)
+    {
+        RING_VERDICT("'Link is Down' log message from driver was obtained "
+                     "when msglvl is set to zero");
+    }
+
+    /*
+     * Conparser merges logs which go to console almost in the same time,
+     * so this check could be not very accurate.
+     */
+    if (count_diff > evt_down_count + evt_up_count)
     {
         TEST_VERDICT("Some logs from driver were detected when msglvl is "
                      "set to zero");
