@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -e
+
+# Optional (for cross-build):
+#   TE_TA_APP_CROSS_HOST         Autotools --host triplet
+#   TE_TA_APP_CROSS_BIN_PATH     Path to cross-toolchain "bin" dir
+
+if [[ ! -x "${EXT_SOURCES}/configure" ]]; then
+    echo "ERROR: '${EXT_SOURCES}/configure' not found or not executable" >&2
+    exit 1
+fi
+
+if [[ -n "${TE_TA_APP_CROSS_BIN_PATH:-}" ]]; then
+    if [[ ! -d "${TE_TA_APP_CROSS_BIN_PATH}" ]]; then
+        echo "ERROR: TE_TA_APP_CROSS_BIN_PATH does not exist: ${TE_TA_APP_CROSS_BIN_PATH}" >&2
+        exit 1
+    fi
+    export PATH="${TE_TA_APP_CROSS_BIN_PATH}:${PATH}"
+fi
+
+JOBS="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)"
+
+CONFIGURE_ARGS=(
+    --prefix=/
+    --bindir=/
+    --libdir=/lib
+    --disable-shared
+    --enable-static
+)
+
+if [[ -n "${TE_TA_APP_CROSS_HOST:-}" ]]; then
+    CONFIGURE_ARGS+=( "--host=${TE_TA_APP_CROSS_HOST}" )
+fi
+
+"${EXT_SOURCES}/configure" "${CONFIGURE_ARGS[@]}"
+make -j "${JOBS}"
+
+for ta_type in ${TE_TA_TYPES}; do
+    DESTDIR="${TE_AGENTS_INST}/${ta_type}" make install
+done
