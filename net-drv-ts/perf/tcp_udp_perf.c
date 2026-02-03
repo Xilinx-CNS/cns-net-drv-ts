@@ -87,6 +87,13 @@
 #define TEST_BENCH_DURATION_SEC 6
 #define MAX_PERF_INSTS 32
 #define TEST_MAX_LINKS 4
+#define EPS 0.00001
+
+/**
+ * Minimal throughput threshold as a fraction of expected link speed
+ * (either from configured bandwidth or operational speed).
+ */
+#define MIN_SPEED_MULTIPLIER 0.01
 
 /**
  * The list of values allowed for parameter of type 'bool_with_default'
@@ -140,8 +147,41 @@ destroy_perf_insts(tapi_perf_server **perf_server,
 }
 
 static void
-perf_summary_throughput_mi_log(const double server_throughput,
-                               const double client_throughput)
+perf3_summary_throughput_mi_log(const double tx_client,
+                                const double rx_client,
+                                const double tx_server,
+                                const double rx_server)
+{
+    te_mi_logger *logger;
+
+    CHECK_RC(te_mi_logger_meas_create("summary throughput", &logger));
+
+    if (tx_server > EPS)
+        te_mi_logger_add_meas(logger, NULL, TE_MI_MEAS_THROUGHPUT, "Server Tx",
+                              TE_MI_MEAS_AGGR_SINGLE, tx_server,
+                              TE_MI_MEAS_MULTIPLIER_PLAIN);
+
+    if (rx_server > EPS)
+        te_mi_logger_add_meas(logger, NULL, TE_MI_MEAS_THROUGHPUT, "Server Rx",
+                              TE_MI_MEAS_AGGR_SINGLE, rx_server,
+                              TE_MI_MEAS_MULTIPLIER_PLAIN);
+
+    if (tx_client > EPS)
+        te_mi_logger_add_meas(logger, NULL, TE_MI_MEAS_THROUGHPUT, "Client Tx",
+                              TE_MI_MEAS_AGGR_SINGLE, tx_client,
+                              TE_MI_MEAS_MULTIPLIER_PLAIN);
+
+    if (rx_server > EPS)
+        te_mi_logger_add_meas(logger, NULL, TE_MI_MEAS_THROUGHPUT, "Client Rx",
+                              TE_MI_MEAS_AGGR_SINGLE, rx_client,
+                              TE_MI_MEAS_MULTIPLIER_PLAIN);
+
+    te_mi_logger_destroy(logger);
+}
+
+static void
+perf2_summary_throughput_mi_log(const double client_throughput,
+                                const double server_throughput)
 {
     te_mi_logger *logger;
 
@@ -158,6 +198,35 @@ perf_summary_throughput_mi_log(const double server_throughput,
                        PLAIN)));
 
     te_mi_logger_destroy(logger);
+}
+
+static void
+add_throughput_artifacts(const char *name, double tx, double rx, double ip2)
+{
+    if (rx > EPS && tx > EPS)
+    {
+
+        TEST_ARTIFACT("%s throughput: Tx: %.2f Mbps, Rx: %.2f Mbps", name,
+                      TE_UNITS_DEC_U2M(tx), TE_UNITS_DEC_U2M(rx));
+        return;
+    }
+    else if (rx > EPS)
+    {
+        TEST_ARTIFACT("%s throughput: Rx: %.2f Mbps", name,
+                      TE_UNITS_DEC_U2M(rx));
+        return;
+    }
+    else if (tx > EPS)
+    {
+        TEST_ARTIFACT("%s throughput: Tx: %.2f Mbps", name,
+                      TE_UNITS_DEC_U2M(tx));
+        return;
+    }
+    if (ip2 > EPS)
+    {
+        TEST_ARTIFACT("%s throughput: %.2f Mbps", name,
+                      TE_UNITS_DEC_U2M(ip2));
+    }
 }
 
 int
@@ -199,11 +268,19 @@ main(int argc, char *argv[])
     rpc_socket_proto                        protocol;
     unsigned int                            n_streams;
     int64_t                                 bandwidth;
+    double                                  link_speed[TEST_MAX_LINKS] = {} ;
     unsigned int                            n_perf_insts;
     tapi_perf_report                        perf_servers_report[MAX_PERF_INSTS];
     tapi_perf_report                        perf_clients_report[MAX_PERF_INSTS];
-    double                                  bits_per_second_server = 0;
-    double                                  bits_per_second_client = 0;
+    double                                  tx_bits_per_second_server = 0.0;
+    double                                  rx_bits_per_second_server = 0.0;
+    double                                  ip2_bits_per_second_server = 0.0;
+    double                                  tx_bits_per_second_client = 0.0;
+    double                                  rx_bits_per_second_client = 0.0;
+    double                                  ip2_bits_per_second_client = 0.0;
+
+    double  bps_per_link_server[TEST_MAX_LINKS];
+    double  bps_per_link_client[TEST_MAX_LINKS];
 
     tapi_job_factory_t                     *client_factory = NULL;
     tapi_job_factory_t                     *server_factory = NULL;
@@ -280,6 +357,10 @@ main(int argc, char *argv[])
         CHECK_RC(tapi_allocate_port_htons(server_rpcs,
             te_sockaddr_get_port_ptr(server_addrs[i])));
     }
+
+    if (n_iut_ports < n_ports)
+        TEST_FAIL("Number of IUT interfaces is less than client/server "
+                  "interfaces pairs.");
 
     CHECK_RC(n_perf_insts * n_ports < MAX_PERF_INSTS ? 0 : TE_EINVAL);
 
@@ -468,6 +549,36 @@ main(int argc, char *argv[])
             te_sockaddr_set_port(server_addr2, te_sockaddr_get_port(server_addr));
             server_addrs[i] = server_addr2;
         }
+
+        if (bandwidth < 0)
+        {
+            int client_speed;
+            int server_speed;
+
+            CHECK_RC(tapi_cfg_phy_speed_oper_get(client_rpcs->ta,
+                                                 client_if->if_name,
+                                                 &client_speed));
+            CHECK_RC(tapi_cfg_phy_speed_oper_get(server_rpcs->ta,
+                                                 server_if->if_name,
+                                                 &server_speed));
+            if (client_speed == 0)
+                WARN("Could not get %s link speed on TA %s",
+                     client_if->if_name, client_rpcs->ta);
+            if (server_speed == 0)
+                WARN("Could not get %s link speed on TA %s",
+                     server_if->if_name, server_rpcs->ta);
+            if (client_speed != server_speed)
+                WARN("Link speed on client %d interface %s do not match "
+                     "server %d interface %s", client_speed,
+                     client_if->if_name, server_speed, server_if->if_name);
+            link_speed[i] = TE_UNITS_DEC_M2U(MIN(client_speed, server_speed));
+        }
+        else
+        {
+            link_speed[i] = TE_UNITS_DEC_M2U(bandwidth);
+        }
+        bps_per_link_client[i] = 0;
+        bps_per_link_server[i] = 0;
     }
 
     CFG_WAIT_CHANGES;
@@ -573,18 +684,75 @@ main(int argc, char *argv[])
         CHECK_RC(tapi_perf_client_report_mi_log(perf_clients[i],
                                                 &perf_clients_report[i]));
 
-        bits_per_second_server += perf_servers_report[i].bits_per_second;
-        bits_per_second_client += perf_clients_report[i].bits_per_second;
+        if (perf_bench == TAPI_PERF_IPERF)
+        {
+            ip2_bits_per_second_server +=
+                perf_servers_report[i].bits_per_second;
+            ip2_bits_per_second_client +=
+                perf_clients_report[i].bits_per_second;
+
+            bps_per_link_client[i / n_perf_insts] +=
+                perf_clients_report[i].bits_per_second;
+            bps_per_link_server[i / n_perf_insts] +=
+                perf_servers_report[i].bits_per_second;
+        }
+        else
+        {
+            rx_bits_per_second_server +=
+                perf_servers_report[i].rx_bits_per_second;
+            tx_bits_per_second_server +=
+                perf_servers_report[i].tx_bits_per_second;
+            rx_bits_per_second_client +=
+                perf_clients_report[i].rx_bits_per_second;
+            tx_bits_per_second_client +=
+                perf_clients_report[i].tx_bits_per_second;
+
+            bps_per_link_client[i / n_perf_insts] +=
+                perf_clients_report[i].rx_bits_per_second;
+            bps_per_link_server[i / n_perf_insts] +=
+                perf_servers_report[i].rx_bits_per_second;
+        }
     }
 
-    TEST_ARTIFACT("Server throughput: %.2f Mbps",
-                  TE_UNITS_DEC_U2M(bits_per_second_server));
+    add_throughput_artifacts("Client", tx_bits_per_second_client,
+                             rx_bits_per_second_client,
+                             ip2_bits_per_second_client);
 
-    TEST_ARTIFACT("Client throughput: %.2f Mbps",
-                  TE_UNITS_DEC_U2M(bits_per_second_client));
+    add_throughput_artifacts("Server", tx_bits_per_second_server,
+                             rx_bits_per_second_server,
+                             ip2_bits_per_second_server);
 
-    perf_summary_throughput_mi_log(bits_per_second_server,
-                                   bits_per_second_client);
+    if (perf_bench == TAPI_PERF_IPERF)
+        perf2_summary_throughput_mi_log(ip2_bits_per_second_client,
+                                        ip2_bits_per_second_server);
+    else
+        perf3_summary_throughput_mi_log(tx_bits_per_second_client,
+                                        rx_bits_per_second_client,
+                                        tx_bits_per_second_server,
+                                        rx_bits_per_second_server);
+
+    for (i = 0; i < n_ports; i++)
+    {
+        double minspeed = link_speed[i] * MIN_SPEED_MULTIPLIER;
+
+        if (minspeed < EPS)
+        {
+            WARN("Minimum throughput check for %s interface is skipped",
+                 iut_ifs[i]->if_name);
+        }
+        else if ((bps_per_link_client[i] > EPS &&
+                  bps_per_link_client[i] < minspeed) ||
+                 (bps_per_link_server[i] > EPS &&
+                  bps_per_link_server[i] < minspeed))
+        {
+            ERROR("Throughput is too low for %s interface",
+                  iut_ifs[i]->if_name);
+            ERROR_VERDICT("Throughput is too low for #%d link.", i);
+        }
+        if (bps_per_link_client[i] < EPS &&
+            bps_per_link_server[i] < EPS)
+            ERROR_VERDICT("Zero throughput for #%d link.", i);
+    }
 
     TEST_SUCCESS;
 
