@@ -69,6 +69,14 @@ if [[ -z "${TE_TS_RIGSDIR}" ]] ; then
     fi
 fi
 
+if [[ -z "${TE_IPERF3_SRC}" ]] ; then
+    check_path="${TE_TS_TOPDIR}"/../iperf
+    if [[ -d "${check_path}" ]] ; then
+        echo "Guessed TE_IPERF3_SRC=${check_path}"
+        export TE_IPERF3_SRC="${check_path}"
+    fi
+fi
+
 test -z "${TE_TS_CONFDIR}" -a -d "${TE_TS_TOPDIR}/conf" \
     && TE_TS_CONFDIR="${TE_TS_TOPDIR}/conf"
 
