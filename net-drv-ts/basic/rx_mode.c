@@ -143,7 +143,7 @@ main(int argc, char *argv[])
 
     int num;
     char buf_tmpl[1024];
-    char if_oid[CFG_OID_MAX];
+    char if_oid[CFG_OID_MAX] = {};
 
     TEST_START;
     TEST_GET_PCO(iut_rpcs);
@@ -252,8 +252,9 @@ main(int argc, char *argv[])
 
 cleanup:
 
-    CLEANUP_CHECK_RC(tapi_cfg_base_if_del_mcast_mac(if_oid,
-                        (const uint8_t *)mcast_addr->sa_data));
+    if (strlen(if_oid) != 0 && mcast_addr != NULL)
+        CLEANUP_CHECK_RC(tapi_cfg_base_if_del_mcast_mac(if_oid,
+                            (const uint8_t *)mcast_addr->sa_data));
 
     CLEANUP_RPC_CLOSE(iut_rpcs, iut_s);
 
