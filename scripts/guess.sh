@@ -20,6 +20,8 @@ if test -z "${TE_BASE}" ; then
         export TE_BASE="${TE_TS_TOPDIR}"
     elif test -e "${TE_TS_TOPDIR}/../te/dispatcher.sh" ; then
         export TE_BASE="${TE_TS_TOPDIR}/../te"
+    elif test -e "${TE_TS_TOPDIR}/../test-environment/dispatcher.sh" ; then
+        export TE_BASE="${TE_TS_TOPDIR}/../test-environment"
     else
         fail "Path to TE sources MUST be specified in TE_BASE"
     fi
