@@ -13,22 +13,22 @@ TE_TS_RUNDIR="$(pwd -P)"
 TE_TS_TOPDIR="$(cd "$(dirname "$(which "$0")")"/.. || exit 1; pwd -P)"
 export TE_TS_TOPDIR
 
-if test -z "${TE_BASE}" ; then
-    if test -e dispatcher.sh ; then
+if [[ -z "${TE_BASE}" ]] ; then
+    if [[ -e dispatcher.sh ]] ; then
         export TE_BASE="${TE_TS_RUNDIR}"
-    elif test -e "${TE_TS_TOPDIR}/dispatcher.sh" ; then
+    elif [[ -e "${TE_TS_TOPDIR}/dispatcher.sh" ]] ; then
         export TE_BASE="${TE_TS_TOPDIR}"
-    elif test -e "${TE_TS_TOPDIR}/../te/dispatcher.sh" ; then
+    elif [[ -e "${TE_TS_TOPDIR}/../te/dispatcher.sh" ]] ; then
         export TE_BASE="${TE_TS_TOPDIR}/../te"
-    elif test -e "${TE_TS_TOPDIR}/../test-environment/dispatcher.sh" ; then
+    elif [[ -e "${TE_TS_TOPDIR}/../test-environment/dispatcher.sh" ]] ; then
         export TE_BASE="${TE_TS_TOPDIR}/../test-environment"
     else
         fail "Path to TE sources MUST be specified in TE_BASE"
     fi
 fi
 
-if test -z "${TE_BUILD}" ; then
-    if test "${TE_TS_TOPDIR}" = "${TE_TS_RUNDIR}" ; then
+if [[ -z "${TE_BUILD}" ]] ; then
+    if [[ "${TE_TS_TOPDIR}" == "${TE_TS_RUNDIR}" ]] ; then
         TE_BUILD="${TE_TS_TOPDIR}/build"
         mkdir -p build
     else
@@ -37,7 +37,7 @@ if test -z "${TE_BUILD}" ; then
     export TE_BUILD
 fi
 
-if test -z "${TE_INSTALL}" ; then
+if [[ -z "${TE_INSTALL}" ]] ; then
     # If under, TE_INSTALL is always inside TE_BUILD in our case
     TE_INSTALL="${TE_BUILD}"/inst
     export TE_INSTALL
@@ -48,13 +48,13 @@ export PATH
 LD_LIBRARY_PATH="${TE_INSTALL}/default/lib:${LD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH
 
-if test -z "${SF_TS_CONFDIR}" ; then
+if [[ -z "${SF_TS_CONFDIR}" ]] ; then
     SF_TS_CONFDIR="${TE_TS_TOPDIR}"/../conf
-    if test ! -d "${SF_TS_CONFDIR}" ; then
+    if [[ ! -d "${SF_TS_CONFDIR}" ]] ; then
         SF_TS_CONFDIR="${TE_TS_TOPDIR}"/../ts-conf
-        if test ! -d "${SF_TS_CONFDIR}" ; then
+        if [[ ! -d "${SF_TS_CONFDIR}" ]] ; then
             SF_TS_CONFDIR="${TE_TS_TOPDIR}"/../ts_conf
-            if test ! -d "${SF_TS_CONFDIR}" ; then
+            if [[ ! -d "${SF_TS_CONFDIR}" ]] ; then
                 fail "Path to shared Xilinx ts-conf MUST be specified in SF_TS_CONFDIR"
             fi
         fi
@@ -79,19 +79,19 @@ if [[ -z "${TE_IPERF3_SRC}" ]] ; then
     fi
 fi
 
-test -z "${TE_TS_CONFDIR}" -a -d "${TE_TS_TOPDIR}/conf" \
+[[ -z "${TE_TS_CONFDIR}" && -d "${TE_TS_TOPDIR}/conf" ]] \
     && TE_TS_CONFDIR="${TE_TS_TOPDIR}/conf"
 
-test -z "${TE_TS_TRC_DB}" -a -e "${TE_TS_TOPDIR}/trc/top.xml" \
+[[ -z "${TE_TS_TRC_DB}" && -e "${TE_TS_TOPDIR}/trc/top.xml" ]] \
     && TE_TS_TRC_DB="${TE_TS_TOPDIR}/trc/top.xml"
 
-test -z "${TE_TS_SRC}" -a -d "${TE_TS_TOPDIR}/net-drv-ts" \
+[[ -z "${TE_TS_SRC}" && -d "${TE_TS_TOPDIR}/net-drv-ts" ]] \
     && export TE_TS_SRC="${TE_TS_TOPDIR}/net-drv-ts"
 
 echo TE_TS_SRC=$TE_TS_SRC
 
-if test -z "${SFC_LINUX_NET_SRC}" ; then
-    if test -e "${TE_TS_TOPDIR}"/../sfc-linux-net ; then
+if [[ -z "${SFC_LINUX_NET_SRC}" ]] ; then
+    if [[ -e "${TE_TS_TOPDIR}"/../sfc-linux-net ]] ; then
         export SFC_LINUX_NET_SRC="${TE_TS_TOPDIR}/../sfc-linux-net/"
         echo "Guessed SFC_LINUX_NET_SRC=${SFC_LINUX_NET_SRC}"
     else
