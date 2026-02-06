@@ -36,5 +36,5 @@ fi
 make -j "${JOBS}"
 
 for ta_type in ${TE_TA_TYPES}; do
-    DESTDIR="${TE_AGENTS_INST}/${ta_type}" make install
+    cp -p -t "${TE_AGENTS_INST}/${ta_type}" src/iperf3
 done
