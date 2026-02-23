@@ -425,6 +425,11 @@
       <iter result="PASSED">
         <arg name="env"/>
         <notes/>
+        <results tags="no-ethtool-opt-dump-module-eeprom" key="NO-ETHTOOL-OPT" notes="unknown option for ethtool">
+          <result value="FAILED">
+            <verdict>tapi_ethtool() returned unexpected error</verdict>
+          </result>
+        </results>
         <results tags="virtio-pci" key="NO-MODULE-EEPROM-DUMP" notes="virtio does support module EEPROM dump">
           <result value="FAILED">
             <verdict>Ethtool command did not terminate successfully</verdict>
@@ -472,6 +477,11 @@
       <iter result="PASSED">
         <arg name="env"/>
         <notes/>
+        <results tags="no-ethtool-opt-show-fec" key="NO-ETHTOOL-OPT" notes="unknown option for ethtool">
+          <result value="FAILED">
+            <verdict>Failed to process ethtool command</verdict>
+          </result>
+        </results>
         <results tags="sfc" key="NO-ETHTOOL-FEC">
           <result value="SKIPPED">
             <verdict>Ethtool command is not supported</verdict>
@@ -490,6 +500,11 @@
       <iter result="PASSED">
         <arg name="env"/>
         <notes/>
+        <results tags="no-ethtool-opt-show-module" key="NO-ETHTOOL-OPT" notes="unknown option for ethtool">
+          <result value="FAILED">
+            <verdict>Failed to process ethtool command</verdict>
+          </result>
+        </results>
       </iter>
     </test>
     <test name="eee" type="script">

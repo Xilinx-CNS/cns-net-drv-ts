@@ -57,4 +57,14 @@ extern int net_drv_ethtool_reset(rcf_rpc_server *rpcs, int s,
                                  unsigned int flags,
                                  unsigned int *ret_flags);
 
+/**
+ * Check whether CLI options used by TS tests are present in
+ * @b ethtool --help output and add proper TRC tags if some are missing.
+ *
+ * @param rpcs            RPC server.
+ *
+ * @return Status code.
+ */
+extern te_errno net_drv_add_missing_ethtool_opt_tags(rcf_rpc_server *rpcs);
+
 #endif /* !__TS_NET_DRV_ETHTOOL_H__ */

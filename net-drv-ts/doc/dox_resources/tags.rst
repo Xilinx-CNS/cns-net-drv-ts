@@ -59,3 +59,7 @@ List of tags set on various testing configurations to distinguish them.
     - peer-*DRIVER*
     - Name of the driver used on peer (aka Tester).
     - peer-i40e
+  *
+    - no-ethtool-opt-*
+    - ethtool CLI option is not present in `ethtool --help` output on IUT.
+    - no-ethtool-opt-show-fec

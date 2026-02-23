@@ -350,6 +350,7 @@ main(int argc, char **argv)
     CHECK_RC(tapi_tags_add_linux_mm(iut_rpcs->ta, ""));
     CHECK_RC(add_driver_tag(iut_rpcs->ta, ""));
     CHECK_RC(add_driver_tag(tst_rpcs->ta, "peer-"));
+    CHECK_RC(net_drv_add_missing_ethtool_opt_tags(iut_rpcs));
     CHECK_RC(tapi_tags_add_firmwareversion_tag(iut_rpcs->ta,
                                                iut_if->if_name, ""));
     CHECK_RC(tapi_tags_add_net_pci_tags(iut_rpcs->ta, iut_if->if_name));
