@@ -467,6 +467,11 @@
         <arg name="tx_ring"/>
         <arg name="channels"/>
         <notes/>
+        <results tags="parallel-links&lt;2" key="FEW-PARALLEL-LINKS">
+          <result value="FAILED">
+            <verdict>Cannot bind env</verdict>
+          </result>
+        </results>
       </iter>
     </test>
     <test name="udp_perf3_dual_port_bidir" type="script">
@@ -493,6 +498,11 @@
         <arg name="tx_ring"/>
         <arg name="channels"/>
         <notes/>
+        <results tags="parallel-links&lt;2" key="FEW-PARALLEL-LINKS">
+          <result value="FAILED">
+            <verdict>Cannot bind env</verdict>
+          </result>
+        </results>
       </iter>
     </test>
     <test name="tcp_perf3_dual_port_scaling" type="script">
@@ -519,6 +529,11 @@
         <arg name="tx_ring"/>
         <arg name="channels"/>
         <notes/>
+        <results tags="parallel-links&lt;2" key="FEW-PARALLEL-LINKS">
+          <result value="FAILED">
+            <verdict>Cannot bind env</verdict>
+          </result>
+        </results>
       </iter>
     </test>
     <test name="tcp_perf3_dual_port_offloads" type="script">
@@ -545,6 +560,11 @@
         <arg name="tx_ring"/>
         <arg name="channels"/>
         <notes/>
+        <results tags="parallel-links&lt;2" key="FEW-PARALLEL-LINKS">
+          <result value="FAILED">
+            <verdict>Cannot bind env</verdict>
+          </result>
+        </results>
       </iter>
     </test>
     <test name="fwd_prologue" type="script">
@@ -553,6 +573,11 @@
       <iter result="PASSED">
         <arg name="env"/>
         <notes/>
+        <results tags="parallel-links&lt;2" key="FEW-PARALLEL-LINKS">
+          <result value="FAILED">
+            <verdict>Cannot bind env</verdict>
+          </result>
+        </results>
       </iter>
     </test>
     <test name="tcp_perf3_fwd_basic" type="script">
@@ -579,6 +604,11 @@
         <arg name="tx_ring"/>
         <arg name="channels"/>
         <notes/>
+        <results tags="parallel-links&lt;2" key="FEW-PARALLEL-LINKS">
+          <result value="FAILED">
+            <verdict>Cannot bind env</verdict>
+          </result>
+        </results>
       </iter>
     </test>
     <test name="udp_perf3_fwd_basic" type="script">
@@ -605,6 +635,11 @@
         <arg name="tx_ring"/>
         <arg name="channels"/>
         <notes/>
+        <results tags="parallel-links&lt;2" key="FEW-PARALLEL-LINKS">
+          <result value="FAILED">
+            <verdict>Cannot bind env</verdict>
+          </result>
+        </results>
       </iter>
     </test>
     <test name="tcp_perf3_fwd_bidir" type="script">
@@ -631,6 +666,11 @@
         <arg name="tx_ring"/>
         <arg name="channels"/>
         <notes/>
+        <results tags="parallel-links&lt;2" key="FEW-PARALLEL-LINKS">
+          <result value="FAILED">
+            <verdict>Cannot bind env</verdict>
+          </result>
+        </results>
       </iter>
     </test>
   </iter>
