@@ -611,6 +611,8 @@ net_drv_set_mtu(const char *ta, const char *if_name, int mtu,
     rc = tapi_cfg_base_if_set_mtu(ta, if_name, mtu, NULL);
     if (rc != 0)
         TEST_VERDICT("Failed to set MTU on %s, rc=%r", where, rc);
+
+    net_drv_wait_up_gen(ta, if_name, false);
 }
 
 /* See description in net_drv_ts.h */
