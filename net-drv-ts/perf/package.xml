@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <!-- (c) Copyright 2016 - 2022 Xilinx, Inc. All rights reserved. -->
-<!-- (c) Copyright 2024 OKTET Labs Ltd. All rights reserved. -->
+<!-- (c) Copyright 2024 - 2026 OKTET Labs Ltd. All rights reserved. -->
 <package version="1.0">
 
     <description>Performance testing</description>
@@ -25,12 +25,14 @@
                     'server_host'{
                         {'iut_rpcs':IUT},
                         if:'iut_if0',
-                        addr:'server_addr0':inet:unicast
+                        addr:'server_addr0':inet:unicast,
+                        addr:'server_lladdr0':ether:unicast
                     },
                     'client_host'{
                         {'tst_rpcs':tester},
                         if:'tst_if0',
-                        addr:'client_addr0':inet:unicast
+                        addr:'client_addr0':inet:unicast,
+                        addr:'client_lladdr0':ether:unicast
                     }
                 },
                 'client_rpcs'='tst_rpcs',
@@ -46,12 +48,14 @@
                     'client_host'{
                         {'iut_rpcs':IUT},
                         if:'iut_if0',
-                        addr:'client_addr0':inet:unicast
+                        addr:'client_addr0':inet:unicast,
+                        addr:'client_lladdr0':ether:unicast
                     },
                     'server_host'{
                         {'tst_rpcs':tester},
                         if:'tst_if0',
-                        addr:'server_addr0':inet:unicast
+                        addr:'server_addr0':inet:unicast,
+                        addr:'server_lladdr0':ether:unicast
                     }
                 },
                 'client_rpcs'='iut_rpcs',
@@ -67,12 +71,14 @@
                     'server_host'{
                         {'iut_rpcs':IUT},
                         if:'iut_if0',
-                        addr:'server_addr0':inet6:unicast
+                        addr:'server_addr0':inet6:unicast,
+                        addr:'server_lladdr0':ether:unicast
                     },
                     'client_host'{
                         {'tst_rpcs':tester},
                         if:'tst_if0',
-                        addr:'client_addr0':inet6:unicast
+                        addr:'client_addr0':inet6:unicast,
+                        addr:'client_lladdr0':ether:unicast
                     }
                 },
                 'client_rpcs'='tst_rpcs',
@@ -88,12 +94,14 @@
                     'client_host'{
                         {'iut_rpcs':IUT},
                         if:'iut_if0',
-                        addr:'client_addr0':inet6:unicast
+                        addr:'client_addr0':inet6:unicast,
+                        addr:'client_lladdr0':ether:unicast
                     },
                     'server_host'{
                         {'tst_rpcs':tester},
                         if:'tst_if0',
-                        addr:'server_addr0':inet6:unicast
+                        addr:'server_addr0':inet6:unicast,
+                        addr:'server_lladdr0':ether:unicast
                     }
                 },
                 'client_rpcs'='iut_rpcs',
@@ -239,6 +247,41 @@
             <value reqs="IPERF2">iperf</value>
             <value reqs="IPERF3">iperf3</value>
         </enum>
+
+        <run name="raw_frame_perf">
+            <script name="raw_frame_perf">
+                <objective>Measure Ethernet frame performance via CSAP/TAD</objective>
+            </script>
+            <arg name="env">
+                <value ref="env.peer2peer.iut_client"/>
+                <value ref="env.peer2peer.iut_server"/>
+            </arg>
+            <arg name="frame_size">
+                <value>64</value>
+                <value>128</value>
+                <value>256</value>
+                <value>512</value>
+                <value>1024</value>
+                <value>1518</value>
+            </arg>
+            <arg name="load_duration">
+                <value>2</value>
+            </arg>
+            <arg name="max_loss_pct">
+                <value>0.05</value>
+            </arg>
+            <arg name="tmpl">
+                <value>{
+                  pdus {
+                    eth:{
+                      dst-addr env:{ name "env.addr.server_lladdr0" },
+                      src-addr env:{ name "env.addr.client_lladdr0" },
+                      length-type plain:8111
+                    }
+                  }
+                }</value>
+            </arg>
+        </run>
 
         <run name="tcp_udp_perf">
             <session track_conf="silent" track_conf_handdown="descendants">

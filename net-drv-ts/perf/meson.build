@@ -4,6 +4,7 @@
 tests = [
     'fwd_prologue',
     'tcp_udp_perf',
+    'raw_frame_perf',
 ]
 
 foreach test : tests

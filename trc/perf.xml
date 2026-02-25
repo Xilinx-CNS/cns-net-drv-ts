@@ -673,5 +673,17 @@
         </results>
       </iter>
     </test>
+    <test name="raw_frame_perf" type="script">
+      <objective>Measure Ethernet frame performance via CSAP/TAD</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="frame_size"/>
+        <arg name="load_duration"/>
+        <arg name="max_loss_pct"/>
+        <arg name="tmpl"/>
+        <notes/>
+      </iter>
+    </test>
   </iter>
 </test>
