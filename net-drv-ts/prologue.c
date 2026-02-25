@@ -339,6 +339,11 @@ main(int argc, char **argv)
     CHECK_RC(net_drv_set_phy_link(iut_rpcs->ta, iut_if->if_name));
     CHECK_RC(net_drv_set_phy_link(tst_rpcs->ta, tst_if->if_name));
 
+    TEST_STEP("Wait until link status becomes UP on both IUT and Tester.");
+    net_drv_wait_up_gen(iut_rpcs->ta, iut_if->if_name, false);
+    net_drv_wait_up_gen(tst_rpcs->ta, tst_if->if_name, false);
+
+    CHECK_RC(rc = cfg_synchronize("/:", TRUE));
     CHECK_RC(rc = cfg_tree_print(NULL, TE_LL_RING, "/:"));
 
     TEST_STEP("Collect and log TRC tags.");
