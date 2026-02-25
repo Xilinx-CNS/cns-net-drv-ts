@@ -620,8 +620,11 @@ main(int argc, char *argv[])
 
         rc = tapi_cfg_cpu_grab_by_prop(server_rpcs->ta, NULL, &cpu_id);
         if (rc != 0 && rc == TE_RC(TE_TAPI, TE_ENOENT))
-            TEST_SKIP("%d/%d CPUs are available for servers",
-                      i, n_perf_insts * n_ports);
+        {
+            WARN("%d/%d CPUs are available for servers",
+                 i, n_perf_insts * n_ports);
+            TEST_SKIP("Too few CPUs are available for perf instances");
+        }
         CHECK_RC(rc);
 
         free(server_addr_str);
@@ -647,7 +650,10 @@ main(int argc, char *argv[])
 
         rc = tapi_cfg_cpu_grab_by_prop(client_rpcs->ta, NULL, &cpu_id);
         if (rc != 0 && rc == TE_RC(TE_TAPI, TE_ENOENT))
-            TEST_SKIP("%d/%d CPUs are available for clients", i, n_perf_insts);
+        {
+            WARN("%d/%d CPUs are available for clients", i, n_perf_insts);
+            TEST_SKIP("Too few CPUs are available for perf instances");
+        }
         CHECK_RC(rc);
 
         perf_clients[i] = tapi_perf_client_create(perf_bench, &perf_opts,

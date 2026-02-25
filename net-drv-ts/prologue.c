@@ -27,6 +27,7 @@
 #include "tapi_cfg_net.h"
 #include "tapi_cfg_modules.h"
 #include "tapi_cfg_pci.h"
+#include "tapi_cfg_cpu.h"
 #include "tapi_sh_env.h"
 #include "tapi_cfg_pci.h"
 #include "tapi_reqs.h"
@@ -246,6 +247,26 @@ prepare_ipv6(void)
     }
 }
 
+static void
+add_cpus_tag(const char *ta, const char *prefix)
+{
+    te_string tag_name = TE_STRING_INIT;
+    te_string tag_val = TE_STRING_INIT;
+    size_t cpus;
+
+    te_string_reset(&tag_name);
+    te_string_append(&tag_name, "%s-cpus", prefix);
+
+    CHECK_RC(tapi_cfg_get_all_threads(ta, &cpus, NULL));
+    te_string_reset(&tag_val);
+    te_string_append(&tag_val, "%zu", cpus);
+    CHECK_RC(tapi_tags_add_tag(te_string_value(&tag_name),
+                               te_string_value(&tag_val)));
+
+    te_string_free(&tag_name);
+    te_string_free(&tag_val);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -374,6 +395,9 @@ main(int argc, char **argv)
     te_string_reset(&str);
     te_string_append(&str, "%d", combined_max);
     CHECK_RC(tapi_tags_add_tag("max-combined-channels", te_string_value(&str)));
+
+    add_cpus_tag(iut_rpcs->ta, "iut");
+    add_cpus_tag(tst_rpcs->ta, "tst");
 
     TEST_SUCCESS;
 

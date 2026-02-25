@@ -40,7 +40,7 @@
         <arg name="perf_bench"/>
         <arg name="dual_mode"/>
         <arg name="protocol"/>
-        <arg name="n_perf_insts"/>
+        <arg name="n_perf_insts">1</arg>
         <arg name="n_streams"/>
         <arg name="bandwidth"/>
         <arg name="rx_csum"/>
@@ -56,6 +56,60 @@
         <arg name="tx_ring"/>
         <arg name="channels"/>
         <notes/>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="perf_bench"/>
+        <arg name="dual_mode"/>
+        <arg name="protocol"/>
+        <arg name="n_perf_insts">2</arg>
+        <arg name="n_streams"/>
+        <arg name="bandwidth"/>
+        <arg name="rx_csum"/>
+        <arg name="rx_gro"/>
+        <arg name="rx_vlan_strip"/>
+        <arg name="tx_csum"/>
+        <arg name="tx_gso"/>
+        <arg name="tso"/>
+        <arg name="tx_vlan_insert"/>
+        <arg name="rx_coalesce_usecs"/>
+        <arg name="rx_max_coalesced_frames"/>
+        <arg name="rx_ring"/>
+        <arg name="tx_ring"/>
+        <arg name="channels"/>
+        <notes/>
+        <results tags="iut-cpus&lt;2|tst-cpus&lt;2" key="TOO-FEW-CPU">
+          <result value="SKIPPED">
+            <verdict>Too few CPUs are available for perf instances</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="perf_bench"/>
+        <arg name="dual_mode"/>
+        <arg name="protocol"/>
+        <arg name="n_perf_insts">4</arg>
+        <arg name="n_streams"/>
+        <arg name="bandwidth"/>
+        <arg name="rx_csum"/>
+        <arg name="rx_gro"/>
+        <arg name="rx_vlan_strip"/>
+        <arg name="tx_csum"/>
+        <arg name="tx_gso"/>
+        <arg name="tso"/>
+        <arg name="tx_vlan_insert"/>
+        <arg name="rx_coalesce_usecs"/>
+        <arg name="rx_max_coalesced_frames"/>
+        <arg name="rx_ring"/>
+        <arg name="tx_ring"/>
+        <arg name="channels"/>
+        <notes/>
+        <results tags="iut-cpus&lt;4|tst-cpus&lt;4" key="TOO-FEW-CPU">
+          <result value="SKIPPED">
+            <verdict>Too few CPUs are available for perf instances</verdict>
+          </result>
+        </results>
       </iter>
     </test>
     <test name="udp_perf2" type="script">
@@ -92,7 +146,7 @@
         <arg name="perf_bench"/>
         <arg name="dual_mode"/>
         <arg name="protocol"/>
-        <arg name="n_perf_insts"/>
+        <arg name="n_perf_insts">1</arg>
         <arg name="n_streams"/>
         <arg name="bandwidth"/>
         <arg name="rx_csum"/>
@@ -108,6 +162,60 @@
         <arg name="tx_ring"/>
         <arg name="channels"/>
         <notes/>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="perf_bench"/>
+        <arg name="dual_mode"/>
+        <arg name="protocol"/>
+        <arg name="n_perf_insts">2</arg>
+        <arg name="n_streams"/>
+        <arg name="bandwidth"/>
+        <arg name="rx_csum"/>
+        <arg name="rx_gro"/>
+        <arg name="rx_vlan_strip"/>
+        <arg name="tx_csum"/>
+        <arg name="tx_gso"/>
+        <arg name="tso"/>
+        <arg name="tx_vlan_insert"/>
+        <arg name="rx_coalesce_usecs"/>
+        <arg name="rx_max_coalesced_frames"/>
+        <arg name="rx_ring"/>
+        <arg name="tx_ring"/>
+        <arg name="channels"/>
+        <notes/>
+        <results tags="iut-cpus&lt;2|tst-cpus&lt;2" key="TOO-FEW-CPU">
+          <result value="SKIPPED">
+            <verdict>Too few CPUs are available for perf instances</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="perf_bench"/>
+        <arg name="dual_mode"/>
+        <arg name="protocol"/>
+        <arg name="n_perf_insts">4</arg>
+        <arg name="n_streams"/>
+        <arg name="bandwidth"/>
+        <arg name="rx_csum"/>
+        <arg name="rx_gro"/>
+        <arg name="rx_vlan_strip"/>
+        <arg name="tx_csum"/>
+        <arg name="tx_gso"/>
+        <arg name="tso"/>
+        <arg name="tx_vlan_insert"/>
+        <arg name="rx_coalesce_usecs"/>
+        <arg name="rx_max_coalesced_frames"/>
+        <arg name="rx_ring"/>
+        <arg name="tx_ring"/>
+        <arg name="channels"/>
+        <notes/>
+        <results tags="iut-cpus&lt;4|tst-cpus&lt;4" key="TOO-FEW-CPU">
+          <result value="SKIPPED">
+            <verdict>Too few CPUs are available for perf instances</verdict>
+          </result>
+        </results>
       </iter>
     </test>
     <test name="tcp_perf3_rx_offloads" type="script">
@@ -264,6 +372,11 @@
         <arg name="tx_ring"/>
         <arg name="channels">1</arg>
         <notes/>
+        <results tags="iut-cpus&lt;4|tst-cpus&lt;4" key="TOO-FEW-CPU">
+          <result value="SKIPPED">
+            <verdict>Too few CPUs are available for perf instances</verdict>
+          </result>
+        </results>
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
@@ -291,6 +404,11 @@
             <verdict>Failed to set number of combined channels: TA_UNIX-EINVAL</verdict>
           </result>
         </results>
+        <results tags="(iut-cpus&lt;4|tst-cpus&lt;4)&amp;max-combined-channels&gt;=2" key="TOO-FEW-CPU">
+          <result value="SKIPPED">
+            <verdict>Too few CPUs are available for perf instances</verdict>
+          </result>
+        </results>
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
@@ -316,6 +434,11 @@
         <results tags="max-combined-channels&lt;4" key="TOO-FEW-COMBINED-CHANNELS">
           <result value="FAILED">
             <verdict>Failed to set number of combined channels: TA_UNIX-EINVAL</verdict>
+          </result>
+        </results>
+        <results tags="(iut-cpus&lt;4|tst-cpus&lt;4)&amp;max-combined-channels&gt;=4" key="TOO-FEW-CPU">
+          <result value="SKIPPED">
+            <verdict>Too few CPUs are available for perf instances</verdict>
           </result>
         </results>
       </iter>
