@@ -62,6 +62,19 @@ sync_print_if_stats(const char *ta, const char *if_name)
                             ta, if_name));
 }
 
+static void
+skip_with_restore(const char *ta, const char *if_name, bool if_up,
+                  const char *message)
+{
+    if (if_up)
+    {
+        CHECK_RC(tapi_cfg_base_if_up(ta, if_name));
+        net_drv_wait_up_gen(ta, if_name, false);
+    }
+
+    TEST_SKIP("%s", message);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -168,7 +181,8 @@ main(int argc, char *argv[])
         }
         else if (RPC_ERRNO(iut_rpcs) == RPC_EOPNOTSUPP)
         {
-            TEST_SKIP("ETHTOOL_RESET is not supported");
+            skip_with_restore(iut_rpcs->ta, iut_if->if_name, if_down,
+                              "ETHTOOL_RESET is not supported");
         }
         else if (RPC_ERRNO(iut_rpcs) != RPC_EINVAL)
         {
@@ -180,7 +194,8 @@ main(int argc, char *argv[])
     {
         if (RPC_ERRNO(iut_rpcs) == RPC_EOPNOTSUPP)
         {
-            TEST_SKIP("ETHTOOL_RESET is not supported");
+            skip_with_restore(iut_rpcs->ta, iut_if->if_name, if_down,
+                              "ETHTOOL_RESET is not supported");
         }
         else
         {
