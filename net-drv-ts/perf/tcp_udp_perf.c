@@ -619,7 +619,7 @@ main(int argc, char *argv[])
         const struct sockaddr *client_addr = client_addrs[i / n_perf_insts];
 
         rc = tapi_cfg_cpu_grab_by_prop(server_rpcs->ta, NULL, &cpu_id);
-        if (rc != 0 && rc == TE_RC(TE_TAPI, TE_ENOENT))
+        if (rc == TE_RC(TE_TAPI, TE_ENOENT))
         {
             WARN("%d/%d CPUs are available for servers",
                  i, n_perf_insts * n_ports);
@@ -649,7 +649,7 @@ main(int argc, char *argv[])
         CHECK_RC(tapi_perf_server_start_unreliable(perf_servers[i]));
 
         rc = tapi_cfg_cpu_grab_by_prop(client_rpcs->ta, NULL, &cpu_id);
-        if (rc != 0 && rc == TE_RC(TE_TAPI, TE_ENOENT))
+        if (rc == TE_RC(TE_TAPI, TE_ENOENT))
         {
             WARN("%d/%d CPUs are available for clients", i, n_perf_insts);
             TEST_SKIP("Too few CPUs are available for perf instances");
