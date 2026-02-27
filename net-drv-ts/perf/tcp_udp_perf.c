@@ -201,8 +201,12 @@ perf2_summary_throughput_mi_log(const double client_throughput,
 }
 
 static void
-add_throughput_artifacts(const char *name, double tx, double rx, double ip2)
+add_throughput_artifacts(const char *name, double tx, double rx, double ip2,
+                         uint64_t retr)
 {
+    if (retr != 0)
+        TEST_ARTIFACT("%s retransmits: %" TE_PRINTF_64 "u", name, retr);
+
     if (rx > EPS && tx > EPS)
     {
 
@@ -278,6 +282,8 @@ main(int argc, char *argv[])
     double                                  tx_bits_per_second_client = 0.0;
     double                                  rx_bits_per_second_client = 0.0;
     double                                  ip2_bits_per_second_client = 0.0;
+    uint64_t                                retransmits_server = 0;
+    uint64_t                                retransmits_client = 0;
 
     double  bps_per_link_server[TEST_MAX_LINKS];
     double  bps_per_link_client[TEST_MAX_LINKS];
@@ -684,6 +690,8 @@ main(int argc, char *argv[])
         CHECK_RC(tapi_perf_client_report_mi_log(perf_clients[i],
                                                 &perf_clients_report[i]));
 
+        retransmits_server += perf_servers_report[i].retransmits;
+        retransmits_client += perf_clients_report[i].retransmits;
         if (perf_bench == TAPI_PERF_IPERF)
         {
             ip2_bits_per_second_server +=
@@ -716,11 +724,13 @@ main(int argc, char *argv[])
 
     add_throughput_artifacts("Client", tx_bits_per_second_client,
                              rx_bits_per_second_client,
-                             ip2_bits_per_second_client);
+                             ip2_bits_per_second_client,
+                             retransmits_client);
 
     add_throughput_artifacts("Server", tx_bits_per_second_server,
                              rx_bits_per_second_server,
-                             ip2_bits_per_second_server);
+                             ip2_bits_per_second_server,
+                             retransmits_server);
 
     if (perf_bench == TAPI_PERF_IPERF)
         perf2_summary_throughput_mi_log(ip2_bits_per_second_client,
