@@ -72,3 +72,7 @@ List of tags set on various testing configurations to distinguish them.
     - Number of CPUs on IUT or Tester side.
       May be used for comparison: greater, equal, less.
     - iut-cpus:2
+  *
+    - *SIDE*-no-ptp
+    - PTP kernel interface is unavailable on IUT or Tester side.
+    - iut-no-ptp

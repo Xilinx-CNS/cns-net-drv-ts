@@ -11,18 +11,68 @@
 #include "net_drv_ts.h"
 #include "net_drv_ptp.h"
 
+static te_errno
+net_drv_get_ethtool_ts_info(rcf_rpc_server *rpcs, const char *if_name,
+                            struct tarpc_ethtool_ts_info *ts_info)
+{
+    struct ifreq ifreq_var;
+    te_errno rc;
+    int s;
+
+    assert(if_name != NULL);
+    assert(ts_info != NULL);
+    assert(rpcs != NULL);
+
+    RPC_AWAIT_ERROR(rpcs);
+    s = rpc_socket(rpcs, RPC_PF_INET, RPC_SOCK_DGRAM, RPC_PROTO_DEF);
+    if (s < 0)
+        return RPC_ERRNO(rpcs);
+
+    memset(&ifreq_var, 0, sizeof(ifreq_var));
+    strncpy(ifreq_var.ifr_name, if_name, sizeof(ifreq_var.ifr_name));
+
+    memset(ts_info, 0, sizeof(*ts_info));
+    ifreq_var.ifr_data = (char *)ts_info;
+    ts_info->cmd = RPC_ETHTOOL_GET_TS_INFO;
+
+    RPC_AWAIT_ERROR(rpcs);
+    rc = rpc_ioctl(rpcs, s, RPC_SIOCETHTOOL, &ifreq_var);
+    if (rc < 0)
+        rc = RPC_ERRNO(rpcs);
+
+    rpc_close(rpcs, s);
+
+    return rc;
+}
+
+static te_errno
+net_drv_open_ptp_device(rcf_rpc_server *rpcs, int phc_index, int flags,
+                        te_string *ptp_path, int *fd)
+{
+    assert(ptp_path != NULL);
+    assert(rpcs != NULL);
+    assert(fd != NULL);
+
+    te_string_reset(ptp_path);
+    te_string_append(ptp_path, "/dev/ptp%d", phc_index);
+
+    RPC_AWAIT_ERROR(rpcs);
+    *fd = rpc_open(rpcs, te_string_value(ptp_path), flags, 0);
+    if (*fd < 0)
+        return RPC_ERRNO(rpcs);
+
+    return 0;
+}
+
 /* See description in net_drv_ptp.h */
 void
 net_drv_open_ptp_fd(rcf_rpc_server *rpcs, const char *if_name, int *fd,
                     const char *vpref)
 {
-    struct ifreq ifreq_var;
     struct tarpc_ethtool_ts_info ts_info;
-
-    char path[1024];
+    te_string path = TE_STRING_INIT_STATIC(PATH_MAX);
     te_string vpref_str = TE_STRING_INIT_STATIC(256);
-    int s = -1;
-    int rc;
+    te_errno rc;
 
     if (vpref != NULL && *vpref != '\0')
     {
@@ -34,38 +84,75 @@ net_drv_open_ptp_fd(rcf_rpc_server *rpcs, const char *if_name, int *fd,
         vpref = "";
     }
 
-    s = rpc_socket(rpcs, RPC_PF_INET, RPC_SOCK_DGRAM, RPC_PROTO_DEF);
-
-    memset(&ifreq_var, 0, sizeof(ifreq_var));
-    strncpy(ifreq_var.ifr_name, if_name,
-            sizeof(ifreq_var.ifr_name));
-
-    memset(&ts_info, 0, sizeof(ts_info));
-    ifreq_var.ifr_data = (char *)&ts_info;
-    ts_info.cmd = RPC_ETHTOOL_GET_TS_INFO;
-
-    RPC_AWAIT_ERROR(rpcs);
-    rc = rpc_ioctl(rpcs, s, RPC_SIOCETHTOOL, &ifreq_var);
-    if (rc < 0)
+    rc = net_drv_get_ethtool_ts_info(rpcs, if_name, &ts_info);
+    if (rc != 0)
     {
         ERROR_VERDICT("%sioctl(SIOCETHTOOL/ETHTOOL_GET_TS_INFO) failed "
-                      "with error %r", vpref, RPC_ERRNO(rpcs));
-        RPC_CLOSE(rpcs, s);
+                      "with error %r", vpref, rc);
         TEST_STOP;
     }
-    RPC_CLOSE(rpcs, s);
 
     if (ts_info.phc_index < 0)
         TEST_SKIP("%sPTP device index is not known", vpref);
 
-    TE_SPRINTF(path, "/dev/ptp%d", (int)(ts_info.phc_index));
-    RPC_AWAIT_ERROR(rpcs);
-    *fd = rpc_open(rpcs, path, RPC_O_RDWR, 0);
-    if (*fd < 0)
+    rc = net_drv_open_ptp_device(rpcs, ts_info.phc_index, RPC_O_RDWR,
+                                 &path, fd);
+    if (rc != 0)
     {
         TEST_VERDICT("%sfailed to open PTP device file, errno=%r",
-                     vpref, RPC_ERRNO(rpcs));
+                     vpref, rc);
     }
+}
+
+/* See description in net_drv_ptp.h */
+bool
+net_drv_is_ptp_supported(rcf_rpc_server *rpcs, const char *if_name)
+{
+    struct tarpc_ethtool_ts_info ts_info;
+    te_string ptp_path = TE_STRING_INIT_STATIC(PATH_MAX);
+    te_errno rc;
+    int fd;
+
+    if (rpcs == NULL || if_name == NULL)
+    {
+        ERROR_VERDICT("Invalid input parameters to check PTP support");
+        TEST_STOP;
+    }
+
+    rc = net_drv_get_ethtool_ts_info(rpcs, if_name, &ts_info);
+    if (rc != 0)
+    {
+        WARN("Cannot check PTP support on TA %s: %r", rpcs->ta, rc);
+        return false;
+    }
+
+    if (ts_info.phc_index < 0)
+    {
+        INFO("PTP device index is not known on TA %s", rpcs->ta);
+        return false;
+    }
+
+    rc = net_drv_open_ptp_device(rpcs, ts_info.phc_index, RPC_O_RDONLY,
+                                 &ptp_path, &fd);
+    if (rc == 0)
+    {
+        rpc_close(rpcs, fd);
+        return true;
+    }
+
+    if (rc == TE_RC(TE_TA_UNIX, TE_ENOENT) ||
+        rc == TE_RC(TE_TA_UNIX, TE_ENODEV))
+    {
+        INFO("PTP clock device %s is not available on TA %s",
+             te_string_value(&ptp_path), rpcs->ta);
+    }
+    else
+    {
+        WARN("Cannot check PTP support on TA %s: open(%s) failed with %r",
+             rpcs->ta, te_string_value(&ptp_path), rc);
+    }
+
+    return false;
 }
 
 /* See description in net_drv_ptp.h */

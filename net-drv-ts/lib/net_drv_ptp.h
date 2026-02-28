@@ -48,6 +48,17 @@ extern void net_drv_open_ptp_fd(rcf_rpc_server *rpcs, const char *if_name,
                                 int *fd, const char *vpref);
 
 /**
+ * Check PTP support for the interface.
+ *
+ * @param rpcs      RPC server.
+ * @param if_name   Interface name.
+ *
+ * @return @c true if PTP support is available, @c false otherwise.
+ */
+extern bool net_drv_is_ptp_supported(rcf_rpc_server *rpcs,
+                                     const char *if_name);
+
+/**
  * Get difference between two timespec structures in seconds
  * (tsa - tsb).
  *

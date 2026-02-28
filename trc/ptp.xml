@@ -14,12 +14,7 @@
         <arg name="min_sleep"/>
         <arg name="max_sleep"/>
         <notes/>
-        <results tags="ice&amp;linux-mm&lt;514" key="NO-PTP">
-          <result value="SKIPPED">
-            <verdict>PTP device index is not known</verdict>
-          </result>
-        </results>
-        <results tags="virtio-pci" key="NO-PTP" notes="Virtio does not support PTP">
+        <results tags="iut-no-ptp" key="NO-PTP">
           <result value="SKIPPED">
             <verdict>PTP device index is not known</verdict>
           </result>
@@ -35,12 +30,7 @@
         <arg name="min_sleep"/>
         <arg name="max_sleep"/>
         <notes/>
-        <results tags="ice&amp;linux-mm&lt;514" key="NO-PTP">
-          <result value="SKIPPED">
-            <verdict>PTP device index is not known</verdict>
-          </result>
-        </results>
-        <results tags="virtio-pci" key="NO-PTP" notes="Virtio does not support PTP">
+        <results tags="iut-no-ptp" key="NO-PTP">
           <result value="SKIPPED">
             <verdict>PTP device index is not known</verdict>
           </result>
@@ -56,12 +46,7 @@
         <arg name="min_sleep"/>
         <arg name="max_sleep"/>
         <notes/>
-        <results tags="ice&amp;linux-mm&lt;514" key="NO-PTP">
-          <result value="SKIPPED">
-            <verdict>PTP device index is not known</verdict>
-          </result>
-        </results>
-        <results tags="virtio-pci" key="NO-PTP" notes="Virtio does not support PTP">
+        <results tags="iut-no-ptp" key="NO-PTP">
           <result value="SKIPPED">
             <verdict>PTP device index is not known</verdict>
           </result>
@@ -77,12 +62,7 @@
         <arg name="min_sleep"/>
         <arg name="max_sleep"/>
         <notes/>
-        <results tags="ice&amp;linux-mm&lt;514" key="NO-PTP">
-          <result value="SKIPPED">
-            <verdict>PTP device index is not known</verdict>
-          </result>
-        </results>
-        <results tags="virtio-pci" key="NO-PTP" notes="Virtio does not support PTP">
+        <results tags="iut-no-ptp" key="NO-PTP">
           <result value="SKIPPED">
             <verdict>PTP device index is not known</verdict>
           </result>
@@ -95,15 +75,15 @@
       <iter result="PASSED">
         <arg name="env"/>
         <notes/>
+        <results tags="iut-no-ptp" key="NO-PTP">
+          <result value="SKIPPED">
+            <verdict>PTP device index is not known</verdict>
+          </result>
+        </results>
         <results tags="i40e" key="NO-PTP">
           <result value="PASSED">
             <verdict>No external timestamp channels</verdict>
             <verdict>Pulse Per Second is not supported</verdict>
-          </result>
-        </results>
-        <results tags="ice&amp;linux-mm&lt;514" key="NO-PTP">
-          <result value="SKIPPED">
-            <verdict>PTP device index is not known</verdict>
           </result>
         </results>
         <results tags="ice&amp;linux-mm&gt;=514" key="NO-PTP">
@@ -116,11 +96,6 @@
             <verdict>Frequency adjustment range is less than expected</verdict>
             <verdict>No external timestamp channels</verdict>
             <verdict>Pulse Per Second is not supported</verdict>
-          </result>
-        </results>
-        <results tags="virtio-pci" key="NO-PTP" notes="Virtio does not support PTP">
-          <result value="SKIPPED">
-            <verdict>PTP device index is not known</verdict>
           </result>
         </results>
         <results tags="xilinx_efct" key="X3-893">
@@ -138,12 +113,7 @@
         <arg name="master_cfg"/>
         <arg name="slave_cfg"/>
         <notes/>
-        <results tags="ice&amp;linux-mm&lt;514" key="NO-PTP">
-          <result value="SKIPPED">
-            <verdict>PTP device index is not known</verdict>
-          </result>
-        </results>
-        <results tags="virtio-pci" key="NO-PTP" notes="Virtio does not support PTP">
+        <results tags="iut-no-ptp" key="NO-PTP">
           <result value="SKIPPED">
             <verdict>PTP device index is not known</verdict>
           </result>
@@ -157,12 +127,7 @@
         <arg name="env"/>
         <arg name="n_samples"/>
         <notes/>
-        <results tags="ice&amp;linux-mm&lt;514" key="NO-PTP">
-          <result value="SKIPPED">
-            <verdict>PTP device index is not known</verdict>
-          </result>
-        </results>
-        <results tags="virtio-pci" key="NO-PTP" notes="Virtio does not support PTP">
+        <results tags="iut-no-ptp" key="NO-PTP">
           <result value="SKIPPED">
             <verdict>PTP device index is not known</verdict>
           </result>
@@ -176,12 +141,7 @@
         <arg name="env"/>
         <arg name="n_samples"/>
         <notes/>
-        <results tags="ice&amp;linux-mm&lt;514" key="NO-PTP">
-          <result value="SKIPPED">
-            <verdict>PTP device index is not known</verdict>
-          </result>
-        </results>
-        <results tags="virtio-pci" key="NO-PTP" notes="Virtio does not support PTP">
+        <results tags="iut-no-ptp" key="NO-PTP">
           <result value="SKIPPED">
             <verdict>PTP device index is not known</verdict>
           </result>
@@ -194,7 +154,7 @@
       <iter result="PASSED">
         <arg name="env"/>
         <notes/>
-        <results tags="ice&amp;linux-mm&lt;514" key="NO-PTP">
+        <results tags="iut-no-ptp" key="NO-PTP">
           <result value="SKIPPED">
             <verdict>PTP device index is not known</verdict>
           </result>
@@ -214,11 +174,6 @@
             <verdict>PTP_SYS_OFFSET_PRECISE request is not supported</verdict>
           </result>
         </results>
-        <results tags="virtio-pci" key="NO-PTP" notes="Virtio does not support PTP">
-          <result value="SKIPPED">
-            <verdict>PTP device index is not known</verdict>
-          </result>
-        </results>
       </iter>
     </test>
     <test name="ptp4l" type="script">
@@ -227,14 +182,14 @@
       <iter result="PASSED">
         <arg name="env"/>
         <notes/>
-        <results tags="ice&amp;linux-mm&lt;514" key="NO-PTP">
+        <results tags="iut-no-ptp" key="NO-PTP">
           <result value="SKIPPED">
             <verdict>IUT: PTP device index is not known</verdict>
           </result>
         </results>
-        <results tags="virtio-pci" key="NO-PTP" notes="Virtio does not support PTP">
+        <results tags="tst-no-ptp" key="NO-PTP">
           <result value="SKIPPED">
-            <verdict>IUT: PTP device index is not known</verdict>
+            <verdict>Tester: PTP device index is not known</verdict>
           </result>
         </results>
       </iter>

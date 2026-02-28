@@ -406,6 +406,10 @@ main(int argc, char **argv)
     CHECK_RC(add_tun_support_tag(iut_rpcs, "iut-"));
     CHECK_RC(add_tun_support_tag(tst_rpcs, "tst-"));
     CHECK_RC(net_drv_add_missing_ethtool_opt_tags(iut_rpcs));
+    if (!net_drv_is_ptp_supported(iut_rpcs, iut_if->if_name))
+        CHECK_RC(tapi_tags_add_tag("iut-no-ptp", NULL));
+    if (!net_drv_is_ptp_supported(tst_rpcs, tst_if->if_name))
+        CHECK_RC(tapi_tags_add_tag("tst-no-ptp", NULL));
     CHECK_RC(tapi_tags_add_firmwareversion_tag(iut_rpcs->ta,
                                                iut_if->if_name, ""));
     CHECK_RC(tapi_tags_add_net_pci_tags(iut_rpcs->ta, iut_if->if_name));
