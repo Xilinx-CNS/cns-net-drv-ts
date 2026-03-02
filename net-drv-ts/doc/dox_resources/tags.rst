@@ -64,6 +64,10 @@ List of tags set on various testing configurations to distinguish them.
     - ethtool CLI option is not present in `ethtool --help` output on IUT.
     - no-ethtool-opt-show-fec
   *
+    - *SIDE*-no-tun
+    - TUN support is unavailable on IUT or Tester (`/dev/net/tun` cannot be opened on the corresponding side).
+    - iut-no-tun
+  *
     - *SIDE*-cpus:*VALUE*
     - Number of CPUs on IUT or Tester side.
       May be used for comparison: greater, equal, less.

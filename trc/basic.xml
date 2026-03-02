@@ -825,6 +825,11 @@
             <verdict>Failed to enable all flags in msglvl</verdict>
           </result>
         </results>
+        <results tags="iut-no-tun" key="NO-TUN">
+          <result value="SKIPPED">
+            <verdict>TUN/TAP is unavailable</verdict>
+          </result>
+        </results>
       </iter>
     </test>
   </iter>

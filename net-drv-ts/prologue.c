@@ -30,6 +30,7 @@
 #include "tapi_cfg_cpu.h"
 #include "tapi_sh_env.h"
 #include "tapi_cfg_pci.h"
+#include "tapi_rpc_unistd.h"
 #include "tapi_reqs.h"
 #include "tapi_tags.h"
 
@@ -169,6 +170,37 @@ get_phy_local_param(const char *ta, const char *param, char **value)
     }
 
     return 0;
+}
+
+static te_errno
+add_tun_support_tag(rcf_rpc_server *rpcs, const char *prefix)
+{
+    te_errno rc;
+    te_string tag = TE_STRING_INIT_STATIC(DEF_STR_LEN);
+    int fd;
+
+    RPC_AWAIT_ERROR(rpcs);
+    fd = rpc_open(rpcs, "/dev/net/tun", RPC_O_RDWR, 0);
+    if (fd >= 0)
+    {
+        RPC_CLOSE(rpcs, fd);
+        return 0;
+    }
+
+    rc = RPC_ERRNO(rpcs);
+    if (rc == RPC_ENOENT || rc == RPC_ENODEV || rc == RPC_EOPNOTSUPP)
+    {
+        INFO("TUN/TAP is not available on TA %s", rpcs->ta);
+        te_string_append(&tag, "%sno-tun", prefix);
+        rc = tapi_tags_add_tag(te_string_value(&tag), NULL);
+        if (rc != 0)
+            return rc;
+
+        return 0;
+    }
+
+    ERROR("Failed to check TUN/TAP support on TA %s: %r", rpcs->ta, rc);
+    return rc;
 }
 
 static void
@@ -371,6 +403,8 @@ main(int argc, char **argv)
     CHECK_RC(tapi_tags_add_linux_mm(iut_rpcs->ta, ""));
     CHECK_RC(add_driver_tag(iut_rpcs->ta, ""));
     CHECK_RC(add_driver_tag(tst_rpcs->ta, "peer-"));
+    CHECK_RC(add_tun_support_tag(iut_rpcs, "iut-"));
+    CHECK_RC(add_tun_support_tag(tst_rpcs, "tst-"));
     CHECK_RC(net_drv_add_missing_ethtool_opt_tags(iut_rpcs));
     CHECK_RC(tapi_tags_add_firmwareversion_tag(iut_rpcs->ta,
                                                iut_if->if_name, ""));

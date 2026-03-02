@@ -165,7 +165,14 @@ main(int argc, char *argv[])
         RING_VERDICT("Failed to enable all flags in msglvl");
 
     TEST_STEP("Create TAP interface on IUT.");
-    CHECK_RC(tapi_cfg_tap_add(iut_rpcs->ta, TAP_NAME));
+    rc = tapi_cfg_tap_add(iut_rpcs->ta, TAP_NAME);
+    if (TE_RC_GET_ERROR(rc) == TE_ENOENT ||
+        TE_RC_GET_ERROR(rc) == RPC_ENODEV ||
+        TE_RC_GET_ERROR(rc) == RPC_EOPNOTSUPP)
+    {
+        TEST_SKIP("TUN/TAP is unavailable");
+    }
+    CHECK_RC(rc);
     CHECK_RC(tapi_cfg_base_if_up(iut_rpcs->ta, TAP_NAME));
 
     CFG_WAIT_CHANGES;
