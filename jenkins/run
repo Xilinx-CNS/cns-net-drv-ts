@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2023 OKTET Labs Ltd. All rights reserved.
+// Copyright (C) 2023-2026 OKTET Labs Ltd. All rights reserved.
 //
 // Main pipeline for running tests.
 
@@ -9,6 +9,13 @@ teTsPipeline {
     specificParameters = [
         booleanParam(name: 'reuse_pco', defaultValue: true,
                      description: 'Reuse RPC server for different tests. It speeds up tests execution.'),
+        string(name: 'net_drv_name',
+               defaultValue: params.net_drv_name ?: '',
+               description: 'Driver name to use from loaded revisions. Optional.'),
+        string(name: 'net_drv_repo', defaultValue: '',
+               description: 'Network driver repository. Optional.'),
+        string(name: 'net_drv_rev', defaultValue: '',
+               description: 'Network driver revision. Optional.'),
     ]
 
     label = 'net-drv-ts'
@@ -17,6 +24,12 @@ teTsPipeline {
     tsconf = true
     publish_logs = true
     concurrent_builds = true
+
+    preRunHook = {
+        def netDrv = load("${teCtx.TS_SRC}/jenkins/net_drv.groovy")
+        netDrv.setDriverBuildScript(teCtx)
+        netDrv.checkoutDriverSources(teCtx)
+    }
 
     optionsProvider = {
         def opts = [

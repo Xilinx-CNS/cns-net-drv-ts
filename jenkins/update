@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2023 OKTET Labs Ltd. All rights reserved.
+// Copyright (C) 2023-2026 OKTET Labs Ltd. All rights reserved.
 //
 // Pipeline to rebuild test suite after something changed in its
 // sources. This pipeline saves revisions in an artifact in case of
@@ -8,6 +8,16 @@
 @Library('teLib') _
 
 teTsPipeline {
+    specificParameters = [
+        string(name: 'net_drv_name',
+               defaultValue: params.net_drv_name ?: '',
+               description: 'Driver name to use from loaded revisions. Optional.'),
+        string(name: 'net_drv_repo', defaultValue: '',
+               description: 'Network driver repository. Optional.'),
+        string(name: 'net_drv_rev', defaultValue: '',
+               description: 'Network driver revision. Optional.'),
+    ]
+
     label = 'net-drv-ts'
     ts_name = 'net-drv-ts'
 
@@ -26,7 +36,19 @@ teTsPipeline {
         def triggers = [
             pollSCM('H * * * *'),
         ]
+
+        if (params.get_revs_from) {
+            // Rebuild update job when upstream revision source changes.
+            triggers += teCommon.jobs_triggers(params.get_revs_from)
+        }
+
         return triggers
+    }
+
+    preRunHook = {
+        def netDrv = load("${teCtx.TS_SRC}/jenkins/net_drv.groovy")
+        netDrv.setDriverBuildScript(teCtx)
+        netDrv.checkoutDriverSources(teCtx)
     }
 
     postRunHook = {
