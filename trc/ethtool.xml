@@ -307,6 +307,43 @@
         </results>
       </iter>
     </test>
+    <test name="pause_stats_increment" type="script">
+      <objective>Check pause statistics increment.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <notes/>
+        <results tags="i40e">
+          <result value="SKIPPED">
+            <verdict>Reception of pause frames is disabled</verdict>
+          </result>
+          <result value="SKIPPED">
+            <verdict>Rx pause frames counter is not available</verdict>
+          </result>
+        </results>
+        <results tags="ice&amp;linux-mm&lt;511">
+          <result value="SKIPPED">
+            <verdict>Reception of pause frames is disabled</verdict>
+          </result>
+          <result value="SKIPPED">
+            <verdict>Rx pause frames counter is not available</verdict>
+          </result>
+        </results>
+        <results tags="ice">
+          <result value="SKIPPED">
+            <verdict>Reception of pause frames is disabled</verdict>
+          </result>
+          <result value="SKIPPED">
+            <verdict>Rx pause frames counter is not available</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="NO-ETHTOOL-PAUSE">
+          <result value="SKIPPED">
+            <verdict>Ethtool command is not supported</verdict>
+          </result>
+        </results>
+      </iter>
+    </test>
     <test name="ts_info" type="script">
       <objective>Check that ethtool provides information about packets timestamping capabilities and PHC device index.</objective>
       <notes/>

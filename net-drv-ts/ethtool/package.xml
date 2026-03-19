@@ -77,6 +77,13 @@
         </run>
 
         <run>
+            <script name="pause_stats_increment"/>
+            <arg name="env">
+                <value ref="env.peer2peer"/>
+            </arg>
+        </run>
+
+        <run>
             <script name="ts_info">
                 <req id="X3-PTP013"/>
             </script>

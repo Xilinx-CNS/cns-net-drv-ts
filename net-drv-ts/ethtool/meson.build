@@ -9,6 +9,7 @@ tests = [
     'eeprom_dump',
     'loopback',
     'msglvl',
+    'pause_stats_increment',
     'register_dump',
     'reset_under_traffic',
     'show_eee',
