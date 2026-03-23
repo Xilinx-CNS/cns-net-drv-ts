@@ -2,6 +2,7 @@
 # (c) Copyright 2021 - 2022 Xilinx, Inc. All rights reserved.
 
 tests = [
+    'autoneg_advertise',
     'check_ring',
     'dev_properties',
     'dump_module_eeprom',

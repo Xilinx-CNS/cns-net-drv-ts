@@ -8,6 +8,46 @@
 
     <session track_conf="silent" track_conf_handdown="descendants">
 
+        <var name="env.peer2peer.an_iut_change">
+            <value reqs="IP4">
+                'net':IUT{
+                    'iut_host'{
+                        {'iut_rpcs':IUT,if:'iut_if'},
+                        addr:'iut_addr':inet:unicast
+                    },
+                    'tst_host'{
+                        {'tst_rpcs':tester},
+                        addr:'tst_addr':inet:unicast,
+                        if:'tst_if'
+                    }
+                },
+                'changed_rpcs'='iut_rpcs',
+                'changed_if'='iut_if',
+                'peer_rpcs'='tst_rpcs',
+                'peer_if'='tst_if'
+            </value>
+        </var>
+
+        <var name="env.peer2peer.an_tst_change">
+            <value reqs="IP4">
+                'net':IUT{
+                    'iut_host'{
+                        {'iut_rpcs':IUT,if:'iut_if'},
+                        addr:'iut_addr':inet:unicast
+                    },
+                    'tst_host'{
+                        {'tst_rpcs':tester},
+                        addr:'tst_addr':inet:unicast,
+                        if:'tst_if'
+                    }
+                },
+                'changed_rpcs'='tst_rpcs',
+                'changed_if'='tst_if',
+                'peer_rpcs'='iut_rpcs',
+                'peer_if'='iut_if'
+            </value>
+        </var>
+
         <run>
             <script name="dev_properties" track_conf="nohistory">
                 <req id="X3-ET001"/>
@@ -139,6 +179,15 @@
             <arg name="env">
                 <value ref="env.peer2peer"/>
             </arg>
+        </run>
+
+        <run>
+            <script name="autoneg_advertise"/>
+            <arg name="env">
+                <value ref="env.peer2peer.an_iut_change"/>
+                <value ref="env.peer2peer.an_tst_change"/>
+            </arg>
+            <arg name="if_down" type="do_if_down"/>
         </run>
 
         <run>

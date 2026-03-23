@@ -557,6 +557,30 @@
         </results>
       </iter>
     </test>
+    <test name="autoneg_advertise" type="script">
+      <objective>Check autonegotiation and advertised modes.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="if_down"/>
+        <notes/>
+        <results tags="ice&amp;peer-ice" notes="ice does not exposes link partner PHY advertised modes">
+          <result value="SKIPPED">
+            <verdict>IUT initial partner preferred PHY: link partner does not advertise requested mode</verdict>
+            <verdict>IUT initial partner lower-priority PHY: link partner does not advertise requested mode</verdict>
+            <verdict>Tester initial partner preferred PHY: link partner does not advertise requested mode</verdict>
+            <verdict>Tester initial partner lower-priority PHY: link partner does not advertise requested mode</verdict>
+            <verdict>Changing advertised PHY modes is not supported on one of sides</verdict>
+          </result>
+        </results>
+        <results key="TOO-FEW-COMMON-PHY-MODES" notes="Setup exposes fewer than two common advertised PHY modes with different priorities">
+          <result value="PASSED"/>
+          <result value="SKIPPED">
+            <verdict>At least two common advertised PHY modes with different priorities are required</verdict>
+          </result>
+        </results>
+      </iter>
+    </test>
     <test name="loopback" type="script">
       <objective>Check that loopback mode works correctly.</objective>
       <notes/>

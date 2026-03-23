@@ -4,6 +4,7 @@
 sources = [
     'net_drv_data_flow.c',
     'net_drv_ethtool.c',
+    'net_drv_phy.c',
     'net_drv_ptp.c',
     'net_drv_rpc.c',
     'net_drv_ts.c',
