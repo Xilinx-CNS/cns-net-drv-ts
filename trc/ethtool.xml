@@ -581,6 +581,19 @@
         </results>
       </iter>
     </test>
+    <test name="parallel_detect" type="script">
+      <objective>Check parallel detect with forced partner.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <notes/>
+        <results tags="port-AUI|port-MII|port-FIBRE|port-BNC|port-DA|port-None|port-Other" notes="Clause 28 parallel detection is meaningful only for twisted-pair PHYs.">
+          <result value="SKIPPED">
+            <verdict>Unsupported PHY for parallel detecting</verdict>
+          </result>
+        </results>
+      </iter>
+    </test>
     <test name="loopback" type="script">
       <objective>Check that loopback mode works correctly.</objective>
       <notes/>

@@ -10,6 +10,7 @@ tests = [
     'eeprom_dump',
     'loopback',
     'msglvl',
+    'parallel_detect',
     'pause_stats_increment',
     'register_dump',
     'reset_under_traffic',
