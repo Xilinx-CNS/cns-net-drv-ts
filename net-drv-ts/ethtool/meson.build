@@ -8,6 +8,7 @@ tests = [
     'dump_module_eeprom',
     'eee',
     'eeprom_dump',
+    'link_fixed_mode',
     'loopback',
     'msglvl',
     'parallel_detect',

@@ -581,6 +581,25 @@
         </results>
       </iter>
     </test>
+    <test name="link_fixed_mode" type="script">
+      <objective>Check fixed PHY mode switching.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <notes/>
+        <results tags="virtio-pci" key="NO-PHY-MODES" notes="Virtio net has no PHY modes to enumerate">
+          <result value="SKIPPED">
+            <verdict>No common supported PHY modes found</verdict>
+          </result>
+        </results>
+        <results key="TOO-FEW-FIXED-PHY-MODES" notes="Too few common PHY modes accepted fixed-mode switching">
+          <result value="PASSED"/>
+          <result value="SKIPPED">
+            <verdict>Too few common PHY modes accepted fixed-mode switching</verdict>
+          </result>
+        </results>
+      </iter>
+    </test>
     <test name="parallel_detect" type="script">
       <objective>Check parallel detect with forced partner.</objective>
       <notes/>

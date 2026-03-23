@@ -191,6 +191,13 @@
         </run>
 
         <run>
+            <script name="link_fixed_mode"/>
+            <arg name="env">
+                <value ref="env.peer2peer"/>
+            </arg>
+        </run>
+
+        <run>
             <script name="parallel_detect"/>
             <arg name="env">
                 <value ref="env.peer2peer"/>
