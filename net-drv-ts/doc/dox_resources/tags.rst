@@ -76,3 +76,13 @@ List of tags set on various testing configurations to distinguish them.
     - *SIDE*-no-ptp
     - PTP kernel interface is unavailable on IUT or Tester side.
     - iut-no-ptp
+  *
+    - pf-count:*VALUE*
+    - Number of network physical functions in the same PCI device as IUT interface.
+      May be used for comparison: greater, equal, less.
+    - pf-count:2
+  *
+    - active-port-count:*VALUE*
+    - Number of active network ports in physical functions from the same as IUT interface.
+      May be used for comparison: greater, equal, less.
+    - active-port-count:2

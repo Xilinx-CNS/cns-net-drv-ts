@@ -298,6 +298,235 @@ add_cpus_tag(const char *ta, const char *prefix)
     te_string_free(&tag_val);
 }
 
+static unsigned int
+pci_device_pf_count_by_driver(const char *ta, const char *if_pci_oid,
+                              unsigned int domain, unsigned int bus,
+                              unsigned int device)
+{
+    unsigned int drv_dev_num = 0;
+    char **drv_pci_oids = NULL;
+    unsigned int pf_count = 0;
+    char *net_driver = NULL;
+    unsigned int i;
+    te_errno rc;
+
+    rc = tapi_cfg_pci_get_driver(if_pci_oid, &net_driver);
+    if (rc != 0)
+    {
+        WARN("Failed to get PCI driver for '%s': %r", if_pci_oid, rc);
+        return 0;
+    }
+
+    if (te_str_is_null_or_empty(net_driver))
+    {
+        WARN("Empty PCI driver for '%s'", if_pci_oid);
+        free(net_driver);
+        return 0;
+    }
+
+    rc = tapi_cfg_pci_devices_by_driver(ta, net_driver, &drv_dev_num,
+                                        &drv_pci_oids);
+    if (rc != 0)
+    {
+        WARN("Failed to get PCI devices for driver '%s' on TA %s: %r",
+             net_driver, ta, rc);
+        free(net_driver);
+        return 0;
+    }
+
+    for (i = 0; i < drv_dev_num; i++)
+    {
+        unsigned int drv_domain;
+        unsigned int drv_bus;
+        unsigned int drv_device;
+        bool is_pf = false;
+
+        rc = tapi_cfg_pci_get_dbdf(drv_pci_oids[i], &drv_domain, &drv_bus,
+                                   &drv_device, NULL);
+        if (rc != 0)
+            continue;
+
+        if (drv_domain != domain || drv_bus != bus || drv_device != device)
+            continue;
+
+        rc = tapi_cfg_pci_is_pf(drv_pci_oids[i], &is_pf);
+        if (rc != 0 || !is_pf)
+            continue;
+
+        pf_count++;
+    }
+
+    for (i = 0; i < drv_dev_num; i++)
+        free(drv_pci_oids[i]);
+    free(drv_pci_oids);
+    free(net_driver);
+
+    return pf_count;
+}
+
+static te_errno
+pci_port_is_active(const char *ta, const char *if_name, te_bool *is_active)
+{
+    te_errno rc;
+
+    *is_active = false;
+
+    rc = tapi_cfg_base_if_await_link_up(ta, if_name, 0, 0, 0);
+    if (rc == 0)
+    {
+        *is_active = true;
+        return 0;
+    }
+
+    if (TE_RC_GET_ERROR(rc) == TE_ETIMEDOUT)
+        return 0;
+
+    return rc;
+}
+
+static unsigned int
+pci_pf_active_port_count(const char *ta, const char *pci_oid)
+{
+    cfg_handle *port_handles = NULL;
+    unsigned int active_port_count = 0;
+    unsigned int port_num = 0;
+    unsigned int i;
+    te_errno rc;
+
+    rc = cfg_find_pattern_fmt(&port_num, &port_handles, "%s/net:*", pci_oid);
+    if (rc != 0 || port_num == 0)
+        goto out;
+
+    for (i = 0; i < port_num; i++)
+    {
+        char *port_if_name = NULL;
+        bool is_active = false;
+
+        rc = cfg_get_instance(port_handles[i], NULL, &port_if_name);
+        if (rc != 0)
+        {
+            free(port_if_name);
+            continue;
+        }
+
+        rc = pci_port_is_active(ta, port_if_name, &is_active);
+        if (rc == 0 && is_active)
+            active_port_count++;
+
+        free(port_if_name);
+    }
+
+out:
+    free(port_handles);
+    return active_port_count;
+}
+
+static unsigned int
+pci_device_active_port_count(const char *ta, unsigned int domain,
+                             unsigned int bus, unsigned int device)
+{
+    cfg_handle *dev_handles = NULL;
+    unsigned int active_port_count = 0;
+    unsigned int dev_num = 0;
+    unsigned int i;
+    te_errno rc;
+
+    rc = cfg_find_pattern_fmt(&dev_num, &dev_handles,
+                              "/agent:%s/hardware:/pci:/device:*", ta);
+    if (rc != 0)
+    {
+        WARN("Failed to list PCI devices on TA %s: %r", ta, rc);
+        return 0;
+    }
+
+    for (i = 0; i < dev_num; i++)
+    {
+        char *dev_oid = NULL;
+        unsigned int dev_domain;
+        unsigned int dev_bus;
+        unsigned int dev_device;
+        bool is_pf = false;
+
+        rc = cfg_get_oid_str(dev_handles[i], &dev_oid);
+        if (rc != 0)
+            continue;
+
+        rc = tapi_cfg_pci_get_dbdf(dev_oid, &dev_domain, &dev_bus,
+                                   &dev_device, NULL);
+        if (rc != 0 || dev_domain != domain || dev_bus != bus ||
+            dev_device != device)
+        {
+            free(dev_oid);
+            continue;
+        }
+
+        rc = tapi_cfg_pci_is_pf(dev_oid, &is_pf);
+        if (rc != 0 || !is_pf)
+        {
+            free(dev_oid);
+            continue;
+        }
+
+        active_port_count += pci_pf_active_port_count(ta, dev_oid);
+        free(dev_oid);
+    }
+
+    free(dev_handles);
+    return active_port_count;
+}
+
+static void
+add_pci_device_count_tags(const char *ta, const char *if_name)
+{
+    te_string active_ports_tag_value = TE_STRING_INIT;
+    te_string pf_tag_value = TE_STRING_INIT;
+    unsigned int active_port_count;
+    char *if_pci_oid = NULL;
+    unsigned int pf_count;
+    unsigned int domain;
+    unsigned int device;
+    unsigned int bus;
+    te_errno rc;
+
+    rc = tapi_cfg_pci_oid_by_net_if(ta, if_name, &if_pci_oid);
+    if (rc != 0)
+    {
+        WARN("Failed to get PCI OID for interface %s on TA %s: %r",
+             if_name, ta, rc);
+        goto out;
+    }
+
+    rc = tapi_cfg_pci_get_dbdf(if_pci_oid, &domain, &bus, &device, NULL);
+    if (rc != 0)
+    {
+        WARN("Failed to parse PCI OID '%s': %r", if_pci_oid, rc);
+        goto out;
+    }
+
+    pf_count = pci_device_pf_count_by_driver(ta, if_pci_oid,
+                                             domain, bus, device);
+    active_port_count = pci_device_active_port_count(ta, domain, bus, device);
+
+    if (pf_count > 0)
+    {
+        te_string_append(&pf_tag_value, "%u", pf_count);
+        CHECK_RC(tapi_tags_add_tag("pf-count",
+                 te_string_value(&pf_tag_value)));
+    }
+
+    if (active_port_count > 0)
+    {
+        te_string_append(&active_ports_tag_value, "%u", active_port_count);
+        CHECK_RC(tapi_tags_add_tag("active-port-count",
+                                   te_string_value(&active_ports_tag_value)));
+    }
+
+out:
+    free(if_pci_oid);
+    te_string_free(&pf_tag_value);
+    te_string_free(&active_ports_tag_value);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -412,6 +641,7 @@ main(int argc, char **argv)
     CHECK_RC(tapi_tags_add_firmwareversion_tag(iut_rpcs->ta,
                                                iut_if->if_name, ""));
     CHECK_RC(tapi_tags_add_net_pci_tags(iut_rpcs->ta, iut_if->if_name));
+    add_pci_device_count_tags(iut_rpcs->ta, iut_if->if_name);
     CHECK_RC(tapi_tags_add_phy_tags(iut_rpcs->ta, iut_if->if_name,
                                     tst_rpcs->ta, tst_if->if_name, ""));
     add_local_phy_tags(iut_rpcs->ta, "iut-");
