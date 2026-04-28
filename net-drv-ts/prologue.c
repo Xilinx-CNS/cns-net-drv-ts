@@ -29,7 +29,6 @@
 #include "tapi_cfg_pci.h"
 #include "tapi_cfg_cpu.h"
 #include "tapi_sh_env.h"
-#include "tapi_cfg_pci.h"
 #include "tapi_rpc_unistd.h"
 #include "tapi_reqs.h"
 #include "tapi_tags.h"
