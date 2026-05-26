@@ -677,12 +677,98 @@
       <objective>Measure Ethernet frame performance via CSAP/TAD</objective>
       <notes/>
       <iter result="PASSED">
-        <arg name="env"/>
+        <arg name="env">VAR.env.peer2peer.iut_client</arg>
         <arg name="frame_size"/>
         <arg name="load_duration"/>
         <arg name="max_loss_pct"/>
         <arg name="tmpl"/>
         <notes/>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env">VAR.env.peer2peer.iut_server</arg>
+        <arg name="frame_size"/>
+        <arg name="load_duration"/>
+        <arg name="max_loss_pct"/>
+        <arg name="tmpl"/>
+        <notes/>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env">VAR.env.peer2peerX2.iut_client</arg>
+        <arg name="frame_size"/>
+        <arg name="load_duration"/>
+        <arg name="max_loss_pct"/>
+        <arg name="tmpl"/>
+        <notes/>
+        <results tags="active-port-count&lt;2" key="FEW-ACTIVE-PORTS">
+          <result value="FAILED">
+            <verdict>Cannot bind env</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env">VAR.env.peer2peerX2.iut_server</arg>
+        <arg name="frame_size"/>
+        <arg name="load_duration"/>
+        <arg name="max_loss_pct"/>
+        <arg name="tmpl"/>
+        <notes/>
+        <results tags="active-port-count&lt;2" key="FEW-ACTIVE-PORTS">
+          <result value="FAILED">
+            <verdict>Cannot bind env</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env">VAR.env.peer2peerX3.iut_client</arg>
+        <arg name="frame_size"/>
+        <arg name="load_duration"/>
+        <arg name="max_loss_pct"/>
+        <arg name="tmpl"/>
+        <notes/>
+        <results tags="active-port-count&lt;3" key="FEW-ACTIVE-PORTS">
+          <result value="FAILED">
+            <verdict>Cannot bind env</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env">VAR.env.peer2peerX3.iut_server</arg>
+        <arg name="frame_size"/>
+        <arg name="load_duration"/>
+        <arg name="max_loss_pct"/>
+        <arg name="tmpl"/>
+        <notes/>
+        <results tags="active-port-count&lt;3" key="FEW-ACTIVE-PORTS">
+          <result value="FAILED">
+            <verdict>Cannot bind env</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env">VAR.env.peer2peerX4.iut_client</arg>
+        <arg name="frame_size"/>
+        <arg name="load_duration"/>
+        <arg name="max_loss_pct"/>
+        <arg name="tmpl"/>
+        <notes/>
+        <results tags="active-port-count&lt;4" key="FEW-ACTIVE-PORTS">
+          <result value="FAILED">
+            <verdict>Cannot bind env</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env">VAR.env.peer2peerX4.iut_server</arg>
+        <arg name="frame_size"/>
+        <arg name="load_duration"/>
+        <arg name="max_loss_pct"/>
+        <arg name="tmpl"/>
+        <notes/>
+        <results tags="active-port-count&lt;4" key="FEW-ACTIVE-PORTS">
+          <result value="FAILED">
+            <verdict>Cannot bind env</verdict>
+          </result>
+        </results>
       </iter>
     </test>
   </iter>

@@ -15,6 +15,12 @@
  * @param env               Testing environment:
  *                          - @ref env.peer2peer.iut_server
  *                          - @ref env.peer2peer.iut_client
+ *                          - @ref env.peer2peerX2.iut_server
+ *                          - @ref env.peer2peerX2.iut_client
+ *                          - @ref env.peer2peerX3.iut_server
+ *                          - @ref env.peer2peerX3.iut_client
+ *                          - @ref env.peer2peerX4.iut_server
+ *                          - @ref env.peer2peerX4.iut_client
  * @param frame_size        Ethernet frame size in bytes, including Ethernet.
  *                          header and FCS:
  *                          - @c 64
@@ -42,6 +48,7 @@
 
 #include "ndn.h"
 #include "tad_common.h"
+#include "tapi_cfg_base.h"
 #include "tapi_eth.h"
 #include "tapi_ndn.h"
 #include "te_defs.h"
@@ -65,55 +72,14 @@
 #define MIN_SPEED_MULTIPLIER 0.01
 /* Allowed excess of Rx packets over Tx packets due to background traffic. */
 #define RX_TX_PKTS_GAP 10
+/* Maximum number of simultaneous links in this test. */
+#define TEST_MAX_LINKS 4
 
 typedef struct ts_range {
     struct timeval first;
     struct timeval last;
     struct timeval dur;
 } ts_range;
-
-static void
-add_pps_artifacts(double tx_pps, double rx_pps)
-{
-    if (rx_pps > EPS && tx_pps > EPS)
-    {
-        TEST_ARTIFACT("Packet rate: Tx: %.3f pps, Rx: %.3f pps",
-                      tx_pps, rx_pps);
-        return;
-    }
-    else if (rx_pps > EPS)
-    {
-        TEST_ARTIFACT("Packet rate: Rx: %.3f pps", rx_pps);
-        return;
-    }
-    else if (tx_pps > EPS)
-    {
-        TEST_ARTIFACT("Packet rate: Tx: %.3f pps", tx_pps);
-    }
-}
-
-static void
-add_l1_bitrate_artifacts(double tx_l1_bps, double rx_l1_bps)
-{
-    if (rx_l1_bps > EPS && tx_l1_bps > EPS)
-    {
-        TEST_ARTIFACT("L1 bitrate: Tx: %.2f Mbps, Rx: %.2f Mbps",
-                      TE_UNITS_DEC_U2M(tx_l1_bps),
-                      TE_UNITS_DEC_U2M(rx_l1_bps));
-        return;
-    }
-    else if (rx_l1_bps > EPS)
-    {
-        TEST_ARTIFACT("L1 bitrate: Rx: %.2f Mbps",
-                      TE_UNITS_DEC_U2M(rx_l1_bps));
-        return;
-    }
-    else if (tx_l1_bps > EPS)
-    {
-        TEST_ARTIFACT("L1 bitrate: Tx: %.2f Mbps",
-                      TE_UNITS_DEC_U2M(tx_l1_bps));
-    }
-}
 
 static void
 log_summary_mi(double tx_pps, double rx_pps,
@@ -139,7 +105,6 @@ get_link_speed(const char *ta, const char *if_name)
     rc = tapi_cfg_phy_speed_oper_get(ta, if_name, &speed);
     if (rc != 0 || speed == TE_PHY_SPEED_UNKNOWN)
         CHECK_RC(tapi_cfg_phy_speed_admin_get(ta, if_name, &speed));
-
 
     if (speed == TE_PHY_SPEED_UNKNOWN)
     {
@@ -196,6 +161,37 @@ get_timestamps(const char *ta, csap_handle_t csap, ts_range *ts)
     te_timersub(&ts->last, &ts->first, &ts->dur);
 }
 
+static void
+set_template_eth_addrs(asn_value *tmpl, const struct sockaddr *dst,
+                       const struct sockaddr *src)
+{
+    CHECK_RC(asn_write_value_field(tmpl, dst->sa_data, ETHER_ADDR_LEN,
+                                   "pdus.0.#eth.dst-addr.#plain"));
+    CHECK_RC(asn_write_value_field(tmpl, src->sa_data, ETHER_ADDR_LEN,
+                                   "pdus.0.#eth.src-addr.#plain"));
+}
+
+static void
+wait_send_completion(const char *ta, csap_handle_t csap, const char *if_name,
+                     unsigned int timeout_s)
+{
+    tad_csap_status_t status = CSAP_IDLE;
+    unsigned int i;
+
+    for (i = 0; i < timeout_s; i++)
+    {
+        CHECK_RC(tapi_csap_get_status(ta, 0, csap, &status));
+        if (status == CSAP_ERROR)
+            TEST_FAIL("Tx CSAP reported error on %s", if_name);
+        if (status != CSAP_BUSY)
+            return;
+        VSLEEP(1, "wait for Tx CSAP completion");
+    }
+
+    TEST_FAIL("Tx CSAP did not complete on %s within %u seconds",
+              if_name, timeout_s);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -204,62 +200,104 @@ main(int argc, char *argv[])
     rcf_rpc_server *client_rpcs = NULL;
     rcf_rpc_server *sender_rpcs = NULL;
     rcf_rpc_server *receiver_rpcs = NULL;
-    const struct if_nameindex *server_if0 = NULL;
-    const struct if_nameindex *client_if0 = NULL;
-    const struct if_nameindex *sender_iface = NULL;
-    const struct if_nameindex *receiver_iface = NULL;
+    const struct if_nameindex *server_ifs[TEST_MAX_LINKS] = {};
+    const struct if_nameindex *client_ifs[TEST_MAX_LINKS] = {};
+    const struct if_nameindex *sender_ifs[TEST_MAX_LINKS] = {};
+    const struct if_nameindex *receiver_ifs[TEST_MAX_LINKS] = {};
+    struct sockaddr sender_lladdrs[TEST_MAX_LINKS] = {};
+    struct sockaddr receiver_lladdrs[TEST_MAX_LINKS] = {};
+    unsigned int n_ports = 0;
 
     int frame_size;
     int load_duration;
     double max_loss_pct;
     asn_value *tmpl = NULL;
+    asn_value *tmpls[TEST_MAX_LINKS] = {};
 
-    int link_speed_mbps;
-    uint64_t link_speed_bps;
+    uint64_t link_speed_bps[TEST_MAX_LINKS] = {};
+    uint64_t common_link_speed_bps = 0;
     int payload_len;
     uint64_t pkt_l1_bits;
-    uint64_t target_packets;
-    double target_pps;
+    uint64_t target_packets[TEST_MAX_LINKS] = {};
+    double target_pps[TEST_MAX_LINKS] = {};
 
-    csap_handle_t csap_send = CSAP_INVALID_HANDLE;
-    csap_handle_t csap_rx = CSAP_INVALID_HANDLE;
+    csap_handle_t csap_send[TEST_MAX_LINKS];
+    csap_handle_t csap_rx[TEST_MAX_LINKS];
 
-    unsigned int tx_pkts = 0;
-    unsigned int rx_pkts = 0;
+    uint64_t tx_pkts[TEST_MAX_LINKS] = {};
+    unsigned int rx_pkts[TEST_MAX_LINKS] = {};
+    uint64_t tx_pkts_total = 0;
+    uint64_t rx_pkts_total = 0;
     int64_t loss_pkts = 0;
     double loss_pct = 0.0;
 
-    ts_range tx_ts = { 0 };
-    ts_range rx_ts = { 0 };
-    double tx_time_s = 0.0;
-    double rx_time_s = 0.0;
+    ts_range tx_ts[TEST_MAX_LINKS] = {};
+    ts_range rx_ts[TEST_MAX_LINKS] = {};
+    double tx_time_s[TEST_MAX_LINKS] = {};
+    double rx_time_s[TEST_MAX_LINKS] = {};
+    double tx_pps_per_link[TEST_MAX_LINKS] = {};
+    double rx_pps_per_link[TEST_MAX_LINKS] = {};
+    double tx_l1_bps_per_link[TEST_MAX_LINKS] = {};
+    double rx_l1_bps_per_link[TEST_MAX_LINKS] = {};
     double tx_pps = 0.0;
     double rx_pps = 0.0;
     double tx_l1_bps = 0.0;
     double rx_l1_bps = 0.0;
-    double min_l1_bps = 0.0;
-    double checked_l1_bps = 0.0;
+    double total_line_rate_bps = 0.0;
+    double tx_util_pct = 0.0;
+    double rx_util_pct = 0.0;
+    unsigned int send_timeout_s = 0;
     bool iut_is_sender = false;
-    const char *checked_dir = NULL;
-    const char *checked_iface = NULL;
+    te_string str = TE_STRING_INIT;
+    unsigned int i;
+
+    for (i = 0; i < TE_ARRAY_LEN(csap_send); i++)
+    {
+        csap_send[i] = CSAP_INVALID_HANDLE;
+        csap_rx[i] = CSAP_INVALID_HANDLE;
+    }
 
     TEST_START;
     TEST_GET_PCO(iut_rpcs);
     TEST_GET_PCO(server_rpcs);
     TEST_GET_PCO(client_rpcs);
-    TEST_GET_IF(server_if0);
-    TEST_GET_IF(client_if0);
     TEST_GET_INT_PARAM(frame_size);
     TEST_GET_INT_PARAM(load_duration);
     TEST_GET_DOUBLE_PARAM(max_loss_pct);
     TEST_GET_NDN_TRAFFIC_TEMPLATE(tmpl);
 
     sender_rpcs = client_rpcs;
-    sender_iface = client_if0;
     receiver_rpcs = server_rpcs;
-    receiver_iface = server_if0;
     iut_is_sender = strcmp(sender_rpcs->ta, iut_rpcs->ta) == 0;
     CHECK_RC(tapi_ndn_subst_env(tmpl, NULL, &env));
+
+    for (i = 0; i < TEST_MAX_LINKS; i++)
+    {
+        te_string_reset(&str);
+        te_string_append(&str, "server_if%u", i);
+        server_ifs[i] = tapi_env_get_if(&env, te_string_value(&str));
+        if (server_ifs[i] == NULL)
+            break;
+
+        te_string_reset(&str);
+        te_string_append(&str, "client_if%u", i);
+        client_ifs[i] = tapi_env_get_if(&env, te_string_value(&str));
+        CHECK_NOT_NULL(client_ifs[i]);
+
+        sender_ifs[i] = client_ifs[i];
+        receiver_ifs[i] = server_ifs[i];
+
+        CHECK_RC(tapi_cfg_base_if_get_link_addr(sender_rpcs->ta,
+                                                sender_ifs[i]->if_name,
+                                                &sender_lladdrs[i]));
+        CHECK_RC(tapi_cfg_base_if_get_link_addr(receiver_rpcs->ta,
+                                                receiver_ifs[i]->if_name,
+                                                &receiver_lladdrs[i]));
+        n_ports++;
+    }
+
+    if (n_ports == 0)
+        TEST_FAIL("No server/client interface pairs found in env");
 
     payload_len = frame_size - ETHER_HDR_LEN - ETHER_CRC_LEN;
     if (payload_len <= 0)
@@ -268,109 +306,209 @@ main(int argc, char *argv[])
                   frame_size);
     }
 
-    link_speed_mbps = get_link_speed(
-        iut_is_sender ? sender_rpcs->ta : receiver_rpcs->ta,
-        iut_is_sender ? sender_iface->if_name : receiver_iface->if_name);
-
-    link_speed_bps = (uint64_t)TE_UNITS_DEC_M2U(link_speed_mbps);
-
     pkt_l1_bits = (uint64_t)(frame_size + ETH_L1_SERVICE_LEN) * CHAR_BIT;
-    target_packets = TE_DIV_ROUND_UP(
-                         link_speed_bps * (uint64_t)load_duration,
-                         pkt_l1_bits);
-    target_pps = (double)link_speed_bps / pkt_l1_bits;
+    send_timeout_s = (unsigned int)((double)load_duration /
+                                    MIN_SPEED_MULTIPLIER) + 30;
 
-    prepare_template(tmpl, target_packets, payload_len);
+    for (i = 0; i < n_ports; i++)
+    {
+        const struct if_nameindex *iut_if = iut_is_sender ?
+                                            sender_ifs[i] : receiver_ifs[i];
 
-    TEST_STEP("Create sender CSAP for frame generation by template.");
-    CHECK_RC(tapi_eth_based_csap_create_by_tmpl(
-                 sender_rpcs->ta, 0, sender_iface->if_name, TAD_ETH_RECV_NO,
-                 tmpl, &csap_send));
+        link_speed_bps[i] = (uint64_t)TE_UNITS_DEC_M2U(
+                                get_link_speed(iut_rpcs->ta, iut_if->if_name));
+        if (i == 0)
+            common_link_speed_bps = link_speed_bps[i];
 
-    TEST_STEP("Create Rx capture CSAP on receiver.");
-    CHECK_RC(tapi_eth_based_csap_create_by_tmpl(
-                 receiver_rpcs->ta, 0, receiver_iface->if_name,
-                 TAD_ETH_RECV_DEF | TAD_ETH_RECV_NO_PROMISC, tmpl, &csap_rx));
+        target_packets[i] = TE_DIV_ROUND_UP(
+                                link_speed_bps[i] * (uint64_t)load_duration,
+                                pkt_l1_bits);
+        target_pps[i] = (double)link_speed_bps[i] / pkt_l1_bits;
 
-    CHECK_RC(tapi_tad_trrecv_start(receiver_rpcs->ta, 0, csap_rx,
-                                   NULL, TAD_TIMEOUT_INF, 0,
-                                   RCF_TRRECV_COUNT));
+        tmpls[i] = asn_copy_value(tmpl);
+        if (tmpls[i] == NULL)
+            TEST_VERDICT("Failed to copy traffic template");
+
+        prepare_template(tmpls[i], target_packets[i], payload_len);
+        set_template_eth_addrs(tmpls[i], &receiver_lladdrs[i],
+                               &sender_lladdrs[i]);
+
+        CHECK_RC(tapi_eth_based_csap_create_by_tmpl(
+                     sender_rpcs->ta, 0, sender_ifs[i]->if_name,
+                     TAD_ETH_RECV_NO, tmpls[i], &csap_send[i]));
+
+        CHECK_RC(tapi_eth_based_csap_create_by_tmpl(
+                     receiver_rpcs->ta, 0, receiver_ifs[i]->if_name,
+                     TAD_ETH_RECV_DEF | TAD_ETH_RECV_NO_PROMISC,
+                     tmpls[i], &csap_rx[i]));
+    }
+
+    for (i = 0; i < n_ports; i++)
+    {
+        CHECK_RC(tapi_tad_trrecv_start(receiver_rpcs->ta, 0, csap_rx[i], NULL,
+                                       TAD_TIMEOUT_INF, 0, RCF_TRRECV_COUNT));
+    }
 
     CHECK_RC(tapi_env_stats_gather(&env));
 
-    TEST_STEP("Send Ethernet frames from sender CSAP.");
-    CHECK_RC(tapi_tad_trsend_start(sender_rpcs->ta, 0, csap_send,
-                                   tmpl, RCF_MODE_BLOCKING));
-    /*
-     * In blocking mode successful trsend_start() completes only after the
-     * whole requested template has been sent.
-     */
-    tx_pkts = (unsigned int)target_packets;
+    TEST_STEP("Send Ethernet frames on all links simultaneously.");
+    for (i = 0; i < n_ports; i++)
+    {
+        CHECK_RC(tapi_tad_trsend_start(sender_rpcs->ta, 0, csap_send[i],
+                                       tmpls[i], RCF_MODE_NONBLOCKING));
+    }
+
+    for (i = 0; i < n_ports; i++)
+    {
+        wait_send_completion(sender_rpcs->ta, csap_send[i],
+                             sender_ifs[i]->if_name,
+                             send_timeout_s);
+        tx_pkts[i] = target_packets[i];
+        tx_pkts_total += tx_pkts[i];
+    }
 
     TAPI_WAIT_NETWORK;
 
-    CHECK_RC(tapi_tad_trrecv_stop(receiver_rpcs->ta, 0, csap_rx,
-                                  NULL, &rx_pkts));
-
-    if (rx_pkts > tx_pkts)
+    for (i = 0; i < n_ports; i++)
     {
-        unsigned int rx_tx_gap = rx_pkts - tx_pkts;
+        CHECK_RC(tapi_tad_trrecv_stop(receiver_rpcs->ta, 0, csap_rx[i], NULL,
+                                      &rx_pkts[i]));
 
-        if (rx_tx_gap > RX_TX_PKTS_GAP)
+        if (rx_pkts[i] > tx_pkts[i])
         {
-            ERROR("Rx CSAP captured more packets than were requested (%u > %u, gap %u > %u)",
-                  rx_pkts, tx_pkts, rx_tx_gap, RX_TX_PKTS_GAP);
-            ERROR_VERDICT("Rx CSAP captured more packets than were sent");
+            unsigned int rx_tx_gap = rx_pkts[i] - tx_pkts[i];
+
+            if (rx_tx_gap > RX_TX_PKTS_GAP)
+            {
+                ERROR("Rx CSAP captured more packets than were requested on link #%u "
+                      "(%u > %" PRIu64 ", gap %u > %u)",
+                      i, rx_pkts[i], tx_pkts[i], rx_tx_gap, RX_TX_PKTS_GAP);
+                ERROR_VERDICT("Rx CSAP captured more packets than were sent");
+            }
+
+            rx_pkts[i] = tx_pkts[i];
         }
 
-        rx_pkts = tx_pkts;
+        rx_pkts_total += rx_pkts[i];
     }
 
-    get_timestamps(sender_rpcs->ta, csap_send, &tx_ts);
-    tx_time_s = tx_ts.dur.tv_sec + (double)tx_ts.dur.tv_usec / TE_SEC2US(1);
-    if (rx_pkts > 0)
+    for (i = 0; i < n_ports; i++)
     {
-        get_timestamps(receiver_rpcs->ta, csap_rx, &rx_ts);
-        rx_time_s = rx_ts.dur.tv_sec +
-                    (double)rx_ts.dur.tv_usec / TE_SEC2US(1);
+        get_timestamps(sender_rpcs->ta, csap_send[i], &tx_ts[i]);
+        tx_time_s[i] = tx_ts[i].dur.tv_sec +
+                       (double)tx_ts[i].dur.tv_usec / TE_SEC2US(1);
+        if (rx_pkts[i] > 0)
+        {
+            get_timestamps(receiver_rpcs->ta, csap_rx[i], &rx_ts[i]);
+            rx_time_s[i] = rx_ts[i].dur.tv_sec +
+                           (double)rx_ts[i].dur.tv_usec / TE_SEC2US(1);
+        }
+
+        if (tx_time_s[i] > 0.0)
+        {
+            tx_pps_per_link[i] = tx_pkts[i] / tx_time_s[i];
+            tx_l1_bps_per_link[i] = tx_pps_per_link[i] * pkt_l1_bits;
+            tx_pps += tx_pps_per_link[i];
+            tx_l1_bps += tx_l1_bps_per_link[i];
+        }
+        if (rx_time_s[i] > 0.0)
+        {
+            rx_pps_per_link[i] = rx_pkts[i] / rx_time_s[i];
+            rx_l1_bps_per_link[i] = rx_pps_per_link[i] * pkt_l1_bits;
+            rx_pps += rx_pps_per_link[i];
+            rx_l1_bps += rx_l1_bps_per_link[i];
+        }
     }
 
-    if (tx_time_s > 0.0)
+    loss_pkts = (int64_t)tx_pkts_total - (int64_t)rx_pkts_total;
+    if (tx_pkts_total > 0)
+        loss_pct = (double)loss_pkts * 100.0 / tx_pkts_total;
+
+    total_line_rate_bps = common_link_speed_bps * n_ports;
+
+    if (total_line_rate_bps > EPS)
     {
-        tx_pps = tx_pkts / tx_time_s;
-        tx_l1_bps = tx_pps * pkt_l1_bits;
+        tx_util_pct = tx_l1_bps * 100.0 / total_line_rate_bps;
+        rx_util_pct = rx_l1_bps * 100.0 / total_line_rate_bps;
     }
-    if (rx_time_s > 0.0)
+
+    TEST_ARTIFACT("PHY: %u links x %.2f Mbps, target %.3f Mpps/link, "
+                  "min checked L1 %.2f Mbps/link",
+                  n_ports, TE_UNITS_DEC_U2M(common_link_speed_bps),
+                  TE_UNITS_DEC_U2M(target_pps[0]),
+                  TE_UNITS_DEC_U2M(common_link_speed_bps *
+                                   MIN_SPEED_MULTIPLIER));
+    TEST_ARTIFACT("Aggregate: Tx %.2f Mbps (%.3f Mpps, %.1f%%), "
+                  "Rx %.2f Mbps (%.3f Mpps, %.1f%%), "
+                  "loss %.3f Mpkts (%.3f%%)",
+                  TE_UNITS_DEC_U2M(tx_l1_bps),
+                  TE_UNITS_DEC_U2M(tx_pps), tx_util_pct,
+                  TE_UNITS_DEC_U2M(rx_l1_bps),
+                  TE_UNITS_DEC_U2M(rx_pps), rx_util_pct,
+                  TE_UNITS_DEC_U2M(loss_pkts), loss_pct);
+    RING("Aggregate packets: Tx %.3f Mpkts, Rx %.3f Mpkts, "
+         "loss %.3f Mpkts",
+         TE_UNITS_DEC_U2M(tx_pkts_total),
+         TE_UNITS_DEC_U2M(rx_pkts_total),
+         TE_UNITS_DEC_U2M(loss_pkts));
+
+    for (i = 0; i < n_ports; i++)
     {
-        rx_pps = rx_pkts / rx_time_s;
-        rx_l1_bps = rx_pps * pkt_l1_bits;
-    }
+        int64_t loss_pkts_link = (int64_t)tx_pkts[i] - (int64_t)rx_pkts[i];
+        double loss_pct_link = tx_pkts[i] > 0 ?
+                               (double)loss_pkts_link * 100.0 / tx_pkts[i] :
+                               0.0;
+        double min_l1_bps = (double)link_speed_bps[i] * MIN_SPEED_MULTIPLIER;
+        double tx_util_pct_link = link_speed_bps[i] > 0 ?
+                                  tx_l1_bps_per_link[i] * 100.0 /
+                                  link_speed_bps[i] : 0.0;
+        double rx_util_pct_link = link_speed_bps[i] > 0 ?
+                                  rx_l1_bps_per_link[i] * 100.0 /
+                                  link_speed_bps[i] : 0.0;
+        double checked_l1_bps = iut_is_sender ? rx_l1_bps_per_link[i] :
+                                                tx_l1_bps_per_link[i];
+        const char *checked_dir = iut_is_sender ? "IUT->Tester" :
+                                                  "Tester->IUT";
+        const char *checked_iface = iut_is_sender ?
+                                    sender_ifs[i]->if_name :
+                                    receiver_ifs[i]->if_name;
 
-    loss_pkts = (int64_t)tx_pkts - rx_pkts;
-    if (tx_pkts > 0)
-        loss_pct = (double)loss_pkts * 100.0 / tx_pkts;
+        TEST_ARTIFACT("Link #%u %s -> %s: Tx/Rx %.2f/%.2f Mbps "
+                      "(%.1f/%.1f%%), loss %.3f%%",
+                      i, sender_ifs[i]->if_name, receiver_ifs[i]->if_name,
+                      TE_UNITS_DEC_U2M(tx_l1_bps_per_link[i]),
+                      TE_UNITS_DEC_U2M(rx_l1_bps_per_link[i]),
+                      tx_util_pct_link, rx_util_pct_link, loss_pct_link);
+        RING("Link #%u packets: Tx %.3f Mpkts, Rx %.3f Mpkts, "
+             "loss %.3f Mpkts",
+             i, TE_UNITS_DEC_U2M(tx_pkts[i]), TE_UNITS_DEC_U2M(rx_pkts[i]),
+             TE_UNITS_DEC_U2M(loss_pkts_link));
+        RING("Link #%u packet rate: Tx %.3f Mpps, Rx %.3f Mpps",
+             i, TE_UNITS_DEC_U2M(tx_pps_per_link[i]),
+             TE_UNITS_DEC_U2M(rx_pps_per_link[i]));
 
-    min_l1_bps = (double)link_speed_bps * MIN_SPEED_MULTIPLIER;
-    checked_dir = iut_is_sender ? "IUT->Tester" : "Tester->IUT";
-    checked_l1_bps = iut_is_sender ? rx_l1_bps : tx_l1_bps;
-    checked_iface = iut_is_sender ? sender_iface->if_name :
-                                    receiver_iface->if_name;
+        if (loss_pct_link > max_loss_pct)
+        {
+            ERROR("Frame loss on link #%u (%.3f%%) exceeds max_loss_pct %.3f%%",
+                  i, loss_pct_link, max_loss_pct);
+        }
 
-    TEST_ARTIFACT("Frame size: %d bytes", frame_size);
-    TEST_ARTIFACT("Ethernet payload length: %d bytes", payload_len);
-    TEST_ARTIFACT("Link speed: %d Mbps", link_speed_mbps);
-    TEST_ARTIFACT("Minimum acceptable throughput: %.2f Mbps",
+        if (checked_l1_bps < EPS)
+        {
+            ERROR("Zero throughput in %s direction for link #%u (IUT interface: %s)",
+                  checked_dir, i, checked_iface);
+            TEST_VERDICT("Zero IUT throughput in checked direction");
+        }
+        else if (checked_l1_bps < min_l1_bps)
+        {
+            ERROR("Throughput is too low in %s direction for link #%u "
+                  "(IUT interface: %s, L1 %.2f Mbps < %.2f Mbps threshold)",
+                  checked_dir, i, checked_iface,
+                  TE_UNITS_DEC_U2M(checked_l1_bps),
                   TE_UNITS_DEC_U2M(min_l1_bps));
-    TEST_ARTIFACT("Target load duration: %d s", load_duration);
-    TEST_ARTIFACT("Target packet rate at line rate: %.3f pps", target_pps);
-    TEST_ARTIFACT("Calculated packets to send: %" PRIu64, target_packets);
-    TEST_ARTIFACT("Tx packets: %u", tx_pkts);
-    TEST_ARTIFACT("Rx packets: %u", rx_pkts);
-    TEST_ARTIFACT("Frame loss: %" TE_PRINTF_64 "d packets (%.3f%%)",
-                  loss_pkts, loss_pct);
-
-    add_pps_artifacts(tx_pps, rx_pps);
-    add_l1_bitrate_artifacts(tx_l1_bps, rx_l1_bps);
+            TEST_VERDICT("IUT throughput is too low in checked direction");
+        }
+    }
 
     log_summary_mi(tx_pps, rx_pps, tx_l1_bps, rx_l1_bps);
 
@@ -381,27 +519,15 @@ main(int argc, char *argv[])
         ERROR_VERDICT("Frame loss exceeds configured threshold");
     }
 
-    if (checked_l1_bps < EPS)
-    {
-        ERROR("Zero throughput in %s direction (IUT interface: %s)",
-              checked_dir, checked_iface);
-        TEST_VERDICT("Zero IUT throughput in checked direction");
-    }
-    else if (checked_l1_bps < min_l1_bps)
-    {
-        ERROR("Throughput is too low in %s direction "
-              "(IUT interface: %s, L1 %.2f Mbps < %.2f Mbps threshold)",
-              checked_dir, checked_iface, TE_UNITS_DEC_U2M(checked_l1_bps),
-              TE_UNITS_DEC_U2M(min_l1_bps));
-        TEST_VERDICT("IUT throughput is too low in checked direction");
-    }
-
     TEST_SUCCESS;
 
 cleanup:
     CLEANUP_CHECK_RC(tapi_tad_csap_destroy_all(0));
 
+    for (i = 0; i < TE_ARRAY_LEN(tmpls); i++)
+        asn_free_value(tmpls[i]);
     asn_free_value(tmpl);
+    te_string_free(&str);
 
     CLEANUP_CHECK_RC(tapi_env_stats_gather_and_log_diff(&env));
 

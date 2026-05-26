@@ -139,22 +139,26 @@
             'server_host'{
                 {'iut_rpcs':IUT},
                 if:'iut_if0',
-                addr:'server_addr0':inet:unicast
+                addr:'server_addr0':inet:unicast,
+                addr:'server_lladdr0':ether:unicast
             },
             'client_host'{
                 {'tst_rpcs':tester},
                 if:'tst_if0',
-                addr:'client_addr0':inet:unicast
+                addr:'client_addr0':inet:unicast,
+                addr:'client_lladdr0':ether:unicast
             }
         },
         'net1':IUT{
             'server_host'{
                 if:'iut_if1',
-                addr:'server_addr1':inet:unicast
+                addr:'server_addr1':inet:unicast,
+                addr:'server_lladdr1':ether:unicast
             },
             'client_host'{
                 if:'tst_if1',
-                addr:'client_addr1':inet:unicast
+                addr:'client_addr1':inet:unicast,
+                addr:'client_lladdr1':ether:unicast
             }
         },
         'client_rpcs'='tst_rpcs',
@@ -171,22 +175,26 @@
             'client_host'{
                 {'iut_rpcs':IUT},
                 if:'iut_if0',
-                addr:'client_addr0':inet:unicast
+                addr:'client_addr0':inet:unicast,
+                addr:'client_lladdr0':ether:unicast
             },
             'server_host'{
                 {'tst_rpcs':tester},
                 if:'tst_if0',
-                addr:'server_addr0':inet:unicast
+                addr:'server_addr0':inet:unicast,
+                addr:'server_lladdr0':ether:unicast
             }
         },
         'net1':IUT{
             'client_host'{
                 if:'iut_if1',
-                addr:'client_addr1':inet:unicast
+                addr:'client_addr1':inet:unicast,
+                addr:'client_lladdr1':ether:unicast
             },
             'server_host'{
                 if:'tst_if1',
-                addr:'server_addr1':inet:unicast
+                addr:'server_addr1':inet:unicast,
+                addr:'server_lladdr1':ether:unicast
             }
         },
         'client_rpcs'='iut_rpcs',
@@ -203,22 +211,26 @@
             'server_host'{
                 {'iut_rpcs':IUT},
                 if:'iut_if0',
-                addr:'server_addr0':inet6:unicast
+                addr:'server_addr0':inet6:unicast,
+                addr:'server_lladdr0':ether:unicast
             },
             'client_host'{
                 {'tst_rpcs':tester},
                 if:'tst_if0',
-                addr:'client_addr0':inet6:unicast
+                addr:'client_addr0':inet6:unicast,
+                addr:'client_lladdr0':ether:unicast
             }
         },
         'net1':IUT{
             'server_host'{
                 if:'iut_if1',
-                addr:'server_addr1':inet6:unicast
+                addr:'server_addr1':inet6:unicast,
+                addr:'server_lladdr1':ether:unicast
             },
             'client_host'{
                 if:'tst_if1',
-                addr:'client_addr1':inet6:unicast
+                addr:'client_addr1':inet6:unicast,
+                addr:'client_lladdr1':ether:unicast
             }
         },
         'client_rpcs'='tst_rpcs',
@@ -235,22 +247,26 @@
             'client_host'{
                 {'iut_rpcs':IUT},
                 if:'iut_if0',
-                addr:'client_addr0':inet6:unicast
+                addr:'client_addr0':inet6:unicast,
+                addr:'client_lladdr0':ether:unicast
             },
             'server_host'{
                 {'tst_rpcs':tester},
                 if:'tst_if0',
-                addr:'server_addr0':inet6:unicast
+                addr:'server_addr0':inet6:unicast,
+                addr:'server_lladdr0':ether:unicast
             }
         },
         'net1':IUT{
             'client_host'{
                 if:'iut_if1',
-                addr:'client_addr1':inet6:unicast
+                addr:'client_addr1':inet6:unicast,
+                addr:'client_lladdr1':ether:unicast
             },
             'server_host'{
                 if:'tst_if1',
-                addr:'server_addr1':inet6:unicast
+                addr:'server_addr1':inet6:unicast,
+                addr:'server_lladdr1':ether:unicast
             }
         },
         'client_rpcs'='iut_rpcs',
@@ -259,6 +275,234 @@
         'server_rpcs'='tst_rpcs',
         'server_if0'='tst_if0',
         'server_if1'='tst_if1'
+    </value>
+  </global>
+  <global name="env.peer2peerX3.iut_server">
+    <value reqs="IP4">
+        'net0':IUT{
+            'server_host'{
+                {'iut_rpcs':IUT},
+                if:'iut_if0',
+                addr:'server_addr0':inet:unicast,
+                addr:'server_lladdr0':ether:unicast
+            },
+            'client_host'{
+                {'tst_rpcs':tester},
+                if:'tst_if0',
+                addr:'client_addr0':inet:unicast,
+                addr:'client_lladdr0':ether:unicast
+            }
+        },
+        'net1':IUT{
+            'server_host'{
+                if:'iut_if1',
+                addr:'server_addr1':inet:unicast,
+                addr:'server_lladdr1':ether:unicast
+            },
+            'client_host'{
+                if:'tst_if1',
+                addr:'client_addr1':inet:unicast,
+                addr:'client_lladdr1':ether:unicast
+            }
+        },
+        'net2':IUT{
+            'server_host'{
+                if:'iut_if2',
+                addr:'server_addr2':inet:unicast,
+                addr:'server_lladdr2':ether:unicast
+            },
+            'client_host'{
+                if:'tst_if2',
+                addr:'client_addr2':inet:unicast,
+                addr:'client_lladdr2':ether:unicast
+            }
+        },
+        'client_rpcs'='tst_rpcs',
+        'client_if0'='tst_if0',
+        'client_if1'='tst_if1',
+        'client_if2'='tst_if2',
+        'server_rpcs'='iut_rpcs',
+        'server_if0'='iut_if0',
+        'server_if1'='iut_if1',
+        'server_if2'='iut_if2'
+    </value>
+  </global>
+  <global name="env.peer2peerX3.iut_client">
+    <value reqs="IP4">
+        'net0':IUT{
+            'client_host'{
+                {'iut_rpcs':IUT},
+                if:'iut_if0',
+                addr:'client_addr0':inet:unicast,
+                addr:'client_lladdr0':ether:unicast
+            },
+            'server_host'{
+                {'tst_rpcs':tester},
+                if:'tst_if0',
+                addr:'server_addr0':inet:unicast,
+                addr:'server_lladdr0':ether:unicast
+            }
+        },
+        'net1':IUT{
+            'client_host'{
+                if:'iut_if1',
+                addr:'client_addr1':inet:unicast,
+                addr:'client_lladdr1':ether:unicast
+            },
+            'server_host'{
+                if:'tst_if1',
+                addr:'server_addr1':inet:unicast,
+                addr:'server_lladdr1':ether:unicast
+            }
+        },
+        'net2':IUT{
+            'client_host'{
+                if:'iut_if2',
+                addr:'client_addr2':inet:unicast,
+                addr:'client_lladdr2':ether:unicast
+            },
+            'server_host'{
+                if:'tst_if2',
+                addr:'server_addr2':inet:unicast,
+                addr:'server_lladdr2':ether:unicast
+            }
+        },
+        'client_rpcs'='iut_rpcs',
+        'client_if0'='iut_if0',
+        'client_if1'='iut_if1',
+        'client_if2'='iut_if2',
+        'server_rpcs'='tst_rpcs',
+        'server_if0'='tst_if0',
+        'server_if1'='tst_if1',
+        'server_if2'='tst_if2'
+    </value>
+  </global>
+  <global name="env.peer2peerX4.iut_server">
+    <value reqs="IP4">
+        'net0':IUT{
+            'server_host'{
+                {'iut_rpcs':IUT},
+                if:'iut_if0',
+                addr:'server_addr0':inet:unicast,
+                addr:'server_lladdr0':ether:unicast
+            },
+            'client_host'{
+                {'tst_rpcs':tester},
+                if:'tst_if0',
+                addr:'client_addr0':inet:unicast,
+                addr:'client_lladdr0':ether:unicast
+            }
+        },
+        'net1':IUT{
+            'server_host'{
+                if:'iut_if1',
+                addr:'server_addr1':inet:unicast,
+                addr:'server_lladdr1':ether:unicast
+            },
+            'client_host'{
+                if:'tst_if1',
+                addr:'client_addr1':inet:unicast,
+                addr:'client_lladdr1':ether:unicast
+            }
+        },
+        'net2':IUT{
+            'server_host'{
+                if:'iut_if2',
+                addr:'server_addr2':inet:unicast,
+                addr:'server_lladdr2':ether:unicast
+            },
+            'client_host'{
+                if:'tst_if2',
+                addr:'client_addr2':inet:unicast,
+                addr:'client_lladdr2':ether:unicast
+            }
+        },
+        'net3':IUT{
+            'server_host'{
+                if:'iut_if3',
+                addr:'server_addr3':inet:unicast,
+                addr:'server_lladdr3':ether:unicast
+            },
+            'client_host'{
+                if:'tst_if3',
+                addr:'client_addr3':inet:unicast,
+                addr:'client_lladdr3':ether:unicast
+            }
+        },
+        'client_rpcs'='tst_rpcs',
+        'client_if0'='tst_if0',
+        'client_if1'='tst_if1',
+        'client_if2'='tst_if2',
+        'client_if3'='tst_if3',
+        'server_rpcs'='iut_rpcs',
+        'server_if0'='iut_if0',
+        'server_if1'='iut_if1',
+        'server_if2'='iut_if2',
+        'server_if3'='iut_if3'
+    </value>
+  </global>
+  <global name="env.peer2peerX4.iut_client">
+    <value reqs="IP4">
+        'net0':IUT{
+            'client_host'{
+                {'iut_rpcs':IUT},
+                if:'iut_if0',
+                addr:'client_addr0':inet:unicast,
+                addr:'client_lladdr0':ether:unicast
+            },
+            'server_host'{
+                {'tst_rpcs':tester},
+                if:'tst_if0',
+                addr:'server_addr0':inet:unicast,
+                addr:'server_lladdr0':ether:unicast
+            }
+        },
+        'net1':IUT{
+            'client_host'{
+                if:'iut_if1',
+                addr:'client_addr1':inet:unicast,
+                addr:'client_lladdr1':ether:unicast
+            },
+            'server_host'{
+                if:'tst_if1',
+                addr:'server_addr1':inet:unicast,
+                addr:'server_lladdr1':ether:unicast
+            }
+        },
+        'net2':IUT{
+            'client_host'{
+                if:'iut_if2',
+                addr:'client_addr2':inet:unicast,
+                addr:'client_lladdr2':ether:unicast
+            },
+            'server_host'{
+                if:'tst_if2',
+                addr:'server_addr2':inet:unicast,
+                addr:'server_lladdr2':ether:unicast
+            }
+        },
+        'net3':IUT{
+            'client_host'{
+                if:'iut_if3',
+                addr:'client_addr3':inet:unicast,
+                addr:'client_lladdr3':ether:unicast
+            },
+            'server_host'{
+                if:'tst_if3',
+                addr:'server_addr3':inet:unicast,
+                addr:'server_lladdr3':ether:unicast
+            }
+        },
+        'client_rpcs'='iut_rpcs',
+        'client_if0'='iut_if0',
+        'client_if1'='iut_if1',
+        'client_if2'='iut_if2',
+        'client_if3'='iut_if3',
+        'server_rpcs'='tst_rpcs',
+        'server_if0'='tst_if0',
+        'server_if1'='tst_if1',
+        'server_if2'='tst_if2',
+        'server_if3'='tst_if3'
     </value>
   </global>
   <global name="env.peer2peerX2.fwd">
