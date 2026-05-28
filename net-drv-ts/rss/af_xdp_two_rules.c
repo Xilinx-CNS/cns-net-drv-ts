@@ -91,6 +91,7 @@ main(int argc, char **argv)
     const struct if_nameindex *iut_if = NULL;
     const struct sockaddr *iut_addr = NULL;
     const struct sockaddr *tst_addr = NULL;
+    bool multi_seg;
     unsigned int copy_mode;
 
     struct sockaddr_storage iut_addr1_st;
@@ -116,10 +117,12 @@ main(int argc, char **argv)
     TEST_GET_IF(iut_if);
     TEST_GET_ADDR(iut_rpcs, iut_addr);
     TEST_GET_ADDR(tst_rpcs, tst_addr);
+    TEST_GET_BOOL_PARAM(multi_seg);
     TEST_GET_ENUM_PARAM(copy_mode, NET_DRV_XDP_COPY_MODE);
 
     CHECK_RC(net_drv_xdp_adjust_rx_size(iut_rpcs->ta, iut_if->if_name,
                                         &xdp_cfg));
+    CFG_WAIT_CHANGES;
 
     net_drv_rss_ctx_prepare(&rss_ctx, iut_rpcs->ta, iut_if->if_name, 0);
     if (rss_ctx.rx_queues < 2)
@@ -158,7 +161,8 @@ main(int argc, char **argv)
 
     TEST_STEP("Create two AF_XDP sockets on IUT, the first one bound to "
               "@b queue1, and the second one bound to @b queue2.");
-    xdp_cfg.bind_flags = copy_mode;
+    xdp_cfg.bind_flags = copy_mode |
+                         (multi_seg ? RPC_XDP_BIND_USE_SG : 0);
     CHECK_RC(net_drv_xdp_create_sock(iut_rpcs, iut_if->if_name, queue1,
                                      &xdp_cfg, map_fd, &xdp_socks[0]));
     CHECK_RC(net_drv_xdp_create_sock(iut_rpcs, iut_if->if_name, queue2,
@@ -192,15 +196,17 @@ main(int argc, char **argv)
                   iut_rpcs->ta, bpf_id, iut_addr->sa_family,
                   tst_addr, SA(&dst_addr), IPPROTO_UDP, TRUE));
 
-    TEST_STEP("Check that the first AF_XDP socket can receive and reply "
-              "UDP packet sent from @p tst_addr to @b iut_addr1.");
+    TEST_STEP("Check that the first AF_XDP socket can receive a UDP packet "
+              "sent from @p tst_addr to @b iut_addr1 and reply over a "
+              "Tx-capable AF_XDP socket.");
     net_drv_xdp_echo(tst_rpcs, tst_s, iut_addr1,
-                     iut_rpcs, xdp_socks, 2, 0);
+                     iut_rpcs, xdp_socks, 2, 0, multi_seg);
 
-    TEST_STEP("Check that the second AF_XDP socket can receive and reply "
-              "UDP packet sent from @p tst_addr to @b iut_addr2.");
+    TEST_STEP("Check that the second AF_XDP socket can receive a UDP packet "
+              "sent from @p tst_addr to @b iut_addr2 and reply over a "
+              "Tx-capable AF_XDP socket.");
     net_drv_xdp_echo(tst_rpcs, tst_s, iut_addr2,
-                     iut_rpcs, xdp_socks, 2, 1);
+                     iut_rpcs, xdp_socks, 2, 1, multi_seg);
 
     TEST_SUCCESS;
 

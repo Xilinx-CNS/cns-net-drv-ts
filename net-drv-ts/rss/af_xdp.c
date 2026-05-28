@@ -48,6 +48,7 @@ main(int argc, char **argv)
     struct sockaddr_storage dst_addr;
 
     net_drv_xdp_cfg xdp_cfg = NET_DRV_XDP_CFG_DEF;
+    bool multi_seg;
     unsigned int copy_mode;
     net_drv_xdp_sock *socks = NULL;
     unsigned int socks_num = 0;
@@ -69,6 +70,7 @@ main(int argc, char **argv)
     TEST_GET_IF(iut_if);
     TEST_GET_ADDR(iut_rpcs, iut_addr);
     TEST_GET_ADDR(tst_rpcs, tst_addr);
+    TEST_GET_BOOL_PARAM(multi_seg);
     TEST_GET_ENUM_PARAM(copy_mode, NET_DRV_XDP_COPY_MODE);
 
     CHECK_RC(net_drv_xdp_adjust_rx_size(iut_rpcs->ta, iut_if->if_name,
@@ -105,7 +107,8 @@ main(int argc, char **argv)
               "the sockets. Set corresponding entries of the XSK map to "
               "file desciptors of the created sockets.");
     socks_num = rss_ctx.rx_queues;
-    xdp_cfg.bind_flags = copy_mode;
+    xdp_cfg.bind_flags = copy_mode |
+                         (multi_seg ? RPC_XDP_BIND_USE_SG : 0);
     net_drv_xdp_create_socks(iut_rpcs, iut_if->if_name,
                              &xdp_cfg, map_fd, socks_num, &socks);
     NET_DRV_XDP_WAIT_SOCKS;
@@ -143,12 +146,12 @@ main(int argc, char **argv)
         TEST_SUBSTEP("Send a packet from the Tester socket. Check that the "
                      "AF_XDP socket assigned to the tested Rx queue gets "
                      "that packet. Construct a reply by inverting "
-                     "addresses and ports of the received packet. "
-                     "Send it back to Tester over the same AF_XDP socket. "
+                     "addresses and ports of the received packet. Send it "
+                     "back to Tester over a Tx-capable AF_XDP socket. "
                      "Check that the Tester socket gets it and its payload "
                      "is the same as in the previously sent packet.");
         net_drv_xdp_echo(tst_rpcs, tst_s, SA(&dst_addr),
-                         iut_rpcs, socks, socks_num, i);
+                         iut_rpcs, socks, socks_num, i, multi_seg);
     }
 
     TEST_SUCCESS;

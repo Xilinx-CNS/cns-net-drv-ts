@@ -20,11 +20,13 @@
 #include "tapi_cfg_if.h"
 #include "common_rss.h"
 
+#define RSS_MULTI_SEG_MTU 9000
+
 /* Send some packets and find out which Rx queue received them. */
 static void
 send_get_rx_queue(rcf_rpc_server *sender_rpcs, int sender_s,
                   rcf_rpc_server *receiver_rpcs, int receiver_s,
-                  unsigned int bpf_id, unsigned int *queue)
+                  unsigned int bpf_id, bool jumbo, unsigned int *queue)
 {
     unsigned int i;
     static unsigned int pkts_num = 10;
@@ -38,8 +40,9 @@ send_get_rx_queue(rcf_rpc_server *sender_rpcs, int sender_s,
 
     for (i = 0; i < pkts_num; i++)
     {
-        net_drv_send_recv_check(sender_rpcs, sender_s,
-                                receiver_rpcs, receiver_s, "");
+        net_drv_send_recv_ext_check(sender_rpcs, sender_s,
+                                    receiver_rpcs, receiver_s,
+                                    jumbo, "");
     }
 
     CHECK_RC(tapi_bpf_rxq_stats_read(receiver_rpcs->ta, bpf_id, &stats,
@@ -125,6 +128,7 @@ try_detect_toeplitz_variant(rcf_rpc_server *iut_rpcs, rcf_rpc_server *tst_rpcs,
                             const char *iut_if_name, int *iut_s, int *tst_s,
                             unsigned int bpf_id, unsigned int table_size,
                             te_toeplitz_hash_cache *cache,
+                            bool jumbo,
                             te_toeplitz_hash_variant *detected)
 {
     struct sockaddr_storage new_iut_addr_st;
@@ -203,7 +207,7 @@ try_detect_toeplitz_variant(rcf_rpc_server *iut_rpcs, rcf_rpc_server *tst_rpcs,
          hash_sym, idx_sym, queue_sym);
 
     send_get_rx_queue(tst_rpcs, *tst_s, iut_rpcs, *iut_s,
-                      bpf_id, &queue_got);
+                      bpf_id, jumbo, &queue_got);
 
     if ((int)queue_got == queue_std)
     {
@@ -234,7 +238,7 @@ detect_toeplitz_variant(rcf_rpc_server *iut_rpcs, rcf_rpc_server *tst_rpcs,
                         const struct sockaddr *tst_addr,
                         const char *iut_if_name, int *iut_s, int *tst_s,
                         unsigned int bpf_id, unsigned int table_size,
-                        te_toeplitz_hash_cache *cache)
+                        te_toeplitz_hash_cache *cache, bool jumbo)
 {
     static const unsigned int attempts_num = 10;
     unsigned int i;
@@ -253,7 +257,7 @@ detect_toeplitz_variant(rcf_rpc_server *iut_rpcs, rcf_rpc_server *tst_rpcs,
     {
         try_detect_toeplitz_variant(iut_rpcs, tst_rpcs, iut_addr, tst_addr,
                                     iut_if_name, iut_s, tst_s, bpf_id,
-                                    table_size, cache, &variant);
+                                    table_size, cache, jumbo, &variant);
 
         if (i > 0 && prev_variant != variant)
             TEST_VERDICT("Cannot detect Toeplitz hash variant");
@@ -286,6 +290,7 @@ main(int argc, char **argv)
     rcf_rpc_server *iut_rpcs = NULL;
     rcf_rpc_server *tst_rpcs = NULL;
     const struct if_nameindex *iut_if = NULL;
+    const struct if_nameindex *tst_if = NULL;
     const struct sockaddr *iut_addr = NULL;
     const struct sockaddr *tst_addr = NULL;
 
@@ -299,13 +304,17 @@ main(int argc, char **argv)
     unsigned int bpf_id;
     int rx_queues;
     unsigned int table_size;
+    bool multi_seg;
+    tapi_bpf_rxq_stats_attach_mode attach_mode;
 
     TEST_START;
     TEST_GET_PCO(iut_rpcs);
     TEST_GET_PCO(tst_rpcs);
     TEST_GET_IF(iut_if);
+    TEST_GET_IF(tst_if);
     TEST_GET_ADDR(iut_rpcs, iut_addr);
     TEST_GET_ADDR(tst_rpcs, tst_addr);
+    TEST_GET_BOOL_PARAM(multi_seg);
 
     /*
      * Try to disable flow-director-atr private flag if it is
@@ -319,6 +328,17 @@ main(int argc, char **argv)
     {
         TEST_VERDICT("Attempt to disable flow-director-atr private "
                      "flag failed unexpectedly: %r", rc);
+    }
+
+    if (multi_seg)
+    {
+        net_drv_set_mtu(iut_rpcs->ta, iut_if->if_name, RSS_MULTI_SEG_MTU,
+                        "IUT interface");
+        net_drv_set_mtu(tst_rpcs->ta, tst_if->if_name, RSS_MULTI_SEG_MTU,
+                        "Tester interface");
+
+        CHECK_RC(cfg_synchronize_fmt(true, "/agent:%s/interface:%s",
+                                     iut_rpcs->ta, iut_if->if_name));
     }
 
     /*
@@ -358,9 +378,21 @@ main(int argc, char **argv)
     CHECK_NOT_NULL(cache = te_toeplitz_cache_init_size(hash_key,
                                                        key_len));
 
-    /* Link XDP hook used to get per-queue statistics */
-    CHECK_RC(tapi_bpf_rxq_stats_init(iut_rpcs->ta, iut_if->if_name,
-                                     "rss_bpf", &bpf_id));
+    /* Link XDP hook used to get per-queue statistics. */
+    attach_mode = multi_seg ? TAPI_BPF_RXQ_STATS_ATTACH_MODE_FRAGS :
+                              TAPI_BPF_RXQ_STATS_ATTACH_MODE_REGULAR;
+    rc = tapi_bpf_rxq_stats_init_mode(iut_rpcs->ta, iut_if->if_name,
+                                      "rss_bpf", attach_mode, &bpf_id);
+    if (rc != 0)
+    {
+        if (multi_seg)
+            TEST_SKIP("Multi-segment XDP support is missing: %r", rc);
+
+        CHECK_RC(rc);
+    }
+
+    if (multi_seg)
+        CFG_WAIT_CHANGES;
 
     /*
      * On balin-x710 configuration (Intel X710 NIC) IUT may not receive UDP
@@ -372,7 +404,7 @@ main(int argc, char **argv)
     /* Detect whether nonstandard Toeplitz hash variant is used */
     detect_toeplitz_variant(iut_rpcs, tst_rpcs, iut_addr, tst_addr,
                             iut_if->if_name, &iut_s, &tst_s, bpf_id,
-                            table_size, cache);
+                            table_size, cache, multi_seg);
 
     CHECK_RC(cfg_synchronize("/:", TRUE));
 

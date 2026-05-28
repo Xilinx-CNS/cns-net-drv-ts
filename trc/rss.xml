@@ -11,6 +11,7 @@
       <notes/>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <notes/>
         <results tags="rx-queues&lt;=1" key="NO-MQ">
           <result value="SKIPPED">
@@ -44,6 +45,7 @@
       <notes/>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <notes/>
       </iter>
     </test>
@@ -52,6 +54,7 @@
       <notes/>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="sock_type"/>
         <notes/>
       </iter>
@@ -61,6 +64,7 @@
       <notes/>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="sock_type"/>
         <notes/>
       </iter>
@@ -70,6 +74,7 @@
       <notes/>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="sock_type"/>
         <notes/>
       </iter>
@@ -79,6 +84,7 @@
       <notes/>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="sock_type"/>
         <arg name="match_src"/>
         <arg name="match_dst"/>
@@ -102,6 +108,7 @@
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="sock_type"/>
         <arg name="match_src"/>
         <arg name="match_dst"/>
@@ -125,6 +132,7 @@
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="sock_type"/>
         <arg name="match_src"/>
         <arg name="match_dst">TRUE</arg>
@@ -143,6 +151,7 @@
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="sock_type"/>
         <arg name="match_src"/>
         <arg name="match_dst"/>
@@ -161,6 +170,7 @@
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="sock_type"/>
         <arg name="match_src"/>
         <arg name="match_dst">FALSE</arg>
@@ -188,6 +198,7 @@
       <notes/>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="sock_type"/>
         <arg name="first_partial"/>
         <arg name="partial_src">FALSE</arg>
@@ -210,6 +221,7 @@
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="sock_type"/>
         <arg name="first_partial">FALSE</arg>
         <arg name="partial_src">TRUE</arg>
@@ -232,6 +244,7 @@
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="sock_type"/>
         <arg name="first_partial">TRUE</arg>
         <arg name="partial_src">TRUE</arg>
@@ -258,6 +271,7 @@
       <notes/>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="sock_type"/>
         <arg name="two_power">FALSE</arg>
         <notes/>
@@ -276,6 +290,7 @@
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="sock_type"/>
         <arg name="two_power">TRUE</arg>
         <notes/>
@@ -298,6 +313,7 @@
       <notes/>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="copy_mode">copy</arg>
         <notes/>
         <results tags="sfc" key="SWNETLINUX-5173">
@@ -308,11 +324,13 @@
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="copy_mode">zerocopy</arg>
         <notes/>
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="copy_mode">none</arg>
         <notes/>
       </iter>
@@ -322,6 +340,7 @@
       <notes/>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="copy_mode">copy</arg>
         <notes/>
         <results tags="sfc" key="SWNETLINUX-5173">
@@ -332,11 +351,13 @@
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="copy_mode">zerocopy</arg>
         <notes/>
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="copy_mode">none</arg>
         <notes/>
       </iter>
@@ -346,6 +367,7 @@
       <notes/>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="copy_mode">copy</arg>
         <notes/>
         <results tags="sfc" key="SWNETLINUX-5173">
@@ -356,11 +378,13 @@
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="copy_mode">zerocopy</arg>
         <notes/>
       </iter>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="copy_mode">none</arg>
         <notes/>
       </iter>
@@ -370,6 +394,7 @@
       <notes/>
       <iter result="PASSED">
         <arg name="env"/>
+        <arg name="multi_seg"/>
         <arg name="sock_type"/>
         <arg name="iters"/>
         <notes/>

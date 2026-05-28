@@ -143,6 +143,26 @@ extern size_t net_drv_send_recv_check(rcf_rpc_server *rpcs_sender,
                                       const char *vpref);
 
 /**
+ * Same as net_drv_send_recv_check(), but allows to force bigger payloads.
+ *
+ * @param rpcs_sender       RPC server from which to send.
+ * @param s_sender          Socket from which to send.
+ * @param rpcs_receiver     RPC server on which to receive.
+ * @param s_receiver        Socket on which to receive.
+ * @param jumbo             If @c TRUE, send bigger payloads to trigger
+ *                          multi-segment path.
+ * @param vpref             Prefix for verdicts.
+ *
+ * @return Number of bytes sent and received.
+ */
+extern size_t net_drv_send_recv_ext_check(rcf_rpc_server *rpcs_sender,
+                                          int s_sender,
+                                          rcf_rpc_server *rpcs_receiver,
+                                          int s_receiver,
+                                          bool jumbo,
+                                          const char *vpref);
+
+/**
  * Same as net_drv_send_recv_check() but allows to specify destination
  * address.
  *

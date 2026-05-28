@@ -10,148 +10,168 @@
 
     <session track_conf="nohistory|sync" track_conf_handdown="descendants">
 
-        <prologue>
-            <script name="prologue"/>
-            <arg name="env">
-                <value ref="env.peer2peer"/>
-            </arg>
-        </prologue>
-
-        <epilogue>
-            <script name="epilogue"/>
-            <arg name="env">
-                <value ref="env.peer2peer"/>
-            </arg>
-        </epilogue>
-
         <run>
-            <script name="hash_key_get" track_conf="nohistory"/>
-            <arg name="env">
-                <value ref="env.peer2peer"/>
-                <value ref="env.peer2peer_ipv6"/>
-            </arg>
-            <arg name="sock_type" type="sock_stream_dgram"/>
-        </run>
+            <session track_conf="nohistory|sync"
+                     track_conf_handdown="descendants">
+                <arg name="multi_seg"/>
 
-        <run>
-            <script name="hash_key_set"/>
-            <arg name="env">
-                <value ref="env.peer2peer"/>
-                <value ref="env.peer2peer_ipv6"/>
-            </arg>
-            <arg name="sock_type" type="sock_stream_dgram"/>
-        </run>
+                <prologue>
+                    <script name="prologue"/>
+                    <arg name="env">
+                        <value ref="env.peer2peer"/>
+                    </arg>
+                    <arg name="multi_seg"/>
+                </prologue>
 
-        <run>
-            <script name="indir_table_set"/>
-            <arg name="env">
-                <value ref="env.peer2peer"/>
-                <value ref="env.peer2peer_ipv6"/>
-            </arg>
-            <arg name="sock_type" type="sock_stream_dgram"/>
-        </run>
+                <epilogue>
+                    <script name="epilogue"/>
+                    <arg name="env">
+                        <value ref="env.peer2peer"/>
+                    </arg>
+                    <arg name="multi_seg"/>
+                </epilogue>
 
-        <run>
-            <script name="rx_rule_tcp_udp"/>
-            <arg name="env">
-                <value ref="env.peer2peer"/>
-                <value ref="env.peer2peer_ipv6"/>
-            </arg>
-            <arg name="sock_type" type="sock_stream_dgram"/>
-            <arg name="match_src" type="boolean" list="">
-                <value>TRUE</value>
-                <value>TRUE</value>
-                <value>FALSE</value>
-            </arg>
-            <arg name="match_dst" type="boolean" list="">
-                <value>TRUE</value>
-                <value>FALSE</value>
-                <value>TRUE</value>
-            </arg>
-            <arg name="location">
-                <value>first</value>
-                <value>last</value>
-                <value>any</value>
-                <value>specific</value>
-            </arg>
-        </run>
+                <run>
+                    <script name="hash_key_get" track_conf="nohistory"/>
+                    <arg name="env">
+                        <value ref="env.peer2peer"/>
+                        <value ref="env.peer2peer_ipv6"/>
+                    </arg>
+                    <arg name="multi_seg"/>
+                    <arg name="sock_type" type="sock_stream_dgram"/>
+                </run>
 
-        <run>
-            <script name="rx_rules_full_part"/>
-            <arg name="env">
-                <value ref="env.peer2peer"/>
-                <value ref="env.peer2peer_ipv6"/>
-            </arg>
-            <arg name="sock_type" type="sock_stream_dgram"/>
-            <arg name="first_partial" type="boolean"/>
-            <arg name="partial_src" type="boolean"/>
-        </run>
+                <run>
+                    <script name="hash_key_set"/>
+                    <arg name="env">
+                        <value ref="env.peer2peer"/>
+                        <value ref="env.peer2peer_ipv6"/>
+                    </arg>
+                    <arg name="multi_seg"/>
+                    <arg name="sock_type" type="sock_stream_dgram"/>
+                </run>
 
-        <run>
-            <script name="change_channels"/>
-            <arg name="env">
-                <value ref="env.peer2peer"/>
-                <value ref="env.peer2peer_ipv6"/>
-            </arg>
-            <arg name="sock_type" type="sock_stream_dgram"/>
-            <arg name="two_power" type="boolean"/>
-        </run>
+                <run>
+                    <script name="indir_table_set"/>
+                    <arg name="env">
+                        <value ref="env.peer2peer"/>
+                        <value ref="env.peer2peer_ipv6"/>
+                    </arg>
+                    <arg name="multi_seg"/>
+                    <arg name="sock_type" type="sock_stream_dgram"/>
+                </run>
 
-        <run>
-            <script name="af_xdp">
-                <req id="AF_XDP"/>
-            </script>
-            <arg name="env">
-                <value ref="env.peer2peer"/>
-                <value ref="env.peer2peer_ipv6"/>
-            </arg>
-            <arg name="copy_mode">
-                <value>none</value>
-                <value>copy</value>
-                <value>zerocopy</value>
-            </arg>
-        </run>
+                <run>
+                    <script name="rx_rule_tcp_udp"/>
+                    <arg name="env">
+                        <value ref="env.peer2peer"/>
+                        <value ref="env.peer2peer_ipv6"/>
+                    </arg>
+                    <arg name="multi_seg"/>
+                    <arg name="sock_type" type="sock_stream_dgram"/>
+                    <arg name="match_src" type="boolean" list="">
+                        <value>TRUE</value>
+                        <value>TRUE</value>
+                        <value>FALSE</value>
+                    </arg>
+                    <arg name="match_dst" type="boolean" list="">
+                        <value>TRUE</value>
+                        <value>FALSE</value>
+                        <value>TRUE</value>
+                    </arg>
+                    <arg name="location">
+                        <value>first</value>
+                        <value>last</value>
+                        <value>any</value>
+                        <value>specific</value>
+                    </arg>
+                </run>
 
-        <run>
-            <script name="af_xdp_rx_rule">
-                <req id="AF_XDP"/>
-            </script>
-            <arg name="env">
-                <value ref="env.peer2peer"/>
-                <value ref="env.peer2peer_ipv6"/>
-            </arg>
-            <arg name="copy_mode">
-                <value>none</value>
-                <value>copy</value>
-                <value>zerocopy</value>
-            </arg>
-        </run>
+                <run>
+                    <script name="rx_rules_full_part"/>
+                    <arg name="env">
+                        <value ref="env.peer2peer"/>
+                        <value ref="env.peer2peer_ipv6"/>
+                    </arg>
+                    <arg name="multi_seg"/>
+                    <arg name="sock_type" type="sock_stream_dgram"/>
+                    <arg name="first_partial" type="boolean"/>
+                    <arg name="partial_src" type="boolean"/>
+                </run>
 
-        <run>
-            <script name="af_xdp_two_rules">
-                <req id="AF_XDP"/>
-            </script>
-            <arg name="env">
-                <value ref="env.peer2peer"/>
-                <value ref="env.peer2peer_ipv6"/>
-            </arg>
-            <arg name="copy_mode">
-                <value>none</value>
-                <value>copy</value>
-                <value>zerocopy</value>
-            </arg>
-        </run>
+                <run>
+                    <script name="change_channels"/>
+                    <arg name="env">
+                        <value ref="env.peer2peer"/>
+                        <value ref="env.peer2peer_ipv6"/>
+                    </arg>
+                    <arg name="multi_seg"/>
+                    <arg name="sock_type" type="sock_stream_dgram"/>
+                    <arg name="two_power" type="boolean"/>
+                </run>
 
-        <run>
-            <script name="too_many_rx_rules"/>
-            <arg name="env">
-                <value ref="env.peer2peer"/>
-                <value ref="env.peer2peer_ipv6"/>
-            </arg>
-            <arg name="sock_type" type="sock_stream_dgram"/>
-            <arg name="iters">
-                <value>10</value>
-            </arg>
+                <run>
+                    <script name="af_xdp">
+                        <req id="AF_XDP"/>
+                    </script>
+                    <arg name="env">
+                        <value ref="env.peer2peer"/>
+                        <value ref="env.peer2peer_ipv6"/>
+                    </arg>
+                    <arg name="multi_seg"/>
+                    <arg name="copy_mode">
+                        <value>none</value>
+                        <value>copy</value>
+                        <value>zerocopy</value>
+                    </arg>
+                </run>
+
+                <run>
+                    <script name="af_xdp_rx_rule">
+                        <req id="AF_XDP"/>
+                    </script>
+                    <arg name="env">
+                        <value ref="env.peer2peer"/>
+                        <value ref="env.peer2peer_ipv6"/>
+                    </arg>
+                    <arg name="multi_seg"/>
+                    <arg name="copy_mode">
+                        <value>none</value>
+                        <value>copy</value>
+                        <value>zerocopy</value>
+                    </arg>
+                </run>
+
+                <run>
+                    <script name="af_xdp_two_rules">
+                        <req id="AF_XDP"/>
+                    </script>
+                    <arg name="env">
+                        <value ref="env.peer2peer"/>
+                        <value ref="env.peer2peer_ipv6"/>
+                    </arg>
+                    <arg name="multi_seg"/>
+                    <arg name="copy_mode">
+                        <value>none</value>
+                        <value>copy</value>
+                        <value>zerocopy</value>
+                    </arg>
+                </run>
+
+                <run>
+                    <script name="too_many_rx_rules"/>
+                    <arg name="env">
+                        <value ref="env.peer2peer"/>
+                        <value ref="env.peer2peer_ipv6"/>
+                    </arg>
+                    <arg name="multi_seg"/>
+                    <arg name="sock_type" type="sock_stream_dgram"/>
+                    <arg name="iters">
+                        <value>10</value>
+                    </arg>
+                </run>
+            </session>
+            <arg name="multi_seg" type="boolean"/>
         </run>
 
     </session>

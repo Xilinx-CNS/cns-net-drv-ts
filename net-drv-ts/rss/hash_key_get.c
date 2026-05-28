@@ -46,6 +46,7 @@ main(int argc, char *argv[])
     const struct sockaddr *iut_addr = NULL;
     const struct sockaddr *tst_addr = NULL;
     rpc_socket_type sock_type;
+    bool multi_seg;
 
     int iut_s = -1;
     int tst_s = -1;
@@ -73,6 +74,7 @@ main(int argc, char *argv[])
     TEST_GET_IF(iut_if);
     TEST_GET_ADDR(iut_rpcs, iut_addr);
     TEST_GET_ADDR(tst_rpcs, tst_addr);
+    TEST_GET_BOOL_PARAM(multi_seg);
     TEST_GET_SOCK_TYPE(sock_type);
 
     TEST_STEP("Check that RSS hash key can be obtained for IUT "
@@ -146,7 +148,7 @@ main(int argc, char *argv[])
         CHECK_RC(net_drv_rss_send_check_stats(tst_rpcs, tst_s, new_tst_addr,
                                               iut_rpcs, iut_s, new_iut_addr,
                                               sock_type, indir,
-                                              bpf_id, ""));
+                                              bpf_id, multi_seg, ""));
 
         RPC_CLOSE(iut_rpcs, iut_s);
         RPC_CLOSE(tst_rpcs, tst_s);

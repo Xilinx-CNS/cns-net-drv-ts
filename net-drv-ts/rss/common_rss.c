@@ -12,10 +12,15 @@
 #include "tapi_bpf_rxq_stats.h"
 #include "tapi_cfg_rx_rule.h"
 #include "tapi_cfg_if.h"
+#include "tapi_cfg_if_chan.h"
 #include "tapi_rpc_bpf.h"
 #include "tapi_mem.h"
 #include "tapi_file.h"
 #include "te_ipstack.h"
+
+#define RSS_NORMAL_MAX_PAYLOAD 1024
+#define RSS_JUMBO_MIN_PAYLOAD 4096
+#define RSS_JUMBO_MAX_PAYLOAD 8192
 
 /* Minimum number of packets to send when testing RSS */
 #define RSS_TEST_MIN_PKTS_NUM 3
@@ -33,7 +38,7 @@ send_check_common(rcf_rpc_server *sender_rpcs, int sender_s,
                   rcf_rpc_server *receiver_rpcs, int receiver_s,
                   const struct sockaddr *receiver_addr,
                   rpc_socket_type sock_type, unsigned int bpf_id,
-                  unsigned int *sent_pkts, const char *vpref)
+                  unsigned int *sent_pkts, bool jumbo, const char *vpref)
 {
     unsigned int i;
     unsigned int pkts_num;
@@ -68,12 +73,28 @@ send_check_common(rcf_rpc_server *sender_rpcs, int sender_s,
 
     for (i = 0; i < pkts_num; i++)
     {
-        net_drv_send_recv_check(sender_rpcs, sender_s,
-                                receiver_rpcs, receiver_s, vpref);
+        net_drv_send_recv_ext_check(sender_rpcs, sender_s,
+                                    receiver_rpcs, receiver_s,
+                                    jumbo, vpref);
     }
 
     *sent_pkts = pkts_num;
     return 0;
+}
+
+static int
+net_drv_pick_rss_payload_len(bool jumbo, int hard_max)
+{
+    int len_min = jumbo ? RSS_JUMBO_MIN_PAYLOAD : 1;
+    int len_max = jumbo ? RSS_JUMBO_MAX_PAYLOAD : RSS_NORMAL_MAX_PAYLOAD;
+
+    if (len_min < 1 || len_min > len_max || len_max > hard_max)
+    {
+        TEST_VERDICT("Invalid RSS payload range [%d, %d], max allowed is %d",
+                     len_min, len_max, hard_max);
+    }
+
+    return rand_range(len_min, len_max);
 }
 
 /* See description in common_rss.h */
@@ -83,14 +104,15 @@ net_drv_rss_send_check_stats(rcf_rpc_server *sender_rpcs, int sender_s,
                              rcf_rpc_server *receiver_rpcs, int receiver_s,
                              const struct sockaddr *receiver_addr,
                              rpc_socket_type sock_type, unsigned int exp_queue,
-                             unsigned int bpf_id, const char *vpref)
+                             unsigned int bpf_id, bool jumbo,
+                             const char *vpref)
 {
     te_errno rc;
     unsigned int pkts_num;
 
     rc = send_check_common(sender_rpcs, sender_s, sender_addr,
                            receiver_rpcs, receiver_s, receiver_addr,
-                           sock_type, bpf_id, &pkts_num, vpref);
+                           sock_type, bpf_id, &pkts_num, jumbo, vpref);
     if (rc != 0)
         return rc;
 
@@ -106,7 +128,7 @@ net_drv_rss_send_get_stats(rcf_rpc_server *sender_rpcs, int sender_s,
                            rcf_rpc_server *receiver_rpcs, int receiver_s,
                            const struct sockaddr *receiver_addr,
                            rpc_socket_type sock_type, unsigned int bpf_id,
-                           tapi_bpf_rxq_stats **stats,
+                           bool jumbo, tapi_bpf_rxq_stats **stats,
                            unsigned int *stats_count,
                            const char *vpref)
 {
@@ -117,7 +139,7 @@ net_drv_rss_send_get_stats(rcf_rpc_server *sender_rpcs, int sender_s,
 
     rc = send_check_common(sender_rpcs, sender_s, sender_addr,
                            receiver_rpcs, receiver_s, receiver_addr,
-                           sock_type, bpf_id, &pkts_num, vpref);
+                           sock_type, bpf_id, &pkts_num, jumbo, vpref);
     if (rc != 0)
         return rc;
 
@@ -488,10 +510,48 @@ net_drv_xdp_adjust_rx_size(const char *ta, const char *if_name,
 
 /* See description in common_rss.h */
 te_errno
+net_drv_xdp_get_queues_num(const char *ta, const char *if_name,
+                           unsigned int *rx_queues,
+                           unsigned int *tx_queues)
+{
+    int combined = 0;
+    te_errno rc;
+    int rx = 0;
+    int tx = 0;
+
+    if (rx_queues == NULL || tx_queues == NULL)
+        return TE_RC(TE_TAPI, TE_EINVAL);
+
+    rc = tapi_cfg_if_chan_cur_get(ta, if_name, TAPI_CFG_IF_CHAN_RX, &rx);
+    if (rc != 0)
+        return rc;
+
+    rc = tapi_cfg_if_chan_cur_get(ta, if_name, TAPI_CFG_IF_CHAN_TX, &tx);
+    if (rc != 0)
+        return rc;
+
+    rc = tapi_cfg_if_chan_cur_get(ta, if_name, TAPI_CFG_IF_CHAN_COMBINED,
+                                  &combined);
+    if (rc != 0)
+        return rc;
+
+    if (rx < 0 || tx < 0 || combined < 0)
+        return TE_RC(TE_TAPI, TE_EINVAL);
+
+    *rx_queues = rx + combined;
+    *tx_queues = tx + combined;
+
+    return 0;
+}
+
+/* See description in common_rss.h */
+te_errno
 net_drv_xdp_create_sock(rcf_rpc_server *rpcs, const char *if_name,
                         unsigned int queue_id, net_drv_xdp_cfg *cfg,
                         int map_fd, net_drv_xdp_sock *sock)
 {
+    unsigned int rx_queues = 0;
+    unsigned int tx_queues = 0;
     int rc;
     size_t mem_len = cfg->frames_num * cfg->frame_len;
     tarpc_xsk_umem_config umem_conf = { 0, };
@@ -508,6 +568,23 @@ net_drv_xdp_create_sock(rcf_rpc_server *rpcs, const char *if_name,
     sock_conf.bind_flags = cfg->bind_flags;
 
     *sock = (net_drv_xdp_sock)NET_DRV_XDP_SOCK_INIT;
+    sock->queue_id = queue_id;
+
+    rc = net_drv_xdp_get_queues_num(rpcs->ta, if_name, &rx_queues, &tx_queues);
+    if (rc != 0)
+    {
+        ERROR_VERDICT("Failed to determine interface queue numbers: %r", rc);
+        return rc;
+    }
+
+    if (queue_id >= rx_queues)
+    {
+        ERROR_VERDICT("Queue id %u is out of Rx queue range [0, %u)",
+                      queue_id, rx_queues);
+        return TE_RC(TE_TAPI, TE_EINVAL);
+    }
+
+    sock->tx_capable = (queue_id < tx_queues);
 
     RPC_AWAIT_ERROR(rpcs);
     rc = rpc_posix_memalign(rpcs, &sock->mem, cfg->frame_len, mem_len);
@@ -600,6 +677,8 @@ net_drv_xdp_destroy_sock(rcf_rpc_server *rpcs, net_drv_xdp_sock *sock)
 
         sock->sock = RPC_NULL;
         sock->fd = -1;
+        sock->queue_id = 0;
+        sock->tx_capable = false;
     }
 
     if (sock->umem != RPC_NULL)
@@ -691,15 +770,17 @@ void
 net_drv_xdp_echo(rcf_rpc_server *rpcs_udp, int s_udp,
                  const struct sockaddr *dst_addr,
                  rcf_rpc_server *rpcs_xdp, net_drv_xdp_sock *socks,
-                 unsigned int socks_num, unsigned int exp_sock)
+                 unsigned int socks_num, unsigned int exp_sock,
+                 bool jumbo)
 {
-#define MAX_DATA_LEN 1024
+#define MAX_DATA_LEN 9000
 #define MAX_PKT_LEN (MAX_DATA_LEN + 200)
     uint8_t send_buf[MAX_DATA_LEN];
     uint8_t recv_buf[MAX_PKT_LEN];
     int send_len;
     int recv_len;
     int rc;
+    unsigned int send_sock;
     unsigned int i;
     te_bool success = FALSE;
 
@@ -716,7 +797,7 @@ net_drv_xdp_echo(rcf_rpc_server *rpcs_udp, int s_udp,
         fds[i].events = RPC_POLLIN;
     }
 
-    send_len = rand_range(1, MAX_DATA_LEN);
+    send_len = net_drv_pick_rss_payload_len(jumbo, MAX_DATA_LEN);
     te_fill_buf(send_buf, send_len);
 
     rc = rpc_sendto(rpcs_udp, s_udp, send_buf, send_len,
@@ -778,8 +859,24 @@ net_drv_xdp_echo(rcf_rpc_server *rpcs_udp, int s_udp,
         goto finish;
     }
 
+    send_sock = i;
+    if (!socks[send_sock].tx_capable)
+    {
+        for (send_sock = 0; send_sock < socks_num; send_sock++)
+        {
+            if (socks[send_sock].tx_capable)
+                break;
+        }
+
+        if (send_sock == socks_num)
+        {
+            ERROR_VERDICT("All AF_XDP sockets are RX-only");
+            goto finish;
+        }
+    }
+
     RPC_AWAIT_ERROR(rpcs_xdp);
-    rc = rpc_xsk_send_simple(rpcs_xdp, socks[i].sock,
+    rc = rpc_xsk_send_simple(rpcs_xdp, socks[send_sock].sock,
                              recv_buf, recv_len);
     if (rc < 0)
     {

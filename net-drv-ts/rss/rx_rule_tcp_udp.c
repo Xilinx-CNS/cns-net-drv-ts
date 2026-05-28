@@ -54,6 +54,7 @@ main(int argc, char *argv[])
     const struct sockaddr *iut_addr = NULL;
     const struct sockaddr *tst_addr = NULL;
     rpc_socket_type sock_type;
+    bool multi_seg;
     te_bool match_src;
     te_bool match_dst;
     int64_t location;
@@ -89,6 +90,7 @@ main(int argc, char *argv[])
     TEST_GET_IF(iut_if);
     TEST_GET_ADDR(iut_rpcs, iut_addr);
     TEST_GET_ADDR(tst_rpcs, tst_addr);
+    TEST_GET_BOOL_PARAM(multi_seg);
     TEST_GET_SOCK_TYPE(sock_type);
     TEST_GET_BOOL_PARAM(match_src);
     TEST_GET_BOOL_PARAM(match_dst);
@@ -177,7 +179,7 @@ main(int argc, char *argv[])
     CHECK_RC(net_drv_rss_send_check_stats(
                                    tst_rpcs, tst_s1, tst_addr,
                                    iut_rpcs, iut_s1, iut_addr,
-                                   sock_type, init_queue, bpf_id,
+                                   sock_type, init_queue, bpf_id, multi_seg,
                                    "Sending data via the first connection "
                                    "before adding a rule"));
 
@@ -187,7 +189,7 @@ main(int argc, char *argv[])
     CHECK_RC(net_drv_rss_send_check_stats(
                                    tst_rpcs, tst_s2, new_tst_addr,
                                    iut_rpcs, iut_s2, new_iut_addr,
-                                   sock_type, init_queue, bpf_id,
+                                   sock_type, init_queue, bpf_id, multi_seg,
                                    "Sending data via the second connection "
                                    "before adding a rule"));
 
@@ -234,7 +236,7 @@ main(int argc, char *argv[])
     CHECK_RC(net_drv_rss_send_check_stats(
                                    tst_rpcs, tst_s1, tst_addr,
                                    iut_rpcs, iut_s1, iut_addr,
-                                   sock_type, new_queue, bpf_id,
+                                   sock_type, new_queue, bpf_id, multi_seg,
                                    "Sending data via the first connection "
                                    "after adding a rule"));
 
@@ -246,7 +248,7 @@ main(int argc, char *argv[])
     CHECK_RC(net_drv_rss_send_check_stats(
                                    tst_rpcs, tst_s2, new_tst_addr,
                                    iut_rpcs, iut_s2, new_iut_addr,
-                                   sock_type, init_queue, bpf_id,
+                                   sock_type, init_queue, bpf_id, multi_seg,
                                    "Sending data via the second connection "
                                    "after adding a rule"));
 

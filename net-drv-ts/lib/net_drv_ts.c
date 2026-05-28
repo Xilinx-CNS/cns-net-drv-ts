@@ -21,6 +21,8 @@
 #include "tapi_cfg_phy.h"
 
 #define MAX_PKT_LEN 1024
+#define JUMBO_PKT_LEN_MIN 4096
+#define JUMBO_PKT_LEN_MAX 8192
 
 /* See description in net_drv_ts.h */
 char *
@@ -269,8 +271,9 @@ net_drv_send_recv_check(rcf_rpc_server *rpcs_sender,
                         int s_receiver,
                         const char *vpref)
 {
-    return net_drv_sendto_recv_check(rpcs_sender, s_sender, NULL,
-                                     rpcs_receiver, s_receiver, vpref);
+    return net_drv_send_recv_ext_check(rpcs_sender, s_sender,
+                                       rpcs_receiver, s_receiver,
+                                       false, vpref);
 }
 
 static size_t
@@ -279,10 +282,11 @@ net_drv_sendto_recv_check_gen(rcf_rpc_server *rpcs_sender,
                               const struct sockaddr *dst_addr,
                               rcf_rpc_server *rpcs_receiver,
                               int s_receiver,
-                              const char *vpref, te_bool may_loss)
+                              const char *vpref, te_bool may_loss,
+                              bool jumbo)
 {
-    char send_buf[MAX_PKT_LEN];
-    char recv_buf[MAX_PKT_LEN];
+    char send_buf[JUMBO_PKT_LEN_MAX];
+    char recv_buf[JUMBO_PKT_LEN_MAX];
     te_bool readable;
     int len;
     int rc;
@@ -291,7 +295,8 @@ net_drv_sendto_recv_check_gen(rcf_rpc_server *rpcs_sender,
     if (vpref == NULL || *vpref == '\0')
         vpref = "Data transmission check";
 
-    len = rand_range(1, MAX_PKT_LEN);
+    len = jumbo ? rand_range(JUMBO_PKT_LEN_MIN, JUMBO_PKT_LEN_MAX) :
+                  rand_range(1, MAX_PKT_LEN);
     te_fill_buf(send_buf, len);
 
     RPC_AWAIT_ERROR(rpcs_sender);
@@ -363,7 +368,7 @@ net_drv_sendto_recv_check(rcf_rpc_server *rpcs_sender,
 {
     return net_drv_sendto_recv_check_gen(rpcs_sender, s_sender, dst_addr,
                                          rpcs_receiver, s_receiver, vpref,
-                                         FALSE);
+                                         false, false);
 }
 
 /* See description in net_drv_ts.h */
@@ -377,7 +382,21 @@ net_drv_sendto_recv_check_may_loss(rcf_rpc_server *rpcs_sender,
 {
     return net_drv_sendto_recv_check_gen(rpcs_sender, s_sender, dst_addr,
                                          rpcs_receiver, s_receiver, vpref,
-                                         TRUE);
+                                         true, false);
+}
+
+/* See description in net_drv_ts.h */
+size_t
+net_drv_send_recv_ext_check(rcf_rpc_server *rpcs_sender,
+                            int s_sender,
+                            rcf_rpc_server *rpcs_receiver,
+                            int s_receiver,
+                            bool jumbo,
+                            const char *vpref)
+{
+    return net_drv_sendto_recv_check_gen(rpcs_sender, s_sender, NULL,
+                                         rpcs_receiver, s_receiver, vpref,
+                                         false, jumbo);
 }
 
 /* See description in net_drv_ts.h */

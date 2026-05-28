@@ -50,6 +50,7 @@ check_indir_table(rcf_rpc_server *iut_rpcs, rcf_rpc_server *tst_rpcs,
                   rpc_socket_type sock_type,
                   int *iut_s, int *tst_s,
                   net_drv_rss_ctx *ctx, unsigned int bpf_id,
+                  bool multi_seg,
                   const char *vpref)
 {
     struct sockaddr_storage new_iut_addr_st;
@@ -99,7 +100,7 @@ check_indir_table(rcf_rpc_server *iut_rpcs, rcf_rpc_server *tst_rpcs,
                                       tst_rpcs, *tst_s, new_tst_addr,
                                       iut_rpcs, *iut_s, new_iut_addr,
                                       sock_type, exp_queue,
-                                      bpf_id, vpref));
+                                      bpf_id, multi_seg, vpref));
 
         RPC_CLOSE(iut_rpcs, *iut_s);
         RPC_CLOSE(tst_rpcs, *tst_s);
@@ -145,6 +146,7 @@ main(int argc, char *argv[])
 
     rpc_socket_type sock_type;
     te_bool two_power;
+    bool multi_seg;
 
     int iut_s = -1;
     int tst_s = -1;
@@ -172,6 +174,7 @@ main(int argc, char *argv[])
     TEST_GET_IF(iut_if);
     TEST_GET_ADDR(iut_rpcs, iut_addr);
     TEST_GET_ADDR(tst_rpcs, tst_addr);
+    TEST_GET_BOOL_PARAM(multi_seg);
     TEST_GET_SOCK_TYPE(sock_type);
     TEST_GET_BOOL_PARAM(two_power);
 
@@ -212,9 +215,11 @@ main(int argc, char *argv[])
               "power of two.");
 
     CHECK_RC(tapi_cfg_if_chan_max_get(iut_rpcs->ta, iut_if->if_name,
-                                      TAPI_CFG_IF_CHAN_COMBINED, &combined_max));
+                                      TAPI_CFG_IF_CHAN_COMBINED,
+                                      &combined_max));
     CHECK_RC(tapi_cfg_if_chan_cur_get(iut_rpcs->ta, iut_if->if_name,
-                                      TAPI_CFG_IF_CHAN_COMBINED, &combined_init));
+                                      TAPI_CFG_IF_CHAN_COMBINED,
+                                      &combined_init));
 
     if (combined_init < 1)
         TEST_SKIP("Initial number of combined channels is zero");
@@ -286,7 +291,7 @@ main(int argc, char *argv[])
                  "the entry of RSS indirection table determined by "
                  "addresses and ports of connected sockets.");
     check_indir_table(iut_rpcs, tst_rpcs, iut_addr, tst_addr, sock_type,
-                      &iut_s, &tst_s, &ctx, bpf_id,
+                      &iut_s, &tst_s, &ctx, bpf_id, multi_seg,
                       "After changing number of combined channels");
 
     TEST_STEP("Change records of RSS indirection table on IUT.");
@@ -329,7 +334,7 @@ main(int argc, char *argv[])
     TEST_STEP("Again check RSS indirection table on IUT in the same "
               "way as before.");
     check_indir_table(iut_rpcs, tst_rpcs, iut_addr, tst_addr, sock_type,
-                      &iut_s, &tst_s, &ctx, bpf_id,
+                      &iut_s, &tst_s, &ctx, bpf_id, multi_seg,
                       "After changing indirection table entries");
 
     if (test_failed)
