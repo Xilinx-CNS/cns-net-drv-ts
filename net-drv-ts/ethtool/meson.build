@@ -21,6 +21,7 @@ tests = [
     'show_pause',
     'statistics',
     'ts_info',
+    'tx_coalesce',
 ]
 
 foreach test : tests

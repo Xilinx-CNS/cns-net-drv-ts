@@ -133,6 +133,33 @@
         </run>
 
         <run>
+            <script name="tx_coalesce"/>
+            <arg name="env">
+                <value ref="env.iut_only"/>
+            </arg>
+            <arg name="profile">
+                <value>disabled</value>
+                <value>time_only</value>
+                <value>frames_only</value>
+                <value>time_frames</value>
+                <value>irq</value>
+                <value>irq_usecs</value>
+                <value>irq_frames</value>
+                <value>adaptive</value>
+                <value>adaptive_low_time</value>
+                <value>adaptive_low_frames</value>
+                <value>adaptive_high_time</value>
+                <value>adaptive_high_frames</value>
+                <value>adaptive_rate</value>
+                <value>invalid</value>
+            </arg>
+            <arg name="per_queue">
+                <value>FALSE</value>
+                <value>TRUE</value>
+            </arg>
+        </run>
+
+        <run>
             <script name="register_dump"/>
             <arg name="env">
                 <value ref="env.iut_only"/>

@@ -396,6 +396,543 @@
         </results>
       </iter>
     </test>
+    <test name="tx_coalesce" type="script">
+      <objective>Check that TX interrupt coalescing parameters are applied on a tested interface.</objective>
+      <notes/>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">disabled</arg>
+        <arg name="per_queue">FALSE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-FRAMES" notes="ice does not support tx_max_coalesced_frames">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-FRAMES" notes="i40e does not support tx_max_coalesced_frames">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">disabled</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-FRAMES" notes="ice does not support tx_max_coalesced_frames">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-FRAMES" notes="i40e does not support tx_max_coalesced_frames">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-PER-QUEUE" notes="virtio-pci reports per-queue Tx coalescing settings as unsupported">
+          <result value="SKIPPED">
+            <verdict>Per-queue Tx coalescing settings are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">time_only</arg>
+        <arg name="per_queue">FALSE</arg>
+        <notes/>
+        <results tags="virtio-pci" key="TX-COAL-TIME-EBUSY" notes="virtio_net cannot change TX NAPI weight while the interface is up">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EBUSY</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">time_only</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="virtio-pci" key="TX-COAL-NO-PER-QUEUE" notes="virtio-pci reports per-queue Tx coalescing settings as unsupported">
+          <result value="SKIPPED">
+            <verdict>Per-queue Tx coalescing settings are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">frames_only</arg>
+        <arg name="per_queue">FALSE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-FRAMES" notes="ice does not support tx_max_coalesced_frames">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-FRAMES" notes="i40e does not support tx_max_coalesced_frames">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-FRAMES-EINVAL" notes="virtio_net without notification coalescing accepts at most one TX frame">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EINVAL</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">frames_only</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-FRAMES" notes="ice does not support tx_max_coalesced_frames">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-FRAMES" notes="i40e does not support tx_max_coalesced_frames">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-PER-QUEUE" notes="virtio-pci reports per-queue Tx coalescing settings as unsupported">
+          <result value="SKIPPED">
+            <verdict>Per-queue Tx coalescing settings are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">time_frames</arg>
+        <arg name="per_queue">FALSE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-FRAMES" notes="ice does not support tx_max_coalesced_frames">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-FRAMES" notes="i40e does not support tx_max_coalesced_frames">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-TIME-FRAMES-EOPNOTSUPP" notes="virtio_net without notification coalescing does not support TX usecs">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">time_frames</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-FRAMES" notes="ice does not support tx_max_coalesced_frames">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-FRAMES" notes="i40e does not support tx_max_coalesced_frames">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-PER-QUEUE" notes="virtio-pci reports per-queue Tx coalescing settings as unsupported">
+          <result value="SKIPPED">
+            <verdict>Per-queue Tx coalescing settings are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">irq</arg>
+        <arg name="per_queue">FALSE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-IRQ-USECS" notes="ice does not support tx_coalesce_usecs_irq">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-IRQ-USECS" notes="i40e does not support tx_coalesce_usecs_irq">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-IRQ-USECS" notes="virtio_net does not support tx_coalesce_usecs_irq">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">irq</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-IRQ-USECS" notes="ice does not support tx_coalesce_usecs_irq">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-IRQ-USECS" notes="i40e does not support tx_coalesce_usecs_irq">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-PER-QUEUE" notes="virtio-pci reports per-queue Tx coalescing settings as unsupported">
+          <result value="SKIPPED">
+            <verdict>Per-queue Tx coalescing settings are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">irq_usecs</arg>
+        <arg name="per_queue">FALSE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-IRQ-USECS" notes="ice does not support tx_coalesce_usecs_irq">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-IRQ-USECS" notes="i40e does not support tx_coalesce_usecs_irq">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-IRQ-USECS" notes="virtio_net does not support tx_coalesce_usecs_irq">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">irq_usecs</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-IRQ-USECS" notes="ice does not support tx_coalesce_usecs_irq">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-IRQ-USECS" notes="i40e does not support tx_coalesce_usecs_irq">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-PER-QUEUE" notes="virtio-pci reports per-queue Tx coalescing settings as unsupported">
+          <result value="SKIPPED">
+            <verdict>Per-queue Tx coalescing settings are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">irq_frames</arg>
+        <arg name="per_queue">FALSE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-IRQ-FRAMES" notes="ice does not support tx_max_coalesced_frames_irq">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-IRQ-FRAMES" notes="virtio_net does not support tx_max_coalesced_frames_irq">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">irq_frames</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-IRQ-FRAMES" notes="ice does not support tx_max_coalesced_frames_irq">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-PER-QUEUE" notes="virtio-pci reports per-queue Tx coalescing settings as unsupported">
+          <result value="SKIPPED">
+            <verdict>Per-queue Tx coalescing settings are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">adaptive</arg>
+        <arg name="per_queue">FALSE</arg>
+        <notes/>
+        <results tags="virtio-pci" key="TX-COAL-NO-ADAPTIVE-TX" notes="virtio_net supports adaptive RX coalescing only">
+          <result value="FAILED">
+            <verdict>Failed to enable use_adaptive_tx_coalesce, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">adaptive</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="virtio-pci" key="TX-COAL-NO-PER-QUEUE" notes="virtio-pci reports per-queue Tx coalescing settings as unsupported">
+          <result value="SKIPPED">
+            <verdict>Per-queue Tx coalescing settings are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">adaptive_low_time</arg>
+        <arg name="per_queue">FALSE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-ADAPTIVE-LOW-TIME" notes="ice does not support tx_coalesce_usecs_low">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-ADAPTIVE-LOW-TIME" notes="i40e does not support tx_coalesce_usecs_low">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-ADAPTIVE-LOW-TIME" notes="virtio_net does not support tx_coalesce_usecs_low">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">adaptive_low_time</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-ADAPTIVE-LOW-TIME" notes="ice does not support tx_coalesce_usecs_low">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-ADAPTIVE-LOW-TIME" notes="i40e does not support tx_coalesce_usecs_low">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-PER-QUEUE" notes="virtio-pci reports per-queue Tx coalescing settings as unsupported">
+          <result value="SKIPPED">
+            <verdict>Per-queue Tx coalescing settings are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">adaptive_low_frames</arg>
+        <arg name="per_queue">FALSE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-ADAPTIVE-LOW-FRAMES" notes="ice does not support tx_max_coalesced_frames_low">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-ADAPTIVE-LOW-FRAMES" notes="i40e does not support tx_max_coalesced_frames_low">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-ADAPTIVE-LOW-FRAMES" notes="virtio_net does not support tx_max_coalesced_frames_low">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">adaptive_low_frames</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-ADAPTIVE-LOW-FRAMES" notes="ice does not support tx_max_coalesced_frames_low">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-ADAPTIVE-LOW-FRAMES" notes="i40e does not support tx_max_coalesced_frames_low">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-PER-QUEUE" notes="virtio-pci reports per-queue Tx coalescing settings as unsupported">
+          <result value="SKIPPED">
+            <verdict>Per-queue Tx coalescing settings are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">adaptive_high_time</arg>
+        <arg name="per_queue">FALSE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-ADAPTIVE-HIGH-TIME" notes="ice does not support tx_coalesce_usecs_high">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-TX-HIGH-TIME-UNUSED" notes="i40e asks to program rx-usecs-high instead of tx-usecs-high">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EINVAL</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-ADAPTIVE-HIGH-TIME" notes="virtio_net does not support tx_coalesce_usecs_high">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">adaptive_high_time</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-ADAPTIVE-HIGH-TIME" notes="ice does not support tx_coalesce_usecs_high">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-TX-HIGH-TIME-UNUSED" notes="i40e asks to program rx-usecs-high instead of tx-usecs-high">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EINVAL</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-PER-QUEUE" notes="virtio-pci reports per-queue Tx coalescing settings as unsupported">
+          <result value="SKIPPED">
+            <verdict>Per-queue Tx coalescing settings are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">adaptive_high_frames</arg>
+        <arg name="per_queue">FALSE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-ADAPTIVE-HIGH-FRAMES" notes="ice does not support tx_max_coalesced_frames_high">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-ADAPTIVE-HIGH-FRAMES" notes="i40e does not support tx_max_coalesced_frames_high">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-ADAPTIVE-HIGH-FRAMES" notes="virtio_net does not support tx_max_coalesced_frames_high">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">adaptive_high_frames</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-ADAPTIVE-HIGH-FRAMES" notes="ice does not support tx_max_coalesced_frames_high">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-ADAPTIVE-HIGH-FRAMES" notes="i40e does not support tx_max_coalesced_frames_high">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-PER-QUEUE" notes="virtio-pci reports per-queue Tx coalescing settings as unsupported">
+          <result value="SKIPPED">
+            <verdict>Per-queue Tx coalescing settings are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">adaptive_rate</arg>
+        <arg name="per_queue">FALSE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-ADAPTIVE-RATE" notes="ice does not support TX adaptive rate parameters">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-ADAPTIVE-RATE" notes="i40e does not support TX adaptive rate parameters">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-ADAPTIVE-RATE" notes="virtio_net does not support TX adaptive rate parameters">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">adaptive_rate</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-NO-ADAPTIVE-RATE" notes="ice does not support TX adaptive rate parameters">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-NO-ADAPTIVE-RATE" notes="i40e does not support TX adaptive rate parameters">
+          <result value="FAILED">
+            <verdict>Failed to set Tx coalescing settings, rc=EOPNOTSUPP</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-PER-QUEUE" notes="virtio-pci reports per-queue Tx coalescing settings as unsupported">
+          <result value="SKIPPED">
+            <verdict>Per-queue Tx coalescing settings are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">invalid</arg>
+        <arg name="per_queue">FALSE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-ZERO-LIMITS" notes="ice accepts zero TX time and frame limits">
+          <result value="FAILED">
+            <verdict>Zero Tx time and frame limits unexpectedly succeeded</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-ZERO-LIMITS" notes="i40e accepts zero TX time and frame limits">
+          <result value="FAILED">
+            <verdict>Zero Tx time and frame limits unexpectedly succeeded</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-ZERO-LIMITS-EBUSY" notes="virtio_net cannot disable TX NAPI weight while the interface is up">
+          <result value="FAILED">
+            <verdict>Zero Tx time and frame limits failed with unexpected rc=EBUSY</verdict>
+          </result>
+        </results>
+      </iter>
+      <iter result="PASSED">
+        <arg name="env"/>
+        <arg name="profile">invalid</arg>
+        <arg name="per_queue">TRUE</arg>
+        <notes/>
+        <results tags="ice" key="TX-COAL-ZERO-LIMITS" notes="ice accepts zero TX time and frame limits">
+          <result value="FAILED">
+            <verdict>Zero Tx time and frame limits unexpectedly succeeded</verdict>
+          </result>
+        </results>
+        <results tags="i40e" key="TX-COAL-ZERO-LIMITS" notes="i40e accepts zero TX time and frame limits">
+          <result value="FAILED">
+            <verdict>Zero Tx time and frame limits unexpectedly succeeded</verdict>
+          </result>
+        </results>
+        <results tags="virtio-pci" key="TX-COAL-NO-PER-QUEUE" notes="virtio-pci reports per-queue Tx coalescing settings as unsupported">
+          <result value="SKIPPED">
+            <verdict>Per-queue Tx coalescing settings are not supported</verdict>
+          </result>
+        </results>
+      </iter>
+    </test>
     <test name="register_dump" type="script">
       <objective>Check that register dump can be obtained.</objective>
       <notes/>
