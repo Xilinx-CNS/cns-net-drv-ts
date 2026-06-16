@@ -49,6 +49,7 @@
 #include "ndn.h"
 #include "tad_common.h"
 #include "tapi_cfg_base.h"
+#include "tapi_cfg_stats.h"
 #include "tapi_eth.h"
 #include "tapi_ndn.h"
 #include "te_defs.h"
@@ -149,6 +150,47 @@ prepare_template(asn_value *tmpl,
     CHECK_RC(asn_write_string(tmpl, send_func, "send-func"));
 }
 
+static uint64_t
+if_counter_delta(uint64_t before, uint64_t after, const char *counter,
+                 const char *if_name)
+{
+    if (after < before)
+    {
+        WARN("Counter %s on %s decreased from %" PRIu64 " to %" PRIu64 "",
+             counter, if_name, before, after);
+        return 0;
+    }
+
+    return after - before;
+}
+
+static void
+calc_if_stats_delta(const tapi_cfg_if_stats *before,
+                    const tapi_cfg_if_stats *after,
+                    const char *if_name,
+                    tapi_cfg_if_stats *diff)
+{
+    memset(diff, 0, sizeof(*diff));
+
+#define IF_STATS_DELTA(_field) \
+    diff->_field = if_counter_delta(before->_field, after->_field, \
+                                    #_field, if_name)
+
+    IF_STATS_DELTA(in_octets);
+    IF_STATS_DELTA(in_ucast_pkts);
+    IF_STATS_DELTA(in_nucast_pkts);
+    IF_STATS_DELTA(in_discards);
+    IF_STATS_DELTA(in_errors);
+    IF_STATS_DELTA(in_unknown_protos);
+    IF_STATS_DELTA(out_octets);
+    IF_STATS_DELTA(out_ucast_pkts);
+    IF_STATS_DELTA(out_nucast_pkts);
+    IF_STATS_DELTA(out_discards);
+    IF_STATS_DELTA(out_errors);
+
+#undef IF_STATS_DELTA
+}
+
 static void
 get_timestamps(const char *ta, csap_handle_t csap, ts_range *ts)
 {
@@ -224,17 +266,26 @@ main(int argc, char *argv[])
     csap_handle_t csap_send[TEST_MAX_LINKS];
     csap_handle_t csap_rx[TEST_MAX_LINKS];
 
-    uint64_t tx_pkts[TEST_MAX_LINKS] = {};
-    unsigned int rx_pkts[TEST_MAX_LINKS] = {};
-    uint64_t tx_pkts_total = 0;
-    uint64_t rx_pkts_total = 0;
+    /* Main metrics are based on interface counters. */
+    uint64_t tx_if_pkts[TEST_MAX_LINKS] = {};
+    uint64_t rx_if_pkts[TEST_MAX_LINKS] = {};
+    unsigned int rx_csap_pkts[TEST_MAX_LINKS] = {};
+    uint64_t tx_if_pkts_total = 0;
+    uint64_t rx_if_pkts_total = 0;
+
+    /* Interface counter snapshots used to calculate traffic deltas. */
+    tapi_cfg_if_stats sender_stats_before[TEST_MAX_LINKS] = {};
+    tapi_cfg_if_stats sender_stats_after[TEST_MAX_LINKS] = {};
+    tapi_cfg_if_stats sender_stats_diff[TEST_MAX_LINKS] = {};
+    tapi_cfg_if_stats receiver_stats_before[TEST_MAX_LINKS] = {};
+    tapi_cfg_if_stats receiver_stats_after[TEST_MAX_LINKS] = {};
+    tapi_cfg_if_stats receiver_stats_diff[TEST_MAX_LINKS] = {};
     int64_t loss_pkts = 0;
     double loss_pct = 0.0;
 
+    /* Rates are calculated over the sender CSAP active interval. */
     ts_range tx_ts[TEST_MAX_LINKS] = {};
-    ts_range rx_ts[TEST_MAX_LINKS] = {};
     double tx_time_s[TEST_MAX_LINKS] = {};
-    double rx_time_s[TEST_MAX_LINKS] = {};
     double tx_pps_per_link[TEST_MAX_LINKS] = {};
     double rx_pps_per_link[TEST_MAX_LINKS] = {};
     double tx_l1_bps_per_link[TEST_MAX_LINKS] = {};
@@ -350,6 +401,15 @@ main(int argc, char *argv[])
     }
 
     CHECK_RC(tapi_env_stats_gather(&env));
+    for (i = 0; i < n_ports; i++)
+    {
+        CHECK_RC(tapi_cfg_stats_if_stats_get(sender_rpcs->ta,
+                                             sender_ifs[i]->if_name,
+                                             &sender_stats_before[i]));
+        CHECK_RC(tapi_cfg_stats_if_stats_get(receiver_rpcs->ta,
+                                             receiver_ifs[i]->if_name,
+                                             &receiver_stats_before[i]));
+    }
 
     TEST_STEP("Send Ethernet frames on all links simultaneously.");
     for (i = 0; i < n_ports; i++)
@@ -363,8 +423,6 @@ main(int argc, char *argv[])
         wait_send_completion(sender_rpcs->ta, csap_send[i],
                              sender_ifs[i]->if_name,
                              send_timeout_s);
-        tx_pkts[i] = target_packets[i];
-        tx_pkts_total += tx_pkts[i];
     }
 
     TAPI_WAIT_NETWORK;
@@ -372,24 +430,68 @@ main(int argc, char *argv[])
     for (i = 0; i < n_ports; i++)
     {
         CHECK_RC(tapi_tad_trrecv_stop(receiver_rpcs->ta, 0, csap_rx[i], NULL,
-                                      &rx_pkts[i]));
+                                      &rx_csap_pkts[i]));
 
-        if (rx_pkts[i] > tx_pkts[i])
+        if (rx_csap_pkts[i] > target_packets[i])
         {
-            unsigned int rx_tx_gap = rx_pkts[i] - tx_pkts[i];
+            uint64_t rx_tx_gap = rx_csap_pkts[i] - target_packets[i];
 
             if (rx_tx_gap > RX_TX_PKTS_GAP)
             {
                 ERROR("Rx CSAP captured more packets than were requested on link #%u "
-                      "(%u > %" PRIu64 ", gap %u > %u)",
-                      i, rx_pkts[i], tx_pkts[i], rx_tx_gap, RX_TX_PKTS_GAP);
-                ERROR_VERDICT("Rx CSAP captured more packets than were sent");
+                      "(%u > %" PRIu64 ", gap %" PRIu64 " > %u)",
+                      i, rx_csap_pkts[i], target_packets[i], rx_tx_gap,
+                      RX_TX_PKTS_GAP);
+                ERROR_VERDICT("Rx CSAP captured more packets than were requested");
             }
 
-            rx_pkts[i] = tx_pkts[i];
+            rx_csap_pkts[i] = (unsigned int)target_packets[i];
+        }
+    }
+
+    NET_DRV_WAIT_IF_STATS_UPDATE;
+    for (i = 0; i < n_ports; i++)
+    {
+        CHECK_RC(tapi_cfg_stats_if_stats_get(sender_rpcs->ta,
+                                             sender_ifs[i]->if_name,
+                                             &sender_stats_after[i]));
+        CHECK_RC(tapi_cfg_stats_if_stats_get(receiver_rpcs->ta,
+                                             receiver_ifs[i]->if_name,
+                                             &receiver_stats_after[i]));
+
+        calc_if_stats_delta(&sender_stats_before[i], &sender_stats_after[i],
+                            sender_ifs[i]->if_name, &sender_stats_diff[i]);
+        calc_if_stats_delta(&receiver_stats_before[i], &receiver_stats_after[i],
+                            receiver_ifs[i]->if_name,
+                            &receiver_stats_diff[i]);
+
+        tx_if_pkts[i] = sender_stats_diff[i].out_ucast_pkts;
+        /*
+         * Treat packets counted by Rx NIC as received by the link even if
+         * they were dropped later due to local resource pressure.
+         */
+        rx_if_pkts[i] = receiver_stats_diff[i].in_ucast_pkts +
+                        receiver_stats_diff[i].in_discards;
+
+        if (rx_if_pkts[i] > tx_if_pkts[i])
+        {
+            uint64_t rx_tx_gap = rx_if_pkts[i] - tx_if_pkts[i];
+
+            if (rx_tx_gap > RX_TX_PKTS_GAP)
+            {
+                ERROR("Rx interface counted more packets than Tx interface "
+                      "on link #%u (%" PRIu64 " > %" PRIu64 ", "
+                      "gap %" PRIu64 " > %u)",
+                      i, rx_if_pkts[i], tx_if_pkts[i], rx_tx_gap,
+                      RX_TX_PKTS_GAP);
+                ERROR_VERDICT("Rx interface counted more packets than Tx interface");
+            }
+
+            rx_if_pkts[i] = tx_if_pkts[i];
         }
 
-        rx_pkts_total += rx_pkts[i];
+        tx_if_pkts_total += tx_if_pkts[i];
+        rx_if_pkts_total += rx_if_pkts[i];
     }
 
     for (i = 0; i < n_ports; i++)
@@ -397,32 +499,24 @@ main(int argc, char *argv[])
         get_timestamps(sender_rpcs->ta, csap_send[i], &tx_ts[i]);
         tx_time_s[i] = tx_ts[i].dur.tv_sec +
                        (double)tx_ts[i].dur.tv_usec / TE_SEC2US(1);
-        if (rx_pkts[i] > 0)
-        {
-            get_timestamps(receiver_rpcs->ta, csap_rx[i], &rx_ts[i]);
-            rx_time_s[i] = rx_ts[i].dur.tv_sec +
-                           (double)rx_ts[i].dur.tv_usec / TE_SEC2US(1);
-        }
 
         if (tx_time_s[i] > 0.0)
         {
-            tx_pps_per_link[i] = tx_pkts[i] / tx_time_s[i];
+            tx_pps_per_link[i] = tx_if_pkts[i] / tx_time_s[i];
             tx_l1_bps_per_link[i] = tx_pps_per_link[i] * pkt_l1_bits;
             tx_pps += tx_pps_per_link[i];
             tx_l1_bps += tx_l1_bps_per_link[i];
-        }
-        if (rx_time_s[i] > 0.0)
-        {
-            rx_pps_per_link[i] = rx_pkts[i] / rx_time_s[i];
+
+            rx_pps_per_link[i] = rx_if_pkts[i] / tx_time_s[i];
             rx_l1_bps_per_link[i] = rx_pps_per_link[i] * pkt_l1_bits;
             rx_pps += rx_pps_per_link[i];
             rx_l1_bps += rx_l1_bps_per_link[i];
         }
     }
 
-    loss_pkts = (int64_t)tx_pkts_total - (int64_t)rx_pkts_total;
-    if (tx_pkts_total > 0)
-        loss_pct = (double)loss_pkts * 100.0 / tx_pkts_total;
+    loss_pkts = (int64_t)tx_if_pkts_total - (int64_t)rx_if_pkts_total;
+    if (tx_if_pkts_total > 0)
+        loss_pct = (double)loss_pkts * 100.0 / tx_if_pkts_total;
 
     total_line_rate_bps = common_link_speed_bps * n_ports;
 
@@ -448,16 +542,17 @@ main(int argc, char *argv[])
                   TE_UNITS_DEC_U2M(loss_pkts), loss_pct);
     RING("Aggregate packets: Tx %.3f Mpkts, Rx %.3f Mpkts, "
          "loss %.3f Mpkts",
-         TE_UNITS_DEC_U2M(tx_pkts_total),
-         TE_UNITS_DEC_U2M(rx_pkts_total),
+         TE_UNITS_DEC_U2M(tx_if_pkts_total),
+         TE_UNITS_DEC_U2M(rx_if_pkts_total),
          TE_UNITS_DEC_U2M(loss_pkts));
 
     for (i = 0; i < n_ports; i++)
     {
-        int64_t loss_pkts_link = (int64_t)tx_pkts[i] - (int64_t)rx_pkts[i];
-        double loss_pct_link = tx_pkts[i] > 0 ?
-                               (double)loss_pkts_link * 100.0 / tx_pkts[i] :
-                               0.0;
+        int64_t loss_pkts_link = (int64_t)tx_if_pkts[i] -
+                                  (int64_t)rx_if_pkts[i];
+        double loss_pct_link = tx_if_pkts[i] > 0 ?
+                               (double)loss_pkts_link * 100.0 /
+                               tx_if_pkts[i] : 0.0;
         double min_l1_bps = (double)link_speed_bps[i] * MIN_SPEED_MULTIPLIER;
         double tx_util_pct_link = link_speed_bps[i] > 0 ?
                                   tx_l1_bps_per_link[i] * 100.0 /
@@ -481,7 +576,8 @@ main(int argc, char *argv[])
                       tx_util_pct_link, rx_util_pct_link, loss_pct_link);
         RING("Link #%u packets: Tx %.3f Mpkts, Rx %.3f Mpkts, "
              "loss %.3f Mpkts",
-             i, TE_UNITS_DEC_U2M(tx_pkts[i]), TE_UNITS_DEC_U2M(rx_pkts[i]),
+             i, TE_UNITS_DEC_U2M(tx_if_pkts[i]),
+             TE_UNITS_DEC_U2M(rx_if_pkts[i]),
              TE_UNITS_DEC_U2M(loss_pkts_link));
         RING("Link #%u packet rate: Tx %.3f Mpps, Rx %.3f Mpps",
              i, TE_UNITS_DEC_U2M(tx_pps_per_link[i]),
