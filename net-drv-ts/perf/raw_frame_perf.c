@@ -82,6 +82,11 @@ typedef struct ts_range {
     struct timeval dur;
 } ts_range;
 
+typedef struct csap_tp_stats {
+    uint64_t packets;
+    uint64_t drops;
+} csap_tp_stats;
+
 static void
 log_summary_mi(double tx_pps, double rx_pps,
                double tx_l1_bps, double rx_l1_bps)
@@ -148,6 +153,46 @@ prepare_template(asn_value *tmpl,
     CHECK_RC(te_snprintf(send_func, sizeof(send_func),
                          "tad_eth_flood:%" PRIu64, target_packets));
     CHECK_RC(asn_write_string(tmpl, send_func, "send-func"));
+}
+
+static void
+get_csap_tp_stats(const char *ta, csap_handle_t csap, csap_tp_stats *stats)
+{
+    int64_t value;
+
+    CHECK_RC(tapi_csap_param_get_llint(ta, 0, csap, CSAP_PARAM_TP_PACKETS,
+                                       &value));
+    if (value < 0)
+    {
+        TEST_VERDICT("CSAP parameter %s returned negative value",
+                     CSAP_PARAM_TP_PACKETS);
+    }
+    stats->packets = (uint64_t)value;
+
+    CHECK_RC(tapi_csap_param_get_llint(ta, 0, csap,
+                                       CSAP_PARAM_TP_DROPS, &value));
+    if (value < 0)
+    {
+        TEST_VERDICT("CSAP parameter %s returned negative value",
+                     CSAP_PARAM_TP_DROPS);
+    }
+    stats->drops = (uint64_t)value;
+}
+
+static void
+log_csap_rx_diagnostics(const char *scope, uint64_t rx_csap_pkts,
+                        uint64_t rx_tp_drops, uint64_t rx_csap_seen_pkts,
+                        uint64_t rx_if_pkts)
+{
+    RING("%s CSAP diagnostics:\n"
+         "  Rx reported by CSAP %.3f Mpkts from %.3f Mpkts seen by interface\n"
+         "  TPACKET drops %.3f Mpkts\n"
+         "  Rx captured %.3f Mpkts",
+         scope,
+         TE_UNITS_DEC_U2M(rx_csap_seen_pkts),
+         TE_UNITS_DEC_U2M(rx_if_pkts),
+         TE_UNITS_DEC_U2M(rx_tp_drops),
+         TE_UNITS_DEC_U2M(rx_csap_pkts));
 }
 
 static uint64_t
@@ -269,9 +314,21 @@ main(int argc, char *argv[])
     /* Main metrics are based on interface counters. */
     uint64_t tx_if_pkts[TEST_MAX_LINKS] = {};
     uint64_t rx_if_pkts[TEST_MAX_LINKS] = {};
-    unsigned int rx_csap_pkts[TEST_MAX_LINKS] = {};
     uint64_t tx_if_pkts_total = 0;
     uint64_t rx_if_pkts_total = 0;
+    uint64_t rx_if_ucast_pkts_total = 0;
+    uint64_t rx_if_discards_total = 0;
+    uint64_t tx_if_discards_total = 0;
+    uint64_t tx_if_errors_total = 0;
+    uint64_t rx_if_errors_total = 0;
+
+    /* CSAP counters are kept as diagnostic data. */
+    unsigned int rx_csap_pkts[TEST_MAX_LINKS] = {};
+    uint64_t rx_csap_seen_pkts[TEST_MAX_LINKS] = {};
+    uint64_t rx_csap_pkts_total = 0;
+    uint64_t rx_csap_seen_pkts_total = 0;
+    csap_tp_stats rx_tp_stats[TEST_MAX_LINKS] = {};
+    uint64_t rx_tp_drops_total = 0;
 
     /* Interface counter snapshots used to calculate traffic deltas. */
     tapi_cfg_if_stats sender_stats_before[TEST_MAX_LINKS] = {};
@@ -447,6 +504,8 @@ main(int argc, char *argv[])
 
             rx_csap_pkts[i] = (unsigned int)target_packets[i];
         }
+
+        rx_csap_pkts_total += rx_csap_pkts[i];
     }
 
     NET_DRV_WAIT_IF_STATS_UPDATE;
@@ -492,6 +551,26 @@ main(int argc, char *argv[])
 
         tx_if_pkts_total += tx_if_pkts[i];
         rx_if_pkts_total += rx_if_pkts[i];
+        rx_if_ucast_pkts_total += receiver_stats_diff[i].in_ucast_pkts;
+        rx_if_discards_total += receiver_stats_diff[i].in_discards;
+        tx_if_discards_total += sender_stats_diff[i].out_discards;
+        tx_if_errors_total += sender_stats_diff[i].out_errors;
+        rx_if_errors_total += receiver_stats_diff[i].in_errors;
+    }
+
+    for (i = 0; i < n_ports; i++)
+    {
+        uint64_t rx_csap_seen_raw;
+
+        get_csap_tp_stats(receiver_rpcs->ta, csap_rx[i], &rx_tp_stats[i]);
+
+        rx_csap_seen_raw = (rx_csap_pkts[i] == 0) ? 0 :
+                           (uint64_t)rx_csap_pkts[i] +
+                           rx_tp_stats[i].drops;
+        rx_csap_seen_pkts[i] = MIN(rx_csap_seen_raw, tx_if_pkts[i]);
+        rx_csap_seen_pkts_total += rx_csap_seen_pkts[i];
+
+        rx_tp_drops_total += rx_tp_stats[i].drops;
     }
 
     for (i = 0; i < n_ports; i++)
@@ -540,11 +619,6 @@ main(int argc, char *argv[])
                   TE_UNITS_DEC_U2M(rx_l1_bps),
                   TE_UNITS_DEC_U2M(rx_pps), rx_util_pct,
                   TE_UNITS_DEC_U2M(loss_pkts), loss_pct);
-    RING("Aggregate packets: Tx %.3f Mpkts, Rx %.3f Mpkts, "
-         "loss %.3f Mpkts",
-         TE_UNITS_DEC_U2M(tx_if_pkts_total),
-         TE_UNITS_DEC_U2M(rx_if_pkts_total),
-         TE_UNITS_DEC_U2M(loss_pkts));
 
     for (i = 0; i < n_ports; i++)
     {
@@ -574,14 +648,6 @@ main(int argc, char *argv[])
                       TE_UNITS_DEC_U2M(tx_l1_bps_per_link[i]),
                       TE_UNITS_DEC_U2M(rx_l1_bps_per_link[i]),
                       tx_util_pct_link, rx_util_pct_link, loss_pct_link);
-        RING("Link #%u packets: Tx %.3f Mpkts, Rx %.3f Mpkts, "
-             "loss %.3f Mpkts",
-             i, TE_UNITS_DEC_U2M(tx_if_pkts[i]),
-             TE_UNITS_DEC_U2M(rx_if_pkts[i]),
-             TE_UNITS_DEC_U2M(loss_pkts_link));
-        RING("Link #%u packet rate: Tx %.3f Mpps, Rx %.3f Mpps",
-             i, TE_UNITS_DEC_U2M(tx_pps_per_link[i]),
-             TE_UNITS_DEC_U2M(rx_pps_per_link[i]));
 
         if (loss_pct_link > max_loss_pct)
         {
@@ -603,6 +669,65 @@ main(int argc, char *argv[])
                   TE_UNITS_DEC_U2M(checked_l1_bps),
                   TE_UNITS_DEC_U2M(min_l1_bps));
             TEST_VERDICT("IUT throughput is too low in checked direction");
+        }
+    }
+
+    RING("Interface counters:");
+    RING("  Tx %.3f Mpkts",
+         TE_UNITS_DEC_U2M(tx_if_pkts_total));
+    RING("  Rx %.3f Mpkts",
+         TE_UNITS_DEC_U2M(rx_if_pkts_total));
+    RING("  Rx details: ucast %.3f Mpkts, discards %.3f Mpkts",
+         TE_UNITS_DEC_U2M(rx_if_ucast_pkts_total),
+         TE_UNITS_DEC_U2M(rx_if_discards_total));
+
+    if (tx_if_discards_total > 0 || tx_if_errors_total > 0 ||
+        rx_if_errors_total > 0)
+    {
+        WARN("Interface issues: Tx discards %" PRIu64 ", "
+             "Tx errors %" PRIu64 ", Rx errors %" PRIu64,
+             tx_if_discards_total, tx_if_errors_total, rx_if_errors_total);
+
+        for (i = 0; i < n_ports; i++)
+        {
+            if (sender_stats_diff[i].out_discards == 0 &&
+                sender_stats_diff[i].out_errors == 0 &&
+                receiver_stats_diff[i].in_errors == 0)
+            {
+                continue;
+            }
+
+            RING("Link #%u interface issues: Tx discards %" PRIu64 ", "
+                 "Tx errors %" PRIu64 ", Rx errors %" PRIu64,
+                 i, sender_stats_diff[i].out_discards,
+                 sender_stats_diff[i].out_errors,
+                 receiver_stats_diff[i].in_errors);
+        }
+    }
+
+    if (rx_tp_drops_total > 0 ||
+        rx_csap_pkts_total != rx_if_pkts_total ||
+        rx_csap_seen_pkts_total != rx_if_pkts_total)
+    {
+        log_csap_rx_diagnostics("Aggregate", rx_csap_pkts_total,
+                                rx_tp_drops_total, rx_csap_seen_pkts_total,
+                                rx_if_pkts_total);
+
+        for (i = 0; i < n_ports; i++)
+        {
+            char scope[32];
+
+            if (rx_tp_stats[i].drops == 0 &&
+                rx_csap_pkts[i] == rx_if_pkts[i] &&
+                rx_csap_seen_pkts[i] == rx_if_pkts[i])
+            {
+                continue;
+            }
+
+            CHECK_RC(te_snprintf(scope, sizeof(scope), "Link #%u", i));
+            log_csap_rx_diagnostics(scope, rx_csap_pkts[i],
+                                    rx_tp_stats[i].drops, rx_csap_seen_pkts[i],
+                                    rx_if_pkts[i]);
         }
     }
 
