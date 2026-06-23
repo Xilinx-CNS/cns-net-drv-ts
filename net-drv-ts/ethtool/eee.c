@@ -207,9 +207,9 @@ main(int argc, char *argv[])
     if (te_rc != 0)
     {
         if (TE_RC_GET_ERROR(te_rc) == TE_ENOENT)
-            TEST_SKIP("EEE is not supported");
+            TEST_SKIP("EEE is not supported on Tester");
         else
-            TEST_VERDICT("Failed to get EEE active state: %r", rc);
+            TEST_VERDICT("Failed to get EEE active state on Tester: %r", rc);
     }
 
     RING("EEE initial state on Tester is%s active",

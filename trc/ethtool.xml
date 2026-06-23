@@ -532,27 +532,27 @@
         <notes/>
         <results tags="port-DA" key="DA-NO-EEE" notes="EEE support depends on PHY and I guess used direct attach cables do not support EEE">
           <result value="SKIPPED">
-            <verdict>EEE is not supported</verdict>
+            <verdict>EEE is not supported on Tester</verdict>
           </result>
         </results>
-        <results tags="ice" key="NO-ETHTOOL-EEE" notes="ice does not support EEE">
+        <results tags="peer-ice" key="NO-ETHTOOL-EEE" notes="ice does not support EEE">
           <result value="SKIPPED">
-            <verdict>EEE is not supported</verdict>
+            <verdict>EEEE is not supported on Tester</verdict>
           </result>
         </results>
-        <results tags="mlx5_core" key="NO-ETHTOOL-EEE" notes="mlx5_core does not support EEE">
+        <results tags="peer-mlx5_core" key="NO-ETHTOOL-EEE" notes="mlx5_core does not support EEE">
           <result value="SKIPPED">
-            <verdict>EEE is not supported</verdict>
+            <verdict>EEE is not supported on Tester</verdict>
           </result>
         </results>
-        <results tags="sfc" key="NO-ETHTOOL-EEE">
+        <results tags="peer-sfc" key="NO-ETHTOOL-EEE">
           <result value="SKIPPED">
-            <verdict>EEE is not supported</verdict>
+            <verdict>EEE is not supported on Tester</verdict>
           </result>
         </results>
-        <results tags="virtio-pci" key="NO-ETHTOOL-EEE" notes="Virtio net does not support EEE">
+        <results tags="peer-qemu-virtio-net" key="NO-ETHTOOL-EEE" notes="Virtio net does not support EEE">
           <result value="SKIPPED">
-            <verdict>EEE is not supported</verdict>
+            <verdict>EEE is not supported on Tester</verdict>
           </result>
         </results>
       </iter>
