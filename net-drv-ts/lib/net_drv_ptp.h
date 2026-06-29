@@ -14,6 +14,7 @@
 #include "te_config.h"
 #include "te_defs.h"
 #include "rcf_rpc.h"
+#include "tapi_ntpd.h"
 
 /**
  * Maximum inaccuracy in seconds when checking what clock_gettime()
@@ -109,5 +110,17 @@ extern void net_drv_ptp_offs_check_dev_gettime(rcf_rpc_server *rpcs,
                                                int ptp_fd,
                                                rpc_clock_id sys_clock,
                                                double ptp_offs);
+
+/**
+ * Disable ntpd daemon if available.
+ *
+ * @param rpcs RPC server.
+ */
+static inline void
+net_drv_ptp_ntpd_disable(rcf_rpc_server *rpcs)
+{
+    if (tapi_ntpd_is_available(rpcs))
+        tapi_ntpd_disable(rpcs);
+}
 
 #endif /* !__TS_NET_DRV_PTP_H__ */

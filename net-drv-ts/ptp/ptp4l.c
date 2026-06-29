@@ -25,7 +25,6 @@
 #include <math.h>
 
 #include "net_drv_test.h"
-#include "tapi_ntpd.h"
 #include "tapi_job.h"
 #include "tapi_job_factory_rpc.h"
 
@@ -177,8 +176,8 @@ main(int argc, char *argv[])
     find_ptp4l(tst_rpcs, "Tester");
 
     TEST_STEP("Disable @b NTP daemon on IUT and Tester.");
-    tapi_ntpd_disable(iut_rpcs);
-    tapi_ntpd_disable(tst_rpcs);
+    net_drv_ptp_ntpd_disable(iut_rpcs);
+    net_drv_ptp_ntpd_disable(tst_rpcs);
 
     TEST_STEP("Use @b clock_settime() on IUT and Tester to set different "
               "initial values for IUT and Tester clocks.");

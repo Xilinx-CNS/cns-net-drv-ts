@@ -28,7 +28,6 @@
 #define TE_TEST_NAME "ptp/sfptpd"
 
 #include "net_drv_test.h"
-#include "tapi_ntpd.h"
 #include "tapi_sfptpd.h"
 #include "tapi_ethtool.h"
 #include "tapi_job_factory_rpc.h"
@@ -296,8 +295,8 @@ main(int argc, char *argv[])
     config_sfptpd(tst_rpcs->ta, tst_if->if_name, master_cfg);
 
     TEST_STEP("Disable @b NTP daemon on IUT and Tester.");
-    tapi_ntpd_disable(iut_rpcs);
-    tapi_ntpd_disable(tst_rpcs);
+    net_drv_ptp_ntpd_disable(iut_rpcs);
+    net_drv_ptp_ntpd_disable(tst_rpcs);
 
     TEST_STEP("Start @b sfptpd on IUT and Tester. On IUT it is configured "
               "to be a slave synchronizing time with master on Tester.");
