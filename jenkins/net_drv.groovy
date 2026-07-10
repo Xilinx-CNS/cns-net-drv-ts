@@ -43,7 +43,7 @@ def getDriverMetaValue(ctx, String drvName, List suffixes, Map vars = null) {
 }
 
 def getDriverName(ctx) {
-    def coreComponents = ['te', 'ts', 'tsconf', 'tsrigs'] as Set
+    def coreComponents = ['te', 'ts', 'tsconf', 'tsrigs', 'iperf3'] as Set
     def candidates = []
     def allRevs = ctx.all_revs
     def selected = (ctx.params.net_drv_name ?:
@@ -182,6 +182,27 @@ def checkoutDriverSources(ctx) {
         ctx.env.TE_IUT_NET_DRV_SRC = ctx[srcVar]
     } else {
         error("Driver sources path is not defined for ${drvName}")
+    }
+}
+
+def checkoutIperf3Sources(ctx) {
+    def url = ctx.teRun.get_url(ctx, 'iperf3')
+
+    if (!url) {
+        return
+    }
+
+    ctx.teRun.generic_checkout(ctx: ctx,
+                               component: 'iperf3',
+                               url: url,
+                               target: 'iperf3',
+                               do_poll: false)
+
+    if (ctx.IPERF3_SRC) {
+        ctx.TE_IPERF3_SRC = ctx.IPERF3_SRC
+        ctx.env.TE_IPERF3_SRC = ctx.IPERF3_SRC
+    } else {
+        error('iperf3 sources path is not defined')
     }
 }
 

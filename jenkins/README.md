@@ -92,3 +92,14 @@ If no driver name is found, integration is skipped.
 name used as a key.
 Absolute paths are used as is, relative paths are resolved against
 `TSRIGS_SRC`.
+
+## Building iperf3
+
+`update` and `run` can checkout and build iperf3 if `iperf3_repo` parameter
+or `IPERF3_GIT_URL` is set. If neither is set, iperf3 checkout is skipped and
+`TE_IPERF3_SRC` is not set by Jenkins, so iperf3 is not built from
+Jenkins-provided sources.
+
+Use `iperf3_branch` to select a branch. Use `iperf3_rev` to override it with
+a specific branch, tag or commit. Site-specific defaults may be set via
+`IPERF3_GIT_URL` and `IPERF3_DEF_BRANCH`.

@@ -16,6 +16,17 @@ teTsPipeline {
                description: 'Network driver repository. Optional.'),
         string(name: 'net_drv_rev', defaultValue: '',
                description: 'Network driver revision. Optional.'),
+        string(name: 'iperf3_repo',
+               defaultValue: params.iperf3_repo,
+               description: 'iperf3 repository (sticky default). Optional.',
+               trim: true),
+        string(name: 'iperf3_branch',
+               defaultValue: params.iperf3_branch,
+               description: 'iperf3 branch (sticky default). Optional.',
+               trim: true),
+        string(name: 'iperf3_rev', defaultValue: '',
+               description: 'iperf3 revision, overwrites branch. Optional.',
+               trim: true),
     ]
 
     label = 'net-drv-ts'
@@ -29,6 +40,7 @@ teTsPipeline {
         def netDrv = load("${teCtx.TS_SRC}/jenkins/net_drv.groovy")
         netDrv.setDriverBuildScript(teCtx)
         netDrv.checkoutDriverSources(teCtx)
+        netDrv.checkoutIperf3Sources(teCtx)
     }
 
     optionsProvider = {
