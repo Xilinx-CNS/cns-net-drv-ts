@@ -338,6 +338,11 @@
             <verdict>Rx pause frames counter is not available</verdict>
           </result>
         </results>
+        <results tags="peer-i40e&amp;!i40e" notes="i40e drops synthetic PAUSE frames on transmit">
+          <result value="FAILED">
+            <verdict>Rx pause frames counter did not increase</verdict>
+          </result>
+        </results>
         <results tags="ice&amp;linux-mm&lt;511">
           <result value="SKIPPED">
             <verdict>Reception of pause frames is disabled</verdict>
