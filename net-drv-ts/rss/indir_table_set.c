@@ -43,6 +43,7 @@ main(int argc, char *argv[])
     const struct sockaddr *iut_addr = NULL;
     const struct sockaddr *tst_addr = NULL;
     rpc_socket_type sock_type;
+    bool multi_seg;
 
     int iut_s = -1;
     int tst_s = -1;
@@ -63,6 +64,7 @@ main(int argc, char *argv[])
     TEST_GET_IF(iut_if);
     TEST_GET_ADDR(iut_rpcs, iut_addr);
     TEST_GET_ADDR(tst_rpcs, tst_addr);
+    TEST_GET_BOOL_PARAM(multi_seg);
     TEST_GET_SOCK_TYPE(sock_type);
 
     net_drv_rss_ctx_prepare(&ctx, iut_rpcs->ta, iut_if->if_name, 0);
@@ -107,6 +109,7 @@ main(int argc, char *argv[])
     rc = net_drv_rss_send_check_stats(tst_rpcs, tst_s, NULL,
                                       iut_rpcs, iut_s, NULL,
                                       sock_type, cur_queue, bpf_id,
+                                      multi_seg,
                                       "Before indirection table change");
     if (rc != 0)
         test_failed = TRUE;
@@ -129,7 +132,7 @@ main(int argc, char *argv[])
     CHECK_RC(net_drv_rss_send_check_stats(
                                     tst_rpcs, tst_s, NULL,
                                     iut_rpcs, iut_s, NULL,
-                                    sock_type, new_queue, bpf_id,
+                                    sock_type, new_queue, bpf_id, multi_seg,
                                     "After indirection table change"));
 
     if (test_failed)

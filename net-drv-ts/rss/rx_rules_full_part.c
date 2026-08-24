@@ -136,6 +136,7 @@ main(int argc, char *argv[])
     const struct sockaddr *iut_addr = NULL;
     const struct sockaddr *tst_addr = NULL;
     rpc_socket_type sock_type;
+    bool multi_seg;
     te_bool first_partial;
     te_bool partial_src;
 
@@ -174,6 +175,7 @@ main(int argc, char *argv[])
     TEST_GET_IF(iut_if);
     TEST_GET_ADDR(iut_rpcs, iut_addr);
     TEST_GET_ADDR(tst_rpcs, tst_addr);
+    TEST_GET_BOOL_PARAM(multi_seg);
     TEST_GET_SOCK_TYPE(sock_type);
     TEST_GET_BOOL_PARAM(first_partial);
     TEST_GET_BOOL_PARAM(partial_src);
@@ -313,7 +315,7 @@ main(int argc, char *argv[])
     CHECK_RC(net_drv_rss_send_get_stats(
                                    tst_rpcs, tst_s, tst_addr,
                                    iut_rpcs, iut_s, iut_addr,
-                                   sock_type, bpf_id,
+                                   sock_type, bpf_id, multi_seg,
                                    &stats, &stats_count,
                                    "The first connection"));
 
@@ -340,7 +342,7 @@ main(int argc, char *argv[])
     CHECK_RC(net_drv_rss_send_get_stats(
                                    tst_rpcs, tst_s, new_tst_addr,
                                    iut_rpcs, iut_s, new_iut_addr,
-                                   sock_type, bpf_id,
+                                   sock_type, bpf_id, multi_seg,
                                    &stats, &stats_count,
                                    "The second connection"));
 

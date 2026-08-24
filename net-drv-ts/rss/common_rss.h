@@ -37,6 +37,7 @@
  *                        @c RPC_SOCK_DGRAM)
  * @param exp_queue       Expected RSS queue ID
  * @param bpf_id          Id of XDP hook used to count packets
+ * @param jumbo           If @c TRUE, use bigger payload to trigger multi-seg
  * @param vpref           Prefix to use in verdicts
  *
  * @return Status code.
@@ -51,6 +52,7 @@ extern te_errno net_drv_rss_send_check_stats(
                                        rpc_socket_type sock_type,
                                        unsigned int exp_queue,
                                        unsigned int bpf_id,
+                                       bool jumbo,
                                        const char *vpref);
 
 /**
@@ -72,6 +74,7 @@ extern te_errno net_drv_rss_send_check_stats(
  * @param sock_type       Socket type (@c RPC_SOCK_STREAM,
  *                        @c RPC_SOCK_DGRAM)
  * @param bpf_id          Id of XDP hook used to count packets
+ * @param jumbo           If @c TRUE, use bigger payload to trigger multi-seg
  * @param stats           Array with retrieved statistics
  * @param stats_count     Number of elements in the retrieved array
  * @param vpref           Prefix to use in verdicts
@@ -87,6 +90,7 @@ extern te_errno net_drv_rss_send_get_stats(
                                        const struct sockaddr *receiver_addr,
                                        rpc_socket_type sock_type,
                                        unsigned int bpf_id,
+                                       bool jumbo,
                                        tapi_bpf_rxq_stats **stats,
                                        unsigned int *stats_count,
                                        const char *vpref);
@@ -325,6 +329,10 @@ extern void net_drv_add_tcpudp_rx_rule(const char *ta, const char *if_name,
 
 /** Structure describing AF_XDP socket */
 typedef struct net_drv_xdp_sock {
+    /** Queue ID used to bind this socket */
+    unsigned int queue_id;
+    /** Whether this socket queue has Tx capability */
+    bool tx_capable;
     /** Memory allocated for UMEM */
     rpc_ptr mem;
     /** Pointer to UMEM structure on TA */
@@ -338,6 +346,8 @@ typedef struct net_drv_xdp_sock {
 /** Initializer for net_drv_xdp_sock */
 #define NET_DRV_XDP_SOCK_INIT \
     {                         \
+        .queue_id = 0,        \
+        .tx_capable = false,  \
         .mem = RPC_NULL,      \
         .umem = RPC_NULL,     \
         .sock = RPC_NULL,     \
@@ -406,6 +416,22 @@ extern te_errno net_drv_xdp_adjust_rx_size(const char *ta,
                                            net_drv_xdp_cfg *cfg);
 
 /**
+ * Get current total number of Rx and Tx queues for a network interface.
+ * The totals include dedicated and combined channels.
+ *
+ * @param ta            Test Agent name.
+ * @param if_name       Interface name.
+ * @param rx_queues     Where to save total Rx queues number.
+ * @param tx_queues     Where to save total Tx queues number.
+ *
+ * @return Status code.
+ */
+extern te_errno net_drv_xdp_get_queues_num(const char *ta,
+                                           const char *if_name,
+                                           unsigned int *rx_queues,
+                                           unsigned int *tx_queues);
+
+/**
  * Create and configure AF_XDP socket.
  *
  * @param rpcs        RPC server
@@ -471,7 +497,8 @@ extern te_errno net_drv_xdp_destroy_socks(rcf_rpc_server *rpcs,
  * Send a packet from a UDP socket. Check that the expected AF_XDP socket
  * gets that packet on a peer. Construct a reply by inverting addresses
  * and ports of the received packet. Send it back to the UDP socket over
- * the same AF_XDP socket. Check that the UDP socket gets it and its
+ * the same AF_XDP socket if it has Tx capability, otherwise use another
+ * Tx-capable AF_XDP socket. Check that the UDP socket gets it and its
  * payload is the same as in the previously sent packet.
  *
  * @note This function can print verdict and fail the test.
@@ -489,6 +516,7 @@ extern void net_drv_xdp_echo(rcf_rpc_server *rpcs_udp, int s_udp,
                              const struct sockaddr *dst_addr,
                              rcf_rpc_server *rpcs_xdp,
                              net_drv_xdp_sock *socks,
-                             unsigned int socks_num, unsigned int exp_sock);
+                             unsigned int socks_num, unsigned int exp_sock,
+                             bool jumbo);
 
 #endif /* !__TS_NET_DRV_COMMON_RSS_H__ */

@@ -47,6 +47,7 @@ main(int argc, char **argv)
     const struct sockaddr *tst_addr = NULL;
 
     net_drv_xdp_cfg xdp_cfg = NET_DRV_XDP_CFG_DEF;
+    bool multi_seg;
     unsigned int copy_mode;
     net_drv_xdp_sock xdp_sock = NET_DRV_XDP_SOCK_INIT;
 
@@ -64,6 +65,7 @@ main(int argc, char **argv)
     TEST_GET_IF(iut_if);
     TEST_GET_ADDR(iut_rpcs, iut_addr);
     TEST_GET_ADDR(tst_rpcs, tst_addr);
+    TEST_GET_BOOL_PARAM(multi_seg);
     TEST_GET_ENUM_PARAM(copy_mode, NET_DRV_XDP_COPY_MODE);
 
     CHECK_RC(net_drv_xdp_adjust_rx_size(iut_rpcs->ta, iut_if->if_name,
@@ -118,7 +120,8 @@ main(int argc, char **argv)
     TEST_STEP("Create AF_XDP socket on IUT bound to @b rule_queue. "
               "Set corresponding record of XSK map of @b rxq_stats program "
               "to its file descriptor.");
-    xdp_cfg.bind_flags = copy_mode;
+    xdp_cfg.bind_flags = copy_mode |
+                         (multi_seg ? RPC_XDP_BIND_USE_SG : 0);
     CHECK_RC(net_drv_xdp_create_sock(iut_rpcs, iut_if->if_name, rule_queue,
                                      &xdp_cfg, map_fd, &xdp_sock));
     NET_DRV_XDP_WAIT_SOCKS;
@@ -126,11 +129,11 @@ main(int argc, char **argv)
     TEST_STEP("Send a packet from the Tester UDP socket. Check that the "
               "AF_XDP socket gets that packet on IUT. Construct a reply "
               "by inverting addresses and ports of the received packet. "
-              "Send it back to Tester over the AF_XDP socket. "
+              "Send it back to Tester over a Tx-capable AF_XDP socket. "
               "Check that the Tester socket gets it and its payload "
               "is the same as in the previously sent packet.");
     net_drv_xdp_echo(tst_rpcs, tst_s, iut_addr,
-                     iut_rpcs, &xdp_sock, 1, 0);
+                     iut_rpcs, &xdp_sock, 1, 0, multi_seg);
 
     TEST_SUCCESS;
 
