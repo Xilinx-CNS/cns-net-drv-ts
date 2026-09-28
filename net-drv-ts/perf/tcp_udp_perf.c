@@ -171,7 +171,7 @@ perf3_summary_throughput_mi_log(const double tx_client,
                               TE_MI_MEAS_AGGR_SINGLE, tx_client,
                               TE_MI_MEAS_MULTIPLIER_PLAIN);
 
-    if (rx_server > EPS)
+    if (rx_client > EPS)
         te_mi_logger_add_meas(logger, NULL, TE_MI_MEAS_THROUGHPUT, "Client Rx",
                               TE_MI_MEAS_AGGR_SINGLE, rx_client,
                               TE_MI_MEAS_MULTIPLIER_PLAIN);
